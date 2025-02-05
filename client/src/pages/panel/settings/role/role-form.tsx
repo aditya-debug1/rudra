@@ -62,8 +62,6 @@ export const RoleForm = ({ isOpen, setIsOpen }: RoleFormProp) => {
       return;
     }
 
-    console.log(role);
-
     try {
       setIsSubmitting(true);
       await createRoleMutation.mutateAsync({

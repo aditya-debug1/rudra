@@ -95,7 +95,6 @@ export const InstantUserForm = ({
         title: "Success",
         description: "User created successfully",
       });
-      console.log(user);
       onOpenChange(false);
       setIsCredentialsOpen(true);
     } catch (error) {
