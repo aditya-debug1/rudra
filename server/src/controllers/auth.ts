@@ -46,8 +46,8 @@ class AuthController {
 
       res.cookie("Access_Token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       });
 
@@ -64,8 +64,8 @@ class AuthController {
     const isProdution = process.env.NODE_ENV === "production";
     res.clearCookie("Access_Token", {
       httpOnly: true,
-      secure: isProdution,
-      sameSite: isProdution ? "none" : "strict",
+      secure: true,
+      sameSite: "none",
     });
 
     res.status(200).json({
