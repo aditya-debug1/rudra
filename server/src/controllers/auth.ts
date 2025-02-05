@@ -61,10 +61,11 @@ class AuthController {
   }
 
   async logout(_req: Request, res: Response) {
+    const isProdution = process.env.NODE_ENV === "production";
     res.clearCookie("Access_Token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProdution,
+      sameSite: isProdution ? "none" : "strict",
     });
 
     res.status(200).json({
