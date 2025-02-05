@@ -11,6 +11,8 @@ import { Route, Routes, useLocation } from "react-router-dom";
 const Dashboard = lazy(() => import("@/pages/panel/dashboard"));
 const UserDetails = lazy(() => import("@/pages/panel/user-details/index"));
 const UserList = lazy(() => import("@/pages/panel/users"));
+const Task = lazy(() => import("@/pages/panel/task"));
+const Reports = lazy(() => import("@/pages/panel/reports"));
 const Settings = lazy(() => import("@/pages/panel/settings"));
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
@@ -46,6 +48,10 @@ const MainBody: React.FC<MainProps> = ({
         return <Dashboard />;
       case "Users":
         return <UserList />;
+      case "Task":
+        return <Task />;
+      case "Reports":
+        return <Reports />;
       case "Settings":
         return <Settings />;
       default:
@@ -90,8 +96,8 @@ const MainBody: React.FC<MainProps> = ({
       pageName: "Client List",
     },
     { path: "form", element: <Maintainance />, pageName: "Form" },
-    { path: "task", element: <Maintainance />, pageName: "Task" },
-    { path: "reports", element: <Maintainance />, pageName: "Reports" },
+    { path: "task", element: <Task />, pageName: "Task" },
+    { path: "reports", element: <Reports />, pageName: "Reports" },
     { path: "inventory", element: <Maintainance />, pageName: "Inventory" },
     { path: "pages", element: <Maintainance />, pageName: "Pages" },
     { path: "settings", element: <Settings />, pageName: "Settings" },

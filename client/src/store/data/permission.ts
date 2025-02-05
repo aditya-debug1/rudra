@@ -22,7 +22,7 @@ export const AdminPermissions: Permission[] = [
     actions: ["read", "create", "delete", "update"],
   },
   {
-    page: "Report",
+    page: "Reports",
     actions: ["read-users"],
   },
   {
@@ -76,6 +76,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
       { value: "read-details", label: "View user details" },
       { value: "update-user", label: "Update user details" },
       { value: "delete-user", label: "Delete user" },
+      { value: "reset-password", label: "Reset user password" },
       { value: "lock-user", label: "Lock users" },
     ],
   },
@@ -90,7 +91,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     ],
   },
   {
-    page: "Report",
+    page: "Reports",
     pageLabel: "Report Sections",
     actions: [{ value: "read-users", label: "View User Reports" }],
   },

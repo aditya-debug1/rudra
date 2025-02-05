@@ -26,7 +26,7 @@ const defaultSuperAdminPermissions = [
     actions: ["read", "create", "delete", "update"],
   },
   {
-    page: "Report",
+    page: "Reports",
     actions: ["read-users"],
   },
   {

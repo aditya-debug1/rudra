@@ -1,16 +1,16 @@
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useEffect } from "react";
 
-const Dashboard = () => {
+const Reports = () => {
   const { setBreadcrumbs } = useBreadcrumb();
   useEffect(() => {
     setBreadcrumbs([
       {
-        label: "Dashboard",
+        label: "Reports",
       },
     ]);
   }, [setBreadcrumbs]);
-  return <div>Dummy Dashboard</div>;
+  return <div>Dummy Reports</div>;
 };
 
-export default Dashboard;
+export default Reports;
