@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/user";
 import createError from "../utils/createError";
-import { JWT_SECRET } from "../config/dotenv";
+import { JWT_SECRET, NODE_ENV } from "../config/dotenv";
 
 class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
@@ -44,10 +44,11 @@ class AuthController {
         algorithm: "HS256",
       });
 
+      const isProdution = NODE_ENV === "production";
       res.cookie("Access_Token", token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        secure: isProdution,
+        sameSite: isProdution ? "none" : "strict",
         maxAge: 24 * 60 * 60 * 1000,
       });
 
@@ -61,11 +62,11 @@ class AuthController {
   }
 
   async logout(_req: Request, res: Response) {
-    const isProdution = process.env.NODE_ENV === "production";
+    const isProdution = NODE_ENV === "production";
     res.clearCookie("Access_Token", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProdution,
+      sameSite: isProdution ? "none" : "strict",
     });
 
     res.status(200).json({
