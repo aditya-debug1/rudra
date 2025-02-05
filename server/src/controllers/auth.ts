@@ -37,6 +37,15 @@ class AuthController {
         );
       }
 
+      if (user.roles.length === 0) {
+        return next(
+          createError(
+            401,
+            "This user has no assigned roles, which restricts access. Please contact the administrator.",
+          ),
+        );
+      }
+
       const { password: _, ...userWithoutPassword } = user.toObject();
 
       const token = jwt.sign(userWithoutPassword, JWT_SECRET, {
