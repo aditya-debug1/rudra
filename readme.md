@@ -113,7 +113,7 @@ Create a `.env` file in the `server` directory with the following:
 ```
 PORT=3000
 JWT_SECRET="your_secret"
-NODE_ENV="development" # production || development
+NODE_ENV="development" # remove this for production
 MONGO=your_mongodb_uri
 SUPER_ADMIN_USERNAME="your_username"
 FRONTEND_URL="http://localhost:5173" #url where frontend will run
