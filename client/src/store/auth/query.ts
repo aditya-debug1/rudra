@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { roleApi } from "@/store/role";
 import { LoginData } from "./type";
 import { useAuthStore } from "./store";
+import { toast } from "@/hooks/use-toast";
 
 export const useAuth = (enabled = false) => {
   const navigate = useNavigate();
@@ -18,15 +19,24 @@ export const useAuth = (enabled = false) => {
       return response.data.data as userType;
     },
     onSuccess: async (userData) => {
-      // Fetch combined role after user data
-
       if (userData.settings?.isPassChange) {
         navigate(`/auth/change-password/${userData._id}`);
       } else if (!userData.settings?.isRegistered) {
         navigate(`/auth/register-user/${userData._id}`);
       } else {
         navigate("/panel/");
+
+        if (userData.roles.length === 0)
+          return toast({
+            title: "Login Error",
+            description:
+              "This user has no assigned roles, which restricts access. Please contact the administrator.",
+            variant: "destructive",
+          });
+
+        // Fetch combined role after user data
         const combinedRole = await roleApi.getCombinedRole(userData.roles);
+
         // Setting current user and combined role
         setUser(userData);
         setCombinedRole(combinedRole);

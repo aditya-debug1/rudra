@@ -32,6 +32,9 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
       return true; // Disable if we don't have role data yet
     }
 
+    if (userRoles.length === 0 && combinedRole.highestPrecedence === 1)
+      return false;
+
     const targetUserRole = getHighestPrecedenceRole(userRoles, rolesQuery.data);
     if (!targetUserRole) {
       return true; // Disable if we can't determine the user's role
