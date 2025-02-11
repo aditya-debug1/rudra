@@ -80,12 +80,20 @@ export const useUserDialogs = ({
       },
       onAction: async () => {
         try {
-          await updateUser.mutateAsync({ userId, updates: userData });
+          if (originalData.isLocked === userData.isLocked) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { isLocked, ...updatedUserData } = userData;
+            await updateUser.mutateAsync({ userId, updates: updatedUserData });
+          } else {
+            await updateUser.mutateAsync({ userId, updates: userData });
+          }
+
           toast({
             title: "Success",
             description: "User updated successfully",
             variant: "success",
           });
+          console.log(userData);
           setEditable(false);
         } catch (error) {
           const err = error as CustomAxiosError;

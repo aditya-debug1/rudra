@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { RoleType } from "./type";
+import { RoleType } from "./types";
 
 interface RoleStore {
   selectedRole: RoleType | null;

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userApi } from "./api";
-import { UserQueryParams } from "./type";
+import { UserQueryParams } from "./types";
 
 export const useUsers = (params: UserQueryParams = {}) => {
   return useQuery({

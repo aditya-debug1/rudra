@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { EmptyRoleSettings, RoleSettings } from "./role-settings";
 import { RoleSortable } from "./role-sortable";
 import { useAuth } from "@/store/auth";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 
-export const Role = () => {
+export default function Role() {
+  const { setBreadcrumbs } = useBreadcrumb();
   const { selectedRole, setSelectedRole } = useRoleStore();
   const {
     rolesQuery,
@@ -33,6 +35,13 @@ export const Role = () => {
       setRoles(rolesQuery.data);
     }
   }, [rolesQuery]);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: "Settings", to: "/panel/settings" },
+      { label: "Roles" },
+    ]);
+  }, [setBreadcrumbs]);
 
   // Handle loading and error states
   if (rolesQuery.isLoading) {
@@ -99,4 +108,4 @@ export const Role = () => {
       )}
     </div>
   );
-};
+}

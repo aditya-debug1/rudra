@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Leave create user unprotected (for signup)
 // Create a new user
-router.post("/", UserController.createUser);
+router.post("/", verifyToken, UserController.createUser);
 
 // Protect all other routes
 // Reset password

@@ -12,7 +12,7 @@ import { useAuth, useAuthStore } from "@/store/auth";
 import useUserStore, { useUpdateUser } from "@/store/users";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { userType } from "@/store/users";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, Eye, Lock, LockOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { hasPermission } from "@/hooks/use-role.ts";
@@ -112,6 +112,7 @@ export const UserAction = ({ user, isDisabled = true }: UserActionProps) => {
 
               {showUserDetails && (
                 <DropdownMenuItem onClick={() => handleOpenDetails(user._id)}>
+                  <Eye className="mr-2 h-4 w-4" />
                   Open Details
                 </DropdownMenuItem>
               )}
@@ -124,6 +125,7 @@ export const UserAction = ({ user, isDisabled = true }: UserActionProps) => {
                     })
                   }
                 >
+                  {LockIcon(user)}
                   {!user.isLocked ? "Lock user" : "Unlock User"}
                 </DropdownMenuItem>
               )}
@@ -135,3 +137,11 @@ export const UserAction = ({ user, isDisabled = true }: UserActionProps) => {
     </>
   );
 };
+
+function LockIcon(user: userType) {
+  return !user.isLocked ? (
+    <Lock className="mr-2 h-4 w-4" />
+  ) : (
+    <LockOpen className="mr-2 h-4 w-4" />
+  );
+}

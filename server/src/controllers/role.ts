@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Role from "../models/role";
 import User from "../models/user";
 import createError from "../utils/createError";
+import auditService from "../utils/audit-service";
 
 interface PrecedenceUpdate {
   _id: string; // Controller expects "_id"
@@ -43,6 +44,14 @@ class RoleController {
 
       await role.save();
 
+      // Create audit log
+      await auditService.logCreate(
+        role.toObject(),
+        req,
+        "Roles",
+        `Created role: ${role.name}`,
+      );
+
       res.status(201).json({
         message: "Role created successfully",
         role,
@@ -82,6 +91,14 @@ class RoleController {
 
       // Delete the role
       await Role.findByIdAndDelete(req.params.id);
+
+      // Create audit log
+      await auditService.logDelete(
+        role,
+        req,
+        "Roles",
+        `Deleted role: ${role.name}`,
+      );
 
       res.status(200).json({
         message: `Role ${role.name} deleted and removed from all users. Precedences updated.`,
@@ -342,6 +359,15 @@ class RoleController {
           updatedAt: new Date(),
         },
         { new: true },
+      );
+
+      // Create audit log
+      await auditService.logUpdate(
+        role,
+        updatedRole,
+        req,
+        "Roles",
+        `Updated role: ${role.name}`,
       );
 
       res.status(200).json({

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import User, { UserAccount } from "../models/user";
 import Role from "../models/role";
 import createError from "../utils/createError";
+import auditService from "../utils/audit-service";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 
@@ -56,6 +57,14 @@ class UserController {
       });
 
       await newUser.save();
+
+      // Create audit log
+      await auditService.logCreate(
+        newUser.toObject(),
+        req,
+        "Users",
+        `Created user: ${username}`,
+      );
 
       // Create a new object without the password field
       const { password: _, ...userResponse } = newUser.toObject();
@@ -168,6 +177,12 @@ class UserController {
         settings,
       } = req.body;
 
+      // Get original user data for audit comparison
+      const originalUser = await User.findById(req.params.id).lean();
+      if (!originalUser) {
+        return next(createError(404, "User not found"));
+      }
+
       // Check if username already exists (excluding current user)
       if (username) {
         const existingUser = await User.findOne({
@@ -208,8 +223,22 @@ class UserController {
         { new: true, select: "-password" },
       );
 
-      if (!updatedUser) {
-        return next(createError(404, "User not found"));
+      // Create audit log
+      if (typeof isLocked === "boolean") {
+        await auditService.logUserLockStatus(
+          isLocked ? "locked" : "unlocked",
+          req,
+          "Users",
+          `${isLocked ? "Locked user" : "Unlocked user"}: ${originalUser.username}`,
+        );
+      } else {
+        await auditService.logUpdate(
+          originalUser,
+          updatedUser,
+          req,
+          "Users",
+          `Updated user: ${originalUser.username}`,
+        );
       }
 
       res.status(200).json({
@@ -332,6 +361,14 @@ class UserController {
       if (!deletedUser) {
         return next(createError(404, "User not found"));
       }
+
+      // Create audit log
+      await auditService.logDelete(
+        deletedUser,
+        req,
+        "Users",
+        `Deleted user: ${deletedUser.username}`,
+      );
 
       res.status(200).json({
         message: "User deleted successfully",

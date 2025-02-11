@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roleApi } from "./api";
-import { RoleType } from "./type";
+import { RoleType } from "./types";
 
 // useRoles.ts
 export const useRoles = () => {

@@ -5,7 +5,7 @@ import {
   PrecedenceUpdate,
   RoleArrayType,
   RoleType,
-} from "./type";
+} from "./types";
 
 //Role Api
 export const roleApi = {

@@ -4,7 +4,7 @@ import { CustomAxiosError } from "@/utils/types/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { roleApi } from "@/store/role";
-import { LoginData } from "./type";
+import { LoginData } from "./types";
 import { useAuthStore } from "./store";
 
 export const useAuth = (enabled = false) => {

@@ -5,7 +5,7 @@ import {
   ResetPasswordParams,
   UserQueryParams,
   userType,
-} from "./type";
+} from "./types";
 
 export const userApi = {
   getUsers: async ({

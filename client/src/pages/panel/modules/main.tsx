@@ -14,6 +14,8 @@ const UserList = lazy(() => import("@/pages/panel/users"));
 const Task = lazy(() => import("@/pages/panel/task"));
 const Reports = lazy(() => import("@/pages/panel/reports"));
 const Settings = lazy(() => import("@/pages/panel/settings"));
+const Role = lazy(() => import("@/pages/panel/settings/role"));
+const Audit = lazy(() => import("@/pages/panel/settings/audit"));
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
@@ -65,42 +67,19 @@ const MainBody: React.FC<MainProps> = ({
     { path: "analytics", element: <Maintainance />, pageName: "Analytics" },
     { path: "users/", element: <UserList />, pageName: "Users" },
     { path: "users/details/:id", element: <UserDetails />, pageName: "Users" },
-    {
-      path: "client-list/:pageno",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    {
-      path: "dump-client-list",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    {
-      path: "new-client-list",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    {
-      path: "new-client-form",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    {
-      path: "client-details/:pageno/:id",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    {
-      path: "client-details/:pageno/:id/remark/:remarkid",
-      element: <Maintainance />,
-      pageName: "Client List",
-    },
-    { path: "form", element: <Maintainance />, pageName: "Form" },
     { path: "task", element: <Task />, pageName: "Task" },
     { path: "reports", element: <Reports />, pageName: "Reports" },
-    { path: "inventory", element: <Maintainance />, pageName: "Inventory" },
-    { path: "pages", element: <Maintainance />, pageName: "Pages" },
     { path: "settings", element: <Settings />, pageName: "Settings" },
+    {
+      path: "settings/roles",
+      element: <Role />,
+      pageName: "Settings",
+    },
+    {
+      path: "settings/audit",
+      element: <Audit />,
+      pageName: "Settings",
+    },
     {
       path: "*",
       element: <CenterWrapper>404 | Page not found</CenterWrapper>,
