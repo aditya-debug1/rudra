@@ -1,5 +1,4 @@
 import { PaginationControls } from "@/components/custom ui/pagination-controls";
-import React from "react";
 
 interface AuditFooterProps {
   currPage: number;
