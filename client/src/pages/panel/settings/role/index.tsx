@@ -5,6 +5,9 @@ import { EmptyRoleSettings, RoleSettings } from "./role-settings";
 import { RoleSortable } from "./role-sortable";
 import { useAuth } from "@/store/auth";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { hasPermission } from "@/hooks/use-role";
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import { AccessDenied } from "@/components/custom ui/error-display";
 
 export default function Role() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -17,6 +20,9 @@ export default function Role() {
   } = useRoles();
 
   const { combinedRole } = useAuth(false);
+  const showRoles =
+    hasPermission(combinedRole, "Settings", "read-role") ||
+    hasPermission(combinedRole, "Settings", "update-role");
 
   const [roles, setRoles] = useState(rolesQuery.data || []);
   const currentRole = roles.find(
@@ -51,6 +57,13 @@ export default function Role() {
   if (rolesQuery.isError) {
     return <div>Error loading roles</div>;
   }
+
+  if (!showRoles)
+    return (
+      <CenterWrapper>
+        <AccessDenied />
+      </CenterWrapper>
+    );
 
   // Handlers
   const handleSetRole = (updatedRole: RoleType) => {

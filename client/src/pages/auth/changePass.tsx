@@ -17,6 +17,8 @@ import { passwordSchema } from "@/utils/zod-schema/password";
 import { useChangeUserPassword } from "@/store/users"; // Adjust the import path as needed
 import { AxiosError } from "axios";
 import newRequest from "@/utils/func/request";
+import { useAuthStore } from "@/store/auth";
+import { AccessDenied } from "@/components/custom ui/error-display";
 
 interface ChangePassword {
   current_password: string;
@@ -28,6 +30,7 @@ export function ChangePass() {
   // Hooks
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { id } = useParams<{ id: string }>();
   const changePassword = useChangeUserPassword();
 
@@ -98,6 +101,13 @@ export function ChangePass() {
 
     handleSubmission(passwords);
   };
+
+  if (!user?.settings?.isPassChange)
+    return (
+      <div className="flex h-svh justify-center items-center">
+        <AccessDenied />
+      </div>
+    );
 
   return (
     <div className="w-svw h-svh grid place-items-center bg-primary-foreground">

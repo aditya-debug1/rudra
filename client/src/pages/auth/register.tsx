@@ -20,6 +20,7 @@ import { CircleX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CustomAxiosError } from "@/utils/types/axios";
+import { AccessDenied } from "@/components/custom ui/error-display";
 
 export const RegisterForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -123,6 +124,13 @@ export const RegisterForm = () => {
       </div>
     );
   }
+
+  if (user?.settings?.isRegistered)
+    return (
+      <div className="h-svh font-semibold flex justify-center items-center">
+        <AccessDenied />
+      </div>
+    );
 
   return (
     <div className="w-svw min-h-svh h-auto grid place-items-center bg-primary-foreground">

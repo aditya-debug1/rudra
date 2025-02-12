@@ -18,6 +18,9 @@ export const useAuth = (enabled = false) => {
       return response.data.data as userType;
     },
     onSuccess: async (userData) => {
+      // Setting current user
+      setUser(userData);
+
       if (userData.settings?.isPassChange) {
         navigate(`/auth/change-password/${userData._id}`);
       } else if (!userData.settings?.isRegistered) {
@@ -28,8 +31,7 @@ export const useAuth = (enabled = false) => {
         // Fetch combined role after user data
         const combinedRole = await roleApi.getCombinedRole(userData.roles);
 
-        // Setting current user and combined role
-        setUser(userData);
+        // Setting current user's combined role
         setCombinedRole(combinedRole);
       }
       queryClient.invalidateQueries({ queryKey: ["current-user"] });

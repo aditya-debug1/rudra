@@ -1,3 +1,5 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -5,8 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { XCircle } from "lucide-react";
+import { XCircle, XOctagon } from "lucide-react";
 
 interface ErrorCardProps {
   title: string;
@@ -41,6 +42,33 @@ const ErrorCard = ({
           {btnTitle}
         </Button>
       </CardFooter>
+    </Card>
+  );
+};
+
+export const AccessDenied = ({
+  title = null,
+  description = null,
+}: {
+  title?: string | null;
+  description?: string | null;
+}) => {
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="text-center">
+        <XOctagon className="w-12 h-12 mx-auto text-destructive mb-2" />
+      </CardHeader>
+      <CardContent>
+        <Alert variant="destructive">
+          <AlertTitle className="text-lg font-semibold">
+            {title ?? "Access Denied"}
+          </AlertTitle>
+          <AlertDescription className="mt-2">
+            {description ??
+              "You don't have permission to access this resource. Please contact your administrator if you believe this is a mistake."}
+          </AlertDescription>
+        </Alert>
+      </CardContent>
     </Card>
   );
 };

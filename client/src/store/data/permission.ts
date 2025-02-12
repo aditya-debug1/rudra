@@ -33,6 +33,7 @@ export const AdminPermissions: Permission[] = [
       "read-role",
       "delete-role",
       "change-precedence",
+      "read-audit",
     ],
   },
 ];
@@ -102,6 +103,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
       { value: "create-role", label: "Create Roles" },
       { value: "update-role", label: "View & Update Roles" },
       { value: "read-role", label: "View Roles" },
+      { value: "read-audit", label: "View Audit Logs" },
       { value: "delete-role", label: "Delete Roles" },
       { value: "change-precedence", label: "Chnage Role Precedence" },
     ],

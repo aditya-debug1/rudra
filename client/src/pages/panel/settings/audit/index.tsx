@@ -5,6 +5,10 @@ import { AuditLogTable } from "./audit-table";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { AuditFooter } from "./audit-footer";
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role";
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import { AccessDenied } from "@/components/custom ui/error-display";
 
 interface QueryParams {
   page: number;
@@ -19,6 +23,7 @@ interface QueryParams {
 export default function AuditLogPage() {
   const limit = 5;
   const { setBreadcrumbs } = useBreadcrumb();
+  const { combinedRole } = useAuth(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     page: 1,
     limit: limit,
@@ -28,6 +33,8 @@ export default function AuditLogPage() {
     startDate: "",
     endDate: "",
   });
+
+  const showAudits = hasPermission(combinedRole, "Settings", "read-audit");
 
   useEffect(() => {
     setBreadcrumbs([
@@ -103,6 +110,13 @@ export default function AuditLogPage() {
   const sourceOptions = ["Users", "Roles"];
 
   if (isLoading) return <div>Loading...</div>;
+
+  if (!showAudits)
+    return (
+      <CenterWrapper>
+        <AccessDenied />
+      </CenterWrapper>
+    );
 
   return (
     <div className="w-full flex items-center flex-col gap-2">
