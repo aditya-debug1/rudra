@@ -22,8 +22,8 @@ const Settings = () => {
   }, [setBreadcrumbs]);
 
   const NavLinks = [
-    { PageName: "Roles", path: "roles", show: showRoles },
-    { PageName: "Audit", path: "audit", show: showAudits },
+    { PageName: "Roles & Role Settings", path: "roles", show: showRoles },
+    { PageName: "Audit Logs", path: "audit", show: showAudits },
   ];
 
   return (
