@@ -48,14 +48,25 @@ export const AuditHeader: React.FC<AuditHeaderProps> = ({
     filters.startDate ||
     filters.endDate;
 
-  const handleDateChange = (date: DateRange) => {
+  const dateValue =
+    filters.startDate && filters.endDate
+      ? {
+          from: new Date(filters.startDate),
+          to: new Date(filters.endDate),
+        }
+      : undefined;
+
+  const handleDateChange = (date: DateRange | undefined) => {
+    if (!date) {
+      onFilterChange("startDate", "");
+      onFilterChange("endDate", "");
+    }
     const from = date?.from;
     const to = date?.to;
 
     if (from && to) {
       from.setHours(0, 0, 0, 0);
       to.setHours(23, 59, 59, 999);
-      console.log(from, to);
       onFilterChange("startDate", from.toISOString());
       onFilterChange("endDate", to.toISOString());
     }
@@ -88,17 +99,12 @@ export const AuditHeader: React.FC<AuditHeaderProps> = ({
         {/* Date Range Picker Section */}
         <div className="lg:col-span-4 flex justify-center">
           <DatePickerWithRange
-            defaultDate={
-              filters.startDate && filters.endDate
-                ? {
-                    from: new Date(filters.startDate),
-                    to: new Date(filters.endDate),
-                  }
-                : undefined
-            }
+            value={dateValue}
             onDateChange={handleDateChange}
+            label="Select Log Date Range"
             disableDates="future"
             className="w-full lg:w-auto"
+            autoClose
           />
         </div>
 

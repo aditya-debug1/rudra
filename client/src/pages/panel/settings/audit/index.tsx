@@ -53,12 +53,14 @@ export default function AuditLogPage() {
     key: keyof Omit<QueryParams, "page" | "limit">,
     value: string,
   ) => {
-    const updatedParams = {
-      ...queryParams,
-      [key]: value,
-      page: 1, // Reset page to 1 when any filter changes
-    };
-    setQueryParams(updatedParams);
+    setQueryParams((prev) => {
+      const updatedParams = {
+        ...prev,
+        [key]: value,
+        page: 1,
+      };
+      return updatedParams;
+    });
     debouncedRefetch();
   };
 

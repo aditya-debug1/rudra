@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { addDays, isBefore, format, isAfter } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { addDays, isBefore, format, isAfter, startOfToday } from "date-fns";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import { DateRange, isDateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -16,14 +16,26 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   disableDates?: "past" | "present" | "future" | null;
   className?: string;
-  defaultDate?: DateRange;
-  onDateChange: (date: DateRange) => void;
+  value?: DateRange;
+  onDateChange: (date: DateRange | undefined) => void;
+  label?: string;
+  required?: boolean;
+  clearable?: boolean;
+  autoClose?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 }
 export function DatePickerWithRange({
   disableDates = null,
-  defaultDate,
+  value,
   onDateChange,
   className,
+  label = "Pick a date",
+  required = false,
+  clearable = true,
+  autoClose = false,
+  minDate,
+  maxDate,
 }: DatePickerProps) {
   // Variables
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -33,26 +45,24 @@ export function DatePickerWithRange({
     from: new Date(),
     to: addDays(new Date(), 20),
   });
+  const [isOpen, setIsOpen] = useState(false);
 
   // useEffects
   useEffect(() => {
-    if (isDateRange(defaultDate)) setDate(defaultDate);
-  }, [defaultDate]);
+    if (isDateRange(value) || !value) setDate(value);
+  }, [value]);
 
   // Handlers
-  const disableDate = (date: Date) => {
-    const today = new Date();
-    const startOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
+  const today = startOfToday();
 
-    if (disableDates === "past") return isBefore(date, startOfToday);
-    if (disableDates === "present") {
-      return !(isBefore(date, startOfToday) || isAfter(date, startOfToday));
-    }
-    if (disableDates === "future") return isAfter(date, startOfToday);
+  const disableDate = (date: Date) => {
+    if (minDate && isBefore(date, minDate)) return true;
+    if (maxDate && isAfter(date, maxDate)) return true;
+
+    if (disableDates === "past") return isBefore(date, today);
+    if (disableDates === "present") return date.getTime() === today.getTime();
+    if (disableDates === "future") return isAfter(date, today);
+
     return false;
   };
 
@@ -61,11 +71,25 @@ export function DatePickerWithRange({
       setDate(selectedDate);
       onDateChange(selectedDate);
     }
+    if (autoClose && selectedDate?.from && selectedDate?.to) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleClear = () => {
+    setDate(undefined);
+    onDateChange(undefined);
+  };
+
+  const formatDateRange = () => {
+    if (!date?.from) return label;
+    if (!date.to) return format(date.from, "LLL dd, y");
+    return `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`;
   };
 
   return (
     <div className={cn("grid gap-2 w-[300px]", className)}>
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             id="date"
@@ -76,17 +100,18 @@ export function DatePickerWithRange({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>Pick a date</span>
+            <span>
+              {formatDateRange()}
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </span>
+            {clearable && date && (
+              <X
+                className="ml-2 h-4 w-4 opacity-50 hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClear();
+                }}
+              />
             )}
           </Button>
         </PopoverTrigger>

@@ -16,6 +16,14 @@
 - **Authentication**:
   - Secure authentication system.
   - JWT-based authentication.
+- **Audit Log Support**:
+  -  Frontend:
+        - Audit log table with pagination and filters.
+        - Users can view logs but cannot delete or modify them.
+  -  Backend:
+        - All security-related actions are logged.
+        - Logs are immutable (cannot be deleted or updated).
+        - Provides better tracking for admin activities and system changes.
 - **Full CRUD Support**:
   - CRUD operations for users and roles.
 
