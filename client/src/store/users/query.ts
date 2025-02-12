@@ -54,9 +54,9 @@ export const useResetPassword = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: userApi.resetPassword,
-    onSuccess: (_data, variables) => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["users", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["users", userId] });
     },
   });
 };

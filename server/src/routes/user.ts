@@ -3,13 +3,11 @@ import UserController from "../controllers/user";
 import verifyToken from "../utils/jwt";
 const router = express.Router();
 
-// Leave create user unprotected (for signup)
 // Create a new user
 router.post("/", verifyToken, UserController.createUser);
 
-// Protect all other routes
 // Reset password
-router.post("/reset-password", verifyToken, UserController.resetPassword);
+router.post("/reset-password/:id", verifyToken, UserController.resetPassword);
 
 // Get all users
 router.get("/", verifyToken, UserController.getAllUsers);

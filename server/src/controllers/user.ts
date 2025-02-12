@@ -292,7 +292,7 @@ class UserController {
 
   async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const { userId, resetBy } = req.body;
+      const userId = req.params.id;
 
       // Find the user whose password needs to be reset
       const userToReset = await User.findById(userId);
@@ -301,7 +301,7 @@ class UserController {
       }
 
       // Find the user who is performing the reset
-      const adminUser = await User.findById(resetBy);
+      const adminUser = req.user;
       if (!adminUser) {
         return next(createError(404, "Admin user not found"));
       }

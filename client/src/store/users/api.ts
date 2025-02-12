@@ -2,7 +2,6 @@ import newRequest from "@/utils/func/request";
 import {
   ChangeUserPassword,
   PaginatedResponse,
-  ResetPasswordParams,
   UserQueryParams,
   userType,
 } from "./types";
@@ -54,11 +53,8 @@ export const userApi = {
     );
     return response.data;
   },
-  resetPassword: async ({ userId, resetBy }: ResetPasswordParams) => {
-    const response = await newRequest.post("/user/reset-password", {
-      userId,
-      resetBy,
-    });
+  resetPassword: async (userId: string) => {
+    const response = await newRequest.post(`/user/reset-password/${userId}`);
     return response.data;
   },
   deleteUser: async (userId: string) => {

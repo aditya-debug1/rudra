@@ -142,8 +142,6 @@ export const useUserDialogs = ({
   };
 
   const handleResetPassword = () => {
-    if (!currentUserId) return;
-
     dialog.show({
       config: {
         iconName: "KeyRound",
@@ -154,15 +152,14 @@ export const useUserDialogs = ({
       },
       onAction: async () => {
         try {
-          const result = await resetPassword.mutateAsync({
-            userId,
-            resetBy: currentUserId,
-          });
+          const result = await resetPassword.mutateAsync(userId);
+
           toast({
             title: "Success",
             description: "User password reset successfully",
             variant: "success",
           });
+
           setTempPass(result.password);
           setIsCredentialsOpen(true);
         } catch (error) {

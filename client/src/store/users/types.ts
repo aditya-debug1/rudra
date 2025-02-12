@@ -37,8 +37,3 @@ export interface UserQueryParams {
   role?: string;
   search?: string;
 }
-
-export interface ResetPasswordParams {
-  userId: string;
-  resetBy: string;
-}
