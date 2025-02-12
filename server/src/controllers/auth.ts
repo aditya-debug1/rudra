@@ -86,21 +86,16 @@ class AuthController {
 
   async getCurrentUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.cookies.Access_Token;
-      if (!token) {
-        return next(createError(401, "Access denied. No token provided"));
+      // req.user is already set by verifyToken middleware
+      if (!req.user) {
+        return next(createError(500, "User not found in request"));
       }
-
-      const decoded = jwt.verify(token, JWT_SECRET) as object;
 
       res.status(200).json({
         success: true,
-        data: decoded,
+        data: req.user,
       });
     } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError) {
-        return next(createError(401, "Invalid token"));
-      }
       return next(createError(500, "Internal server error"));
     }
   }

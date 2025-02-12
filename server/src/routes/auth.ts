@@ -1,5 +1,6 @@
 import express from "express";
 import AuthController from "../controllers/auth";
+import verifyToken from "../utils/jwt";
 
 const router = express.Router();
 
@@ -10,6 +11,6 @@ router.post("/login", AuthController.login);
 router.post("/logout", AuthController.logout);
 
 // Get current user
-router.post("/current-user", AuthController.getCurrentUser);
+router.post("/current-user", verifyToken, AuthController.getCurrentUser);
 
 export default router;
