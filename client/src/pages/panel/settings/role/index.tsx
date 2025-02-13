@@ -7,7 +7,9 @@ import { useAuth } from "@/store/auth";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { hasPermission } from "@/hooks/use-role";
 import { CenterWrapper } from "@/components/custom ui/center-page";
-import { AccessDenied } from "@/components/custom ui/error-display";
+import ErrorCard, { AccessDenied } from "@/components/custom ui/error-display";
+import { CustomAxiosError } from "@/utils/types/axios";
+import { RoleSkeleton } from "./role-skeleton";
 
 export default function Role() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -19,7 +21,7 @@ export default function Role() {
     updatePrecedencesMutation,
   } = useRoles();
 
-  const { combinedRole } = useAuth(false);
+  const { combinedRole, logout: handleLogout } = useAuth(false);
   const showRoles =
     hasPermission(combinedRole, "Settings", "read-role") ||
     hasPermission(combinedRole, "Settings", "update-role");
@@ -51,11 +53,30 @@ export default function Role() {
 
   // Handle loading and error states
   if (rolesQuery.isLoading) {
-    return <div>Loading...</div>;
+    return <RoleSkeleton />;
   }
 
-  if (rolesQuery.isError) {
-    return <div>Error loading roles</div>;
+  if (rolesQuery.error) {
+    const { response, message } = rolesQuery.error as CustomAxiosError;
+    let errMsg = response?.data.error ?? message;
+
+    if (errMsg === "Access denied. No token provided")
+      errMsg = "Access denied. No token provided please login again";
+
+    if (errMsg === "Network Error")
+      errMsg =
+        "Connection issue detected. Please check your internet or try again later.";
+
+    return (
+      <CenterWrapper className="px-2 gap-2 text-center">
+        <ErrorCard
+          title="Error occured"
+          description={errMsg}
+          btnTitle="Go to Login"
+          onAction={handleLogout}
+        />
+      </CenterWrapper>
+    );
   }
 
   if (!showRoles)

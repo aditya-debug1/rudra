@@ -7,7 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { XCircle, XOctagon } from "lucide-react";
+import { useAuth } from "@/store/auth";
+import { ArrowRight, XCircle, XOctagon } from "lucide-react";
 
 interface ErrorCardProps {
   title: string;
@@ -53,6 +54,7 @@ export const AccessDenied = ({
   title?: string | null;
   description?: string | null;
 }) => {
+  const { logout } = useAuth(false);
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
@@ -68,6 +70,14 @@ export const AccessDenied = ({
               "You don't have permission to access this resource. Please contact your administrator if you believe this is a mistake."}
           </AlertDescription>
         </Alert>
+        <Button
+          className="mt-4 w-full font-semibold"
+          variant="secondary"
+          onClick={() => logout()}
+        >
+          LOGOUT
+          <ArrowRight className="mx-1" size={18} />
+        </Button>
       </CardContent>
     </Card>
   );
