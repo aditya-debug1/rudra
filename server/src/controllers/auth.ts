@@ -53,8 +53,8 @@ class AuthController {
       const isProdution = NODE_ENV === "production";
       res.cookie("Access_Token", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: isProdution,
+        sameSite: isProdution ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
       });
