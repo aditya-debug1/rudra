@@ -36,9 +36,6 @@ class AuthController {
 
       const tokenPayload = {
         _id: safeUser._id,
-        roles: safeUser.roles,
-        isLocked: safeUser.isLocked,
-        settings: safeUser.settings,
         username: safeUser.username,
       };
 

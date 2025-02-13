@@ -13,6 +13,11 @@ declare global {
   }
 }
 
+interface Payload {
+  _id: string;
+  username: string;
+}
+
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies instead of headers
@@ -22,16 +27,19 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
       return next(createError(401, "Access denied. No token provided"));
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as UserAccount;
+    const decoded = jwt.verify(token, JWT_SECRET) as Payload;
 
     // Find user and check if token matches active token
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(decoded._id)
+      .select("-password") // Exclude sensitive fields
+      .lean();
+
     if (!user || user.activeToken !== token) {
       res.clearCookie("Access_Token");
       return next(createError(401, "Session expired or invalidated"));
     }
 
-    if (decoded.isLocked) {
+    if (user.isLocked) {
       next(
         createError(
           401,
@@ -40,7 +48,7 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
       );
       return;
     }
-    req.user = decoded;
+    req.user = user;
     next();
   } catch (error) {
     next(createError(401, "Invalid token"));

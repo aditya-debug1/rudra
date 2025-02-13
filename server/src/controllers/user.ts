@@ -301,7 +301,10 @@ class UserController {
       }
 
       // Find the user who is performing the reset
-      const adminUser = req.user;
+      const resetBy = req.user._id;
+      const adminUser = await User.findById(resetBy)
+        .select("-password -activeToken") // Exclude sensitive fields
+        .lean();
       if (!adminUser) {
         return next(createError(404, "Admin user not found"));
       }

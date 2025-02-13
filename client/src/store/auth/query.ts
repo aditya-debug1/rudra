@@ -43,10 +43,10 @@ export const useAuth = (enabled = false) => {
     mutationFn: async () => {
       setUser(null);
       await newRequest.post("/auth/logout");
+      navigate("/auth/login");
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ["current-user"] });
-      navigate("/auth/login");
     },
     onError: () => {
       navigate("/auth/login");
