@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { roleApi } from "@/store/role";
 import { LoginData } from "./types";
 import { useAuthStore } from "./store";
+import { toast } from "@/hooks/use-toast";
 
 export const useAuth = (enabled = false) => {
   const navigate = useNavigate();
@@ -59,17 +60,27 @@ export const useAuth = (enabled = false) => {
   } = useQuery({
     queryKey: ["current-user"],
     queryFn: async () => {
-      const response = await newRequest.post("/auth/current-user");
-      const userData = response.data.data;
+      try {
+        const response = await newRequest.post("/auth/current-user");
+        const userData = response.data.data;
 
-      // Fetch combined role after user data
-      const combinedRole = await roleApi.getCombinedRole(userData.roles);
+        // Fetch combined role after user data
+        const combinedRole = await roleApi.getCombinedRole(userData.roles);
 
-      // Setting current user and combined role
-      setUser(userData);
-      setCombinedRole(combinedRole);
+        // Setting current user and combined role
+        setUser(userData);
+        setCombinedRole(combinedRole);
 
-      return userData;
+        return userData;
+      } catch (error) {
+        const Err = error as CustomAxiosError;
+
+        toast({
+          title: "Error occurred!",
+          description: Err.response?.data.error,
+          variant: "destructive",
+        });
+      }
     },
     enabled,
     retry: false,

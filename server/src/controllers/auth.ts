@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/user";
 import createError from "../utils/createError";
 import { JWT_SECRET, NODE_ENV } from "../config/dotenv";
@@ -29,68 +29,83 @@ class AuthController {
       }
 
       if (user.isLocked) {
-        return next(
-          createError(
-            401,
-            "Your account has been locked. Please contact your administrator or try again later.",
-          ),
-        );
+        return next(createError(403, "Account is locked"));
       }
 
-      if (user.roles.length === 0) {
-        return next(
-          createError(
-            401,
-            "This user has no assigned roles, which restricts access. Please contact the administrator.",
-          ),
-        );
-      }
+      const { password: _, ...safeUser } = user.toObject();
 
-      const { password: _, ...userWithoutPassword } = user.toObject();
+      const tokenPayload = {
+        _id: safeUser._id,
+        roles: safeUser.roles,
+        isLocked: safeUser.isLocked,
+        settings: safeUser.settings,
+        username: safeUser.username,
+      };
 
-      const token = jwt.sign(userWithoutPassword, JWT_SECRET, {
+      const token = jwt.sign(tokenPayload, JWT_SECRET, {
         expiresIn: "24h",
         algorithm: "HS256",
       });
 
+      // Store the new token as the active token
+      await User.findByIdAndUpdate(user._id, { activeToken: token });
+
       const isProdution = NODE_ENV === "production";
       res.cookie("Access_Token", token, {
         httpOnly: true,
-        secure: isProdution,
-        sameSite: isProdution ? "none" : "strict",
+        secure: false,
+        sameSite: "lax",
         maxAge: 24 * 60 * 60 * 1000,
+        path: "/",
       });
 
       res.status(200).json({
         success: true,
-        data: userWithoutPassword,
+        data: safeUser,
       });
     } catch (error) {
-      next(error);
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Login failed",
+        ),
+      );
     }
   }
 
-  async logout(_req: Request, res: Response) {
-    const isProdution = NODE_ENV === "production";
-    res.clearCookie("Access_Token", {
-      httpOnly: true,
-      secure: isProdution,
-      sameSite: isProdution ? "none" : "strict",
-    });
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Clear the active token in database
+      await User.findByIdAndUpdate(req.user._id, { activeToken: null });
 
-    res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
+      const isProdution = NODE_ENV === "production";
+
+      res.clearCookie("Access_Token", {
+        httpOnly: true,
+        secure: isProdution,
+        sameSite: isProdution ? "none" : "lax",
+        path: "/", // Added path to ensure cookie is cleared properly
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Logout failed",
+        ),
+      );
+    }
   }
 
   async getCurrentUser(req: Request, res: Response, next: NextFunction) {
     try {
-      // req.user is already set by verifyToken middleware
       if (!req.user) {
         return next(createError(500, "User not found in request"));
       }
-
       res.status(200).json({
         success: true,
         data: req.user,

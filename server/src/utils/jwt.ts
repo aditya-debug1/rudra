@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import createError from "../utils/createError";
 import { JWT_SECRET } from "../config/dotenv";
-import { UserAccount } from "../models/user";
+import User, { UserAccount } from "../models/user";
 
 // Extend Express Request type
 declare global {
@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies instead of headers
     const token = req.cookies.Access_Token;
@@ -23,6 +23,13 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as UserAccount;
+
+    // Find user and check if token matches active token
+    const user = await User.findById(decoded._id);
+    if (!user || user.activeToken !== token) {
+      res.clearCookie("Access_Token");
+      return next(createError(401, "Session expired or invalidated"));
+    }
 
     if (decoded.isLocked) {
       next(
