@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
+import { AuthLogModel } from "../models/auth";
 import createError from "../utils/createError";
 import { JWT_SECRET, NODE_ENV } from "../config/dotenv";
 
@@ -37,6 +38,7 @@ class AuthController {
       const tokenPayload = {
         _id: safeUser._id,
         username: safeUser.username,
+        isLocked: safeUser.isLocked,
       };
 
       const token = jwt.sign(tokenPayload, JWT_SECRET, {
@@ -44,8 +46,13 @@ class AuthController {
         algorithm: "HS256",
       });
 
-      // Store the new token as the active token
-      await User.findByIdAndUpdate(user._id, { activeToken: token });
+      // Create login log entry
+      await AuthLogModel.create({
+        action: "login",
+        userID: user._id,
+        username: user.username,
+        sessionID: token, // Using JWT token as sessionID
+      });
 
       const isProdution = NODE_ENV === "production";
       res.cookie("Access_Token", token, {
@@ -72,16 +79,22 @@ class AuthController {
 
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
-      // Clear the active token in database
-      await User.findByIdAndUpdate(req.user._id, { activeToken: null });
+      const token = req.cookies.Access_Token;
+
+      // Create logout log entry
+      await AuthLogModel.create({
+        action: "logout",
+        userID: req.user._id,
+        username: req.user.username,
+        sessionID: token,
+      });
 
       const isProdution = NODE_ENV === "production";
-
       res.clearCookie("Access_Token", {
         httpOnly: true,
         secure: isProdution,
         sameSite: isProdution ? "none" : "lax",
-        path: "/", // Added path to ensure cookie is cleared properly
+        path: "/",
       });
 
       res.status(200).json({
@@ -100,12 +113,18 @@ class AuthController {
 
   async getCurrentUser(req: Request, res: Response, next: NextFunction) {
     try {
-      if (!req.user) {
+      if (!req.user._id) {
+        return next(createError(500, "Unauthorized user"));
+      }
+
+      const user = await User.findById(req.user._id).select("-password").lean();
+      if (!user) {
         return next(createError(500, "User not found in request"));
       }
+
       res.status(200).json({
         success: true,
-        data: req.user,
+        data: user,
       });
     } catch (error) {
       return next(createError(500, "Internal server error"));

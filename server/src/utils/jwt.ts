@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import createError from "../utils/createError";
 import { JWT_SECRET } from "../config/dotenv";
-import User, { UserAccount } from "../models/user";
+import { AuthLogModel } from "../models/auth";
+import createError from "../utils/createError";
 
 // Extend Express Request type
 declare global {
@@ -16,6 +16,7 @@ declare global {
 interface Payload {
   _id: string;
   username: string;
+  isLocked: boolean;
 }
 
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,17 +30,17 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as Payload;
 
-    // Find user and check if token matches active token
-    const user = await User.findById(decoded._id)
-      .select("-password") // Exclude sensitive fields
-      .lean();
+    // Find the most recent auth log for this token
+    const lastAuthLog = await AuthLogModel.findOne({
+      userID: decoded._id,
+    }).sort({ timestamp: -1 });
 
-    if (!user || user.activeToken !== token) {
+    if (!lastAuthLog || lastAuthLog?.sessionID !== token) {
       res.clearCookie("Access_Token");
       return next(createError(401, "Session expired or invalidated"));
     }
 
-    if (user.isLocked) {
+    if (decoded.isLocked) {
       next(
         createError(
           401,
@@ -48,7 +49,7 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
       );
       return;
     }
-    req.user = user;
+    req.user = decoded;
     next();
   } catch (error) {
     next(createError(401, "Invalid token"));
