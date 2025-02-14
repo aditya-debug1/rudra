@@ -13,4 +13,7 @@ router.post("/logout", verifyToken, AuthController.logout);
 // Get current user
 router.post("/current-user", verifyToken, AuthController.getCurrentUser);
 
+// Get user auth logs
+router.get("/logs", verifyToken, AuthController.getLogs);
+
 export default router;

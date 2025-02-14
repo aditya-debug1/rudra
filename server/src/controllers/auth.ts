@@ -130,6 +130,73 @@ class AuthController {
       return next(createError(500, "Internal server error"));
     }
   }
+
+  async getLogs(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        search,
+        userId,
+        username,
+        action,
+        startDate,
+        endDate,
+        page = 1,
+        limit = 10,
+      } = req.query;
+
+      const query: any = {};
+
+      // Add filters if provided
+      if (userId) query.userID = userId;
+      if (username) query.username = username;
+      if (action) query.action = action;
+      if (startDate || endDate) {
+        query.timestamp = {};
+        if (startDate) query.timestamp.$gte = new Date(startDate as string);
+        if (endDate) query.timestamp.$lte = new Date(endDate as string);
+      }
+
+      if (search) {
+        const searchTerms = (search as string).trim().split(/\s+/);
+        query.$and = searchTerms.map((term) => {
+          const termRegex = new RegExp(term, "i");
+          return {
+            $or: [{ username: termRegex }, { action: termRegex }],
+          };
+        });
+      }
+
+      // Calculate skip value for pagination
+      const skip = (Number(page) - 1) * Number(limit);
+
+      // Get total count for pagination
+      const total = await AuthLogModel.countDocuments(query);
+
+      // Get logs with pagination
+      const logs = await AuthLogModel.find(query)
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(Number(limit));
+
+      res.status(200).json({
+        success: true,
+        data: {
+          logs,
+          currentPage: Number(page),
+          limitNumber: Number(limit),
+          totalLogs: total,
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Failed to fetch auth logs",
+        ),
+      );
+    }
+  }
 }
 
 export default new AuthController();

@@ -22,14 +22,19 @@ class AuditLogController {
 
       // Apply search filter if provided
       if (search) {
-        const searchRegex = new RegExp(String(search), "i");
-        query.$or = [
-          { source: searchRegex },
-          { description: searchRegex },
-          { "actor.userId": searchRegex },
-          { "actor.username": searchRegex },
-          { "event.action": searchRegex },
-        ];
+        const searchTerms = (search as string).trim().split(/\s+/);
+        query.$and = searchTerms.map((term) => {
+          const termRegex = new RegExp(term, "i");
+          return {
+            $or: [
+              { source: termRegex },
+              { description: termRegex },
+              { "actor.userId": termRegex },
+              { "actor.username": termRegex },
+              { "event.action": termRegex },
+            ],
+          };
+        });
       }
 
       // Apply specific filters
