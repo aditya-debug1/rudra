@@ -79,7 +79,7 @@ export function LoginForm() {
     <div className="w-svw h-svh grid place-items-center bg-primary-foreground">
       <Card className="w-full max-w-xs">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Rudra</CardTitle>
           <CardDescription className="text-base">
             Enter your username below to login.
           </CardDescription>

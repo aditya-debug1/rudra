@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           id="logo"
           className="w-full flex-center border-b-2 text-2xl font-bold"
         >
-          LOGO
+          RUDRA
         </div>
         <ul id="links" className="mb-auto relative">
           {NavLinks.map((item, index) => (
@@ -113,7 +113,7 @@ const SheetSidebar: React.FC<SidebarProps> = ({
         side="left"
       >
         <SheetHeader>
-          <SheetTitle>LOGO</SheetTitle>
+          <SheetTitle>RUDRA</SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[725px] w-full">
           <ul id="links" className="h-full relative">

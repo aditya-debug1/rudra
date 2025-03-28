@@ -15,6 +15,7 @@ interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   disableDates?: "past" | "present" | "future" | null;
   closeOnDayClick?: boolean;
   className?: string;
+  label?: string;
   defaultDate?: Date;
   onDateChange: (date: Date) => void;
 }
@@ -25,6 +26,7 @@ export function DatePicker({
   defaultDate,
   onDateChange,
   className,
+  label,
 }: DatePickerProps) {
   // useStates
   const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +79,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {date ? format(date, "PPP") : <span>{label ?? "Pick a date"}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
