@@ -13,11 +13,18 @@ export const NavLinks = [
     to: "/users",
   },
   {
+    pageName: "Clients",
+    icon: "Scroll",
+    label: "Client List",
+    to: "/clients",
+  },
+  {
     pageName: "Task",
     icon: "ClipboardList",
     label: "Task",
     to: "/task",
   },
+  { pageName: "Form", icon: "ReceiptText", label: "Form", to: "/form" },
   {
     pageName: "Reports",
     icon: "TriangleAlert",
