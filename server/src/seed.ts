@@ -22,8 +22,31 @@ const defaultSuperAdminPermissions = [
     ],
   },
   {
+    page: "Clients",
+    actions: [
+      "read",
+      "create-clients",
+      "delete-clients",
+      "update-clients",
+      "read-details",
+      "create-visits",
+      "update-visits",
+      "delete-visits",
+      "create-remarks",
+      "delete-remarks",
+    ],
+  },
+  {
     page: "Task",
     actions: ["read", "create", "delete", "update"],
+  },
+  {
+    page: "Form",
+    pageLabel: "Form Sections",
+    actions: [
+      { value: "client-form", label: "View Client Form" },
+      { value: "client-partner-form", label: "View Client Partner Form" },
+    ],
   },
   {
     page: "Reports",
