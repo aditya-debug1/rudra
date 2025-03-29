@@ -68,7 +68,7 @@ export function RoleSortable({
   const showAddButton = hasPermission(combinedRole, "Settings", "create-role");
   const showEditButton =
     hasPermission(combinedRole, "Settings", "update-role") ||
-    hasPermission(combinedRole, "Settings", "read-role");
+    hasPermission(combinedRole, "Settings", "view-role");
   const showDeleteButton = hasPermission(
     combinedRole,
     "Settings",

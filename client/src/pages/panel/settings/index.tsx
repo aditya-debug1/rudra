@@ -13,9 +13,9 @@ const Settings = () => {
   const { combinedRole } = useAuth(false);
 
   const showRoles =
-    hasPermission(combinedRole, "Settings", "read-role") ||
+    hasPermission(combinedRole, "Settings", "view-role") ||
     hasPermission(combinedRole, "Settings", "update-role");
-  const showAudits = hasPermission(combinedRole, "Settings", "read-audit");
+  const showAudits = hasPermission(combinedRole, "Settings", "view-audit");
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Settings" }]);

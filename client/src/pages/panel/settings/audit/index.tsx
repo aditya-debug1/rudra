@@ -36,7 +36,7 @@ export default function AuditLogPage() {
     endDate: "",
   });
 
-  const showAudits = hasPermission(combinedRole, "Settings", "read-audit");
+  const showAudits = hasPermission(combinedRole, "Settings", "view-audit");
 
   useEffect(() => {
     setBreadcrumbs([

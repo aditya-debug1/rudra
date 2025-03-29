@@ -7,28 +7,28 @@ import bcrypt from "bcrypt";
 const defaultSuperAdminPermissions = [
   {
     page: "Dashboard",
-    actions: ["read"],
+    actions: ["view"],
   },
   {
     page: "Users",
     actions: [
-      "read",
+      "view-users",
       "reset-password",
       "create-user",
       "lock-user",
-      "read-details",
+      "view-details",
       "update-user",
       "delete-user",
     ],
   },
   {
-    page: "Clients",
+    page: "Client",
     actions: [
-      "read",
-      "create-clients",
-      "delete-clients",
-      "update-clients",
-      "read-details",
+      "view-clients",
+      "create-client",
+      "delete-client",
+      "update-client",
+      "view-details",
       "create-visits",
       "update-visits",
       "delete-visits",
@@ -38,29 +38,25 @@ const defaultSuperAdminPermissions = [
   },
   {
     page: "Task",
-    actions: ["read", "create", "delete", "update"],
+    actions: ["view", "create", "delete", "update"],
   },
   {
     page: "Form",
-    pageLabel: "Form Sections",
-    actions: [
-      { value: "client-form", label: "View Client Form" },
-      { value: "client-partner-form", label: "View Client Partner Form" },
-    ],
+    actions: ["client-form", "client-partner-form"],
   },
   {
     page: "Reports",
-    actions: ["read-users"],
+    actions: ["users-report"],
   },
   {
     page: "Settings",
     actions: [
       "create-role",
       "update-role",
-      "read-role",
+      "view-role",
       "delete-role",
       "change-precedence",
-      "read-audit",
+      "view-audit",
     ],
   },
 ];

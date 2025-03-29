@@ -23,7 +23,7 @@ export default function Role() {
 
   const { combinedRole, logout: handleLogout } = useAuth(false);
   const showRoles =
-    hasPermission(combinedRole, "Settings", "read-role") ||
+    hasPermission(combinedRole, "Settings", "view-role") ||
     hasPermission(combinedRole, "Settings", "update-role");
 
   const [roles, setRoles] = useState(rolesQuery.data || []);

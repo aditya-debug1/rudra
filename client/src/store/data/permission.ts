@@ -3,28 +3,28 @@ import { Permission } from "../role";
 export const AdminPermissions: Permission[] = [
   {
     page: "Dashboard",
-    actions: ["read"],
+    actions: ["view"],
   },
   {
     page: "Users",
     actions: [
-      "read",
+      "view-users",
       "reset-password",
       "create-user",
       "lock-user",
-      "read-details",
+      "view-details",
       "update-user",
       "delete-user",
     ],
   },
   {
-    page: "Clients",
+    page: "Client",
     actions: [
-      "read",
-      "create-clients",
-      "delete-clients",
-      "update-clients",
-      "read-details",
+      "view-clients",
+      "create-client",
+      "delete-client",
+      "update-client",
+      "view-details",
       "create-visits",
       "update-visits",
       "delete-visits",
@@ -34,7 +34,7 @@ export const AdminPermissions: Permission[] = [
   },
   {
     page: "Task",
-    actions: ["read", "create", "delete", "update"],
+    actions: ["view", "create", "delete", "update"],
   },
   {
     page: "Form",
@@ -42,17 +42,17 @@ export const AdminPermissions: Permission[] = [
   },
   {
     page: "Reports",
-    actions: ["read-users"],
+    actions: ["users-report"],
   },
   {
     page: "Settings",
     actions: [
       "create-role",
       "update-role",
-      "read-role",
+      "view-role",
       "delete-role",
       "change-precedence",
-      "read-audit",
+      "view-audit",
     ],
   },
 ];
@@ -60,11 +60,11 @@ export const AdminPermissions: Permission[] = [
 export const DefaultPermissions: Permission[] = [
   {
     page: "Dashboard",
-    actions: ["read"],
+    actions: ["view"],
   },
   {
     page: "Task",
-    actions: ["read", "create", "delete", "update"],
+    actions: ["view", "create", "delete", "update"],
   },
 ];
 
@@ -83,17 +83,15 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
   {
     page: "Dashboard",
     pageLabel: "Dashboard Sections",
-    actions: [
-      { value: "read", label: "View Dashboard" }, // Based on AdminPermissions
-    ],
+    actions: [{ value: "view", label: "View Dashboard" }],
   },
   {
     page: "Users",
     pageLabel: "Users Sections",
     actions: [
-      { value: "read", label: "View Users" },
+      { value: "view-users", label: "View Users" },
       { value: "create-user", label: "Create new users" },
-      { value: "read-details", label: "View user details" },
+      { value: "view-details", label: "View user details" },
       { value: "update-user", label: "Update user details" },
       { value: "delete-user", label: "Delete user" },
       { value: "reset-password", label: "Reset user password" },
@@ -104,10 +102,26 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     page: "Task",
     pageLabel: "Task Sections",
     actions: [
-      { value: "read", label: "View Tasks" },
-      { value: "create", label: "Create Tasks" },
-      { value: "delete", label: "Delete Tasks" },
-      { value: "update", label: "Update Tasks" },
+      { value: "view", label: "View Task" },
+      { value: "create", label: "Create Task" },
+      { value: "delete", label: "Delete Task" },
+      { value: "update", label: "Update Task" },
+    ],
+  },
+  {
+    page: "Client",
+    pageLabel: "Client Sections",
+    actions: [
+      { value: "view-clients", label: "View Clients" },
+      { value: "create-client", label: "Create Client" },
+      { value: "delete-client", label: "Delete Client" },
+      { value: "update-client", label: "Update Client Details" },
+      { value: "view-details", label: "View Client Details" },
+      { value: "create-visits", label: "Create Client Visit" },
+      { value: "update-visits", label: "Update Client Visit" },
+      { value: "delete-visits", label: "Delete Client Visit" },
+      { value: "create-remarks", label: "Create Visit Remarks" },
+      { value: "delete-remarks", label: "Delete Visit Remarks" },
     ],
   },
   {
@@ -121,7 +135,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
   {
     page: "Reports",
     pageLabel: "Report Sections",
-    actions: [{ value: "read-users", label: "View User Reports" }],
+    actions: [{ value: "users-report", label: "View User Reports" }],
   },
   {
     page: "Settings",
@@ -129,10 +143,10 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     actions: [
       { value: "create-role", label: "Create Roles" },
       { value: "update-role", label: "View & Update Roles" },
-      { value: "read-role", label: "View Roles" },
-      { value: "read-audit", label: "View Audit Logs" },
+      { value: "view-role", label: "View Roles" },
+      { value: "view-audit", label: "View Audit Logs" },
       { value: "delete-role", label: "Delete Roles" },
-      { value: "change-precedence", label: "Chnage Role Precedence" },
+      { value: "change-precedence", label: "Change Role Precedence" },
     ],
   },
 ];

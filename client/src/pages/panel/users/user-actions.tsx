@@ -31,7 +31,7 @@ export const UserAction = ({ user, isDisabled = true }: UserActionProps) => {
   const { combinedRole } = useAuth(false);
 
   //Access for buttons
-  const showUserDetails = hasPermission(combinedRole, "Users", "read-details");
+  const showUserDetails = hasPermission(combinedRole, "Users", "view-details");
   const showLockButton = hasPermission(combinedRole, "Users", "lock-user");
 
   const hasAnyAccess = showUserDetails || showLockButton;
