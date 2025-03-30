@@ -22,7 +22,7 @@ const defaultSuperAdminPermissions = [
     ],
   },
   {
-    page: "Client",
+    page: "Clients",
     actions: [
       "view-clients",
       "create-client",

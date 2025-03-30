@@ -18,7 +18,7 @@ export const AdminPermissions: Permission[] = [
     ],
   },
   {
-    page: "Client",
+    page: "Clients",
     actions: [
       "view-clients",
       "create-client",
@@ -109,7 +109,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     ],
   },
   {
-    page: "Client",
+    page: "Clients",
     pageLabel: "Client Sections",
     actions: [
       { value: "view-clients", label: "View Clients" },
