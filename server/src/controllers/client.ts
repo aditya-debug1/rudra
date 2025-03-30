@@ -15,6 +15,7 @@ class ClientController {
         altNo,
         address,
         note,
+        project,
         requirement,
         budget,
         visitData,
@@ -29,6 +30,7 @@ class ClientController {
         altNo,
         address,
         note,
+        project,
         requirement,
         budget,
       });
@@ -100,6 +102,7 @@ class ClientController {
               { phoneNo: termRegex },
               { altNo: termRegex },
               { address: termRegex },
+              { project: termRegex },
               { requirement: termRegex },
               {
                 $expr: {
@@ -113,6 +116,9 @@ class ClientController {
           };
         });
       }
+
+      // Add filter to ensure clients have at least one visit
+      clientQuery.visits = { $exists: true, $ne: [] };
 
       // Find clients with their latest visit matching the filter
       const clients = await Client.aggregate([
@@ -248,6 +254,7 @@ class ClientController {
         altNo,
         address,
         note,
+        project,
         requirement,
         budget,
       } = req.body;
@@ -263,6 +270,7 @@ class ClientController {
           altNo,
           address,
           note,
+          project,
           requirement,
           budget,
         },

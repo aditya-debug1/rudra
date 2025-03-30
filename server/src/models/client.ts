@@ -10,6 +10,7 @@ export interface ClientType extends Document {
   altNo?: string;
   address?: string;
   note?: string;
+  project: string;
   requirement: string;
   budget: number;
   visits: Types.ObjectId[];
@@ -28,6 +29,7 @@ const ClientSchema = new Schema({
   altNo: String,
   address: String,
   note: String,
+  project: { type: String, required: true },
   requirement: { type: String, required: true },
   budget: { type: Number, required: true },
   visits: [{ type: Schema.Types.ObjectId, ref: "Visit" }],
