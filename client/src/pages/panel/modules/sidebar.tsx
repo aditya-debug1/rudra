@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
 
 // NavLink & SidebarProps interface used for both Normal Sidebar and SheetSidebar
 interface NavLink {
@@ -100,9 +101,13 @@ const SheetSidebar: React.FC<SidebarProps> = ({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon">
-          <AlignLeft />
-        </Button>
+        <span>
+          <Tooltip content="Open Sidebar">
+            <Button variant="outline" size="icon">
+              <AlignLeft />
+            </Button>
+          </Tooltip>
+        </span>
       </SheetTrigger>
       <SheetContent
         className={cn(
