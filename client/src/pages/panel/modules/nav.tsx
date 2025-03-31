@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { cn } from "@/lib/utils";
+import { userType } from "@/store/users";
 import { ChevronRight } from "lucide-react";
 import * as React from "react";
 import { Fragment } from "react";
@@ -27,11 +28,13 @@ import { Link } from "react-router-dom";
 interface NavProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
   logoutFunc: () => void;
+  user?: userType;
 }
 
 const Nav: React.FC<NavProps> = ({
   currContent,
   logoutFunc,
+  user,
   className,
   ...props
 }) => {
@@ -69,7 +72,9 @@ const Nav: React.FC<NavProps> = ({
               className="overflow-hidden rounded-full"
             >
               <Avatar>
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarFallback>
+                  {`${user?.firstName[0]}${user?.lastName[0]}`.toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

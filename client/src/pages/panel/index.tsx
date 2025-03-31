@@ -57,6 +57,7 @@ export const Panel = () => {
           className={styles.AppNavbar}
           currContent={currPage}
           logoutFunc={handleLogout}
+          user={currUser}
         />
         <MainBody
           className={styles.AppContent}
