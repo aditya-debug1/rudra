@@ -4,3 +4,10 @@ export function removeElementAtIndex<T>(arr: T[], index: number): T[] {
   }
   return arr;
 }
+
+export const getLabelFromValue = (
+  options: { label: string; value: string }[],
+  value: string,
+): string | undefined => {
+  return options.find((option) => option.value === value)?.label;
+};
