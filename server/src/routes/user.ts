@@ -12,6 +12,9 @@ router.post("/reset-password/:id", verifyToken, UserController.resetPassword);
 // Get all users
 router.get("/", verifyToken, UserController.getAllUsers);
 
+// Get all users summary
+router.get("/summary", verifyToken, UserController.getUsersSummary);
+
 // Get user by ID
 router.get("/:id", verifyToken, UserController.getUserById);
 

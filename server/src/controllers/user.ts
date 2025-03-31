@@ -142,6 +142,25 @@ class UserController {
     }
   }
 
+  async getUsersSummary(req: Request, res: Response, next: NextFunction) {
+    try {
+      const users = await User.find(
+        {},
+        "_id firstName lastName username roles",
+      );
+      res.status(200).json(users);
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error
+            ? error.message
+            : "Error fetching user summaries",
+        ),
+      );
+    }
+  }
+
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
       // Exclude password field from query

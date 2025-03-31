@@ -10,6 +10,14 @@ export const useUsers = (params: UserQueryParams = {}) => {
   });
 };
 
+export const useUsersSummary = () => {
+  return useQuery({
+    queryKey: ["users-summary"],
+    queryFn: () => userApi.getUsersSummary(),
+    placeholderData: (previousData) => previousData,
+  });
+};
+
 export const useUser = (userId: string) => {
   return useQuery({
     queryKey: ["users", userId],

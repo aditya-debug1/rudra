@@ -3,6 +3,7 @@ import {
   ChangeUserPassword,
   PaginatedResponse,
   UserQueryParams,
+  usersSummaryType,
   userType,
 } from "./types";
 
@@ -21,6 +22,10 @@ export const userApi = {
     });
     const response = await newRequest.get(`/user?${queryParams}`);
     return response.data as PaginatedResponse;
+  },
+  getUsersSummary: async () => {
+    const response = await newRequest.get("/user/summary");
+    return response.data as usersSummaryType[];
   },
   getUserById: async (userId: string) => {
     const response = await newRequest.get(`/user/${userId}`);

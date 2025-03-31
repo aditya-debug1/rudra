@@ -37,3 +37,11 @@ export interface UserQueryParams {
   role?: string;
   search?: string;
 }
+
+export interface usersSummaryType {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  roles: string[];
+}
