@@ -1,18 +1,18 @@
 export interface RemarkType {
-  _id: string;
+  _id?: string;
   date: Date;
   remark: string;
 }
 
 export interface VisitType {
-  _id: string;
+  _id?: string;
   date: Date;
   reference: string;
   source: string;
   relation: string;
   closing: string;
-  status: "lost" | "cold" | "warm" | "hot" | "booked";
-  remarks: RemarkType[];
+  status: null | "lost" | "cold" | "warm" | "hot" | "booked";
+  remarks?: RemarkType[];
 }
 
 export interface ClientType {
@@ -25,6 +25,7 @@ export interface ClientType {
   altNo?: string;
   address?: string;
   note?: string;
+  project: string;
   requirement: string;
   budget: number;
   visits: VisitType[];

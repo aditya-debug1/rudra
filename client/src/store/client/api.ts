@@ -79,6 +79,7 @@ export const clientApi = {
     altNo?: string;
     address?: string;
     note?: string;
+    project: string;
     requirement: string;
     budget: number;
     visitData: Omit<VisitType, "client">;
@@ -102,6 +103,7 @@ export const clientApi = {
       altNo: string;
       address: string;
       note: string;
+      project: string;
       requirement: string;
       budget: number;
     }>,

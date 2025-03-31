@@ -29,6 +29,7 @@ type ComboboxProps = {
   emptyMessage?: string;
   className?: string;
   width?: string;
+  valueSearch?: boolean; // New property to toggle search behavior
 };
 
 export const Combobox = ({
@@ -40,8 +41,28 @@ export const Combobox = ({
   emptyMessage = "No option found.",
   className = "",
   width = "w-[200px]",
+  valueSearch = false, // Default to false (search by label)
 }: ComboboxProps) => {
   const [open, setOpen] = React.useState(false);
+
+  // Custom filter function based on valueSearch prop
+  const filterFunction = React.useCallback(
+    (value: string, search: string) => {
+      search = search.toLowerCase();
+      const option = options.find((option) => option.value === value);
+
+      if (!option) return false;
+
+      if (valueSearch) {
+        // Search by value
+        return option.value.toLowerCase().includes(search);
+      } else {
+        // Search by label (default)
+        return option.label.toLowerCase().includes(search);
+      }
+    },
+    [options, valueSearch],
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,7 +80,7 @@ export const Combobox = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className={`${width} p-0`}>
-        <Command>
+        <Command filter={filterFunction}>
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
