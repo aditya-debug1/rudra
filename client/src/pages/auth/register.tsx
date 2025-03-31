@@ -134,7 +134,7 @@ export const RegisterForm = () => {
 
   return (
     <div className="w-svw min-h-svh h-auto grid place-items-center bg-primary-foreground">
-      <Card className="my-10 w-[80%] md:w-full max-w-md">
+      <Card className="my-10 w-[90%] md:w-full max-w-md">
         <CardHeader>
           <CardTitle>Complete Registration</CardTitle>
           <CardDescription>Update your information</CardDescription>

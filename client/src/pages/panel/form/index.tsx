@@ -25,7 +25,7 @@ const Form = () => {
             Registration Forms
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6 w-full">
+        <CardContent className="p-4 sm:p-6 w-full">
           <Tabs defaultValue="client" className="w-full">
             <TabsList className="grid max-w-[500px] w-full grid-cols-2 mx-auto mb-6">
               <TabsTrigger value="client">

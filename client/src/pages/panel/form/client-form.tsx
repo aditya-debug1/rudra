@@ -211,13 +211,15 @@ const ClientForm = () => {
 
   return (
     <Card className="w-full mx-auto">
-      <CardHeader>
-        <CardTitle>Client Registration Form</CardTitle>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-xl sm:text-2xl">
+          Client Registration Form
+        </CardTitle>
         <CardDescription>
           Enter client details and visit information
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <div className="space-y-6">
           {/* Client Information Section */}
           <div className="space-y-6">

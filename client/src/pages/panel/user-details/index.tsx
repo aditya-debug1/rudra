@@ -129,7 +129,7 @@ function UserDetails() {
 
   return (
     <>
-      <Card className="my-10 w-[90%] md:w-full max-w-md">
+      <Card className="md:my-10 w-90svw md:w-full max-w-md">
         <CardHeader>
           <CardTitle>User Details</CardTitle>
           <CardDescription>
