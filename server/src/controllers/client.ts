@@ -74,21 +74,42 @@ class ClientController {
         source,
         relation,
         closing,
+        fromDate,
+        toDate,
+        minBudget,
+        maxBudget,
       } = req.query;
 
       const pageNumber = Number(page);
       const limitNumber = Number(limit);
 
       // Construct visit filter query
-      const visitFilter: any = {};
+      const visitFilter: Record<string, any> = {};
       if (status) visitFilter.status = status as string;
       if (reference) visitFilter.reference = reference as string;
       if (source) visitFilter.source = source as string;
       if (relation) visitFilter.relation = relation as string;
       if (closing) visitFilter.closing = closing as string;
 
+      // Add date range filtering for visits
+      if (fromDate || toDate) {
+        visitFilter.date = {};
+
+        if (fromDate) {
+          const from = new Date(fromDate as string);
+          from.setHours(0, 0, 0, 0); // Set to 00:00:00
+          visitFilter.date.$gte = from;
+        }
+
+        if (toDate) {
+          const to = new Date(toDate as string);
+          to.setHours(23, 59, 59, 999); // Set to 23:59:59.999
+          visitFilter.date.$lte = to;
+        }
+      }
+
       // Text search query for clients
-      let clientQuery: any = {};
+      let clientQuery: Record<string, any> = {};
       if (search) {
         const searchTerms = (search as string).trim().split(/\s+/);
         clientQuery.$and = searchTerms.map((term) => {
@@ -117,8 +138,32 @@ class ClientController {
         });
       }
 
+      // Add budget range filtering for clients
+      if (minBudget || maxBudget) {
+        clientQuery.budget = {};
+        if (minBudget) clientQuery.budget.$gte = Number(minBudget);
+        if (maxBudget) clientQuery.budget.$lte = Number(maxBudget);
+      }
+
       // Add filter to ensure clients have at least one visit
       clientQuery.visits = { $exists: true, $ne: [] };
+
+      // Create the match conditions for the aggregation pipeline
+      const visitMatchConditions: any[] = [{ $in: ["$_id", "$$clientVisits"] }];
+
+      // Add regular visit filters
+      Object.entries(visitFilter).forEach(([key, value]) => {
+        if (key === "date" && typeof value === "object") {
+          if (value.$gte) {
+            visitMatchConditions.push({ $gte: ["$date", value.$gte] });
+          }
+          if (value.$lte) {
+            visitMatchConditions.push({ $lte: ["$date", value.$lte] });
+          }
+        } else {
+          visitMatchConditions.push({ $eq: [`$${key}`, value] });
+        }
+      });
 
       // Find clients with their latest visit matching the filter
       const clients = await Client.aggregate([
@@ -131,12 +176,7 @@ class ClientController {
               {
                 $match: {
                   $expr: {
-                    $and: [
-                      { $in: ["$_id", "$$clientVisits"] },
-                      ...Object.entries(visitFilter).map(([key, value]) => ({
-                        $eq: [`$${key}`, value],
-                      })),
-                    ],
+                    $and: visitMatchConditions,
                   },
                 },
               },
@@ -158,6 +198,25 @@ class ClientController {
         { $limit: limitNumber },
       ]);
 
+      // Create the match conditions for the count aggregation pipeline
+      const countVisitMatchConditions: any[] = [
+        { $in: ["$_id", "$$clientVisits"] },
+      ];
+
+      // Add regular visit filters to count query
+      Object.entries(visitFilter).forEach(([key, value]) => {
+        if (key === "date" && typeof value === "object") {
+          if (value.$gte) {
+            countVisitMatchConditions.push({ $gte: ["$date", value.$gte] });
+          }
+          if (value.$lte) {
+            countVisitMatchConditions.push({ $lte: ["$date", value.$lte] });
+          }
+        } else {
+          countVisitMatchConditions.push({ $eq: [`$${key}`, value] });
+        }
+      });
+
       // Count total matching clients
       const totalClients = await Client.aggregate([
         { $match: clientQuery },
@@ -169,12 +228,7 @@ class ClientController {
               {
                 $match: {
                   $expr: {
-                    $and: [
-                      { $in: ["$_id", "$$clientVisits"] },
-                      ...Object.entries(visitFilter).map(([key, value]) => ({
-                        $eq: [`$${key}`, value],
-                      })),
-                    ],
+                    $and: countVisitMatchConditions,
                   },
                 },
               },
@@ -219,7 +273,6 @@ class ClientController {
       );
     }
   }
-
   async getClient(req: Request, res: Response, next: NextFunction) {
     try {
       const client = await Client.findById(req.params.id).populate({
