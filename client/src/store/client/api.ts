@@ -30,6 +30,10 @@ interface ClientFilters {
   source?: string;
   relation?: string;
   closing?: string;
+  fromDate?: Date;
+  toDate?: Date;
+  minBudget?: number;
+  maxBudget?: number;
 }
 
 // Client API methods
@@ -45,6 +49,10 @@ export const clientApi = {
       source,
       relation,
       closing,
+      fromDate,
+      toDate,
+      minBudget,
+      maxBudget,
     } = filters;
 
     const queryParams = new URLSearchParams();
@@ -53,9 +61,13 @@ export const clientApi = {
     if (search) queryParams.append("search", search);
     if (status) queryParams.append("status", status);
     if (reference) queryParams.append("reference", reference);
-    if (source) queryParams.append("search", source);
-    if (relation) queryParams.append("search", relation);
-    if (closing) queryParams.append("search", closing);
+    if (source) queryParams.append("source", source);
+    if (relation) queryParams.append("relation", relation);
+    if (closing) queryParams.append("closing", closing);
+    if (fromDate) queryParams.append("fromDate", fromDate.toString());
+    if (toDate) queryParams.append("toDate", toDate.toString());
+    if (minBudget) queryParams.append("minBudget", minBudget.toString());
+    if (maxBudget) queryParams.append("maxBudget", maxBudget.toString());
 
     const response = await newRequest.get<GetClientsResponse>(
       `/client?${queryParams.toString()}`,
