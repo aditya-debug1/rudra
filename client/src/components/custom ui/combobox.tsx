@@ -30,6 +30,7 @@ type ComboboxProps = {
   className?: string;
   width?: string;
   valueSearch?: boolean; // Property to toggle search behavior
+  disabled?: boolean;
 };
 
 export const Combobox = ({
@@ -42,6 +43,7 @@ export const Combobox = ({
   className = "",
   width = "w-[200px]",
   valueSearch = false, // Default to false (search by label)
+  disabled = false,
 }: ComboboxProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,6 +79,7 @@ export const Combobox = ({
           role="combobox"
           aria-expanded={open}
           className={`${width} justify-between ${className}`}
+          disabled={disabled}
         >
           {selectedLabel}
           <ChevronsUpDown className="opacity-50" />
