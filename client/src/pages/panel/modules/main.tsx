@@ -9,9 +9,10 @@ import { Route, Routes, useLocation } from "react-router-dom";
 
 // Pages
 const Dashboard = lazy(() => import("@/pages/panel/dashboard"));
-const UserDetails = lazy(() => import("@/pages/panel/user-details/index"));
 const UserList = lazy(() => import("@/pages/panel/users"));
+const UserDetails = lazy(() => import("@/pages/panel/user-details"));
 const ClientList = lazy(() => import("@/pages/panel/client"));
+const ClientDetails = lazy(() => import("@/pages/panel/client-details"));
 const Task = lazy(() => import("@/pages/panel/task"));
 const Form = lazy(() => import("@/pages/panel/form"));
 const Reports = lazy(() => import("@/pages/panel/reports"));
@@ -74,6 +75,11 @@ const MainBody: React.FC<MainProps> = ({
     { path: "users/", element: <UserList />, pageName: "Users" },
     { path: "users/details/:id", element: <UserDetails />, pageName: "Users" },
     { path: "clients/", element: <ClientList />, pageName: "Clients" },
+    {
+      path: "clients/details/:id",
+      element: <ClientDetails />,
+      pageName: "Clients",
+    },
     { path: "task", element: <Task />, pageName: "Task" },
     { path: "form", element: <Form />, pageName: "Form" },
     { path: "reports", element: <Reports />, pageName: "Reports" },
