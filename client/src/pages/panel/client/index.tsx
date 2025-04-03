@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { ClientTable } from "./client-table";
 import { ClientFooter } from "./client-footer";
 import { ClientHeader } from "./client-header";
+import { useNavigate } from "react-router-dom";
 
 const ClientsList = () => {
   const { filters, setFilters, setSelectedClientId } = useClientStore();
+  const navigate = useNavigate();
   const [isFiltered, setIsFiltered] = useState(false);
   const [status, setStatus] = useState(filters.status || "");
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -51,7 +53,8 @@ const ClientsList = () => {
   };
 
   // Handle client selection
-  const handleOpenDetail = (id: string) => {
+  const handleOpenDetails = (id: string) => {
+    navigate(`details/${id}`);
     setSelectedClientId(id);
   };
 
@@ -85,7 +88,7 @@ const ClientsList = () => {
           handleSetStatus={handleSetStatus}
         />
 
-        <ClientTable data={data} openDetails={handleOpenDetail} />
+        <ClientTable data={data} openDetails={handleOpenDetails} />
 
         {data && <ClientFooter data={data} />}
       </CardContent>

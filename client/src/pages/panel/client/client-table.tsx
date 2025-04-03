@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/table";
 import { ClientType, GetClientsResponse } from "@/store/client";
 import { requirementOptions } from "@/store/data/options";
+import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { getLabelFromValue } from "@/utils/func/arrayUtils";
+import { simplifyNumber } from "@/utils/func/numberUtils.ts";
 import { toProperCase } from "@/utils/func/strUtils";
 import { ChevronRight } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -42,11 +44,21 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [heights, setHeights] = useState<Record<string, number>>({});
   const contentRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const { data: managers } = useUsersSummary();
 
   const toggleItem = (id: string) => {
     setOpenItems((prev) => ({
       [id]: !prev[id],
     }));
+  };
+
+  const getManagerName = (
+    username: string,
+    managers: usersSummaryType[] | undefined,
+  ) => {
+    if (!managers || !username) return username;
+    const manager = managers.find((m) => m.username === username);
+    return manager ? manager.firstName : username;
   };
 
   useEffect(() => {
@@ -109,18 +121,18 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                         client.requirement,
                       )}
                     </TableCell>
-                    <TableCell>₹{client.budget.toLocaleString()}</TableCell>
+                    <TableCell>₹{simplifyNumber(client.budget)}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       {client.visits[0].reference}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {client.visits[0].source}
+                      {getManagerName(client.visits[0].source, managers)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {client.visits[0].relation}
+                      {getManagerName(client.visits[0].relation, managers)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {client.visits[0].closing}
+                      {getManagerName(client.visits[0].closing, managers)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusClr(client.visits[0].status)}>
@@ -185,6 +197,13 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                               <h4 className="text-sm font-bold">Project:</h4>
                               <p className="text-sm">
                                 {client.project || "N/A"}
+                              </p>
+                            </span>
+                            <span className="col-span-2 flex items-center justify-start gap-3">
+                              <h4 className="text-sm font-bold">Remark:</h4>
+                              <p className="text-sm">
+                                {client.visits?.[0]?.remarks?.[0]?.remark ??
+                                  "No remark"}
                               </p>
                             </span>
                           </div>
