@@ -70,7 +70,26 @@ class VisitController {
         return next(createError(404, "Visit not found"));
       }
 
-      await Client.findByIdAndUpdate(visit.get("client"), {
+      const clientId = visit.get("client");
+      const client = await Client.findById(visit.get("client")).populate(
+        "visits",
+      );
+
+      // Check if client exists and has more than one visit
+      if (!client) {
+        return next(createError(404, "Client not found"));
+      }
+
+      if (client.visits.length <= 1) {
+        return next(
+          createError(
+            400,
+            "Cannot delete the only visit for this client. A client must have at least one visit.",
+          ),
+        );
+      }
+
+      await Client.findByIdAndUpdate(clientId, {
         $pull: { visits: visit._id },
       });
 
