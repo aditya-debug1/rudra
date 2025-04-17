@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Client } from "../models/client";
 import { Visit } from "../models/visit";
 import createError from "../utils/createError";
+import auditService from "../utils/audit-service";
 
 class ClientController {
   async createClient(req: Request, res: Response, next: NextFunction) {
@@ -48,6 +49,14 @@ class ClientController {
       await Client.findByIdAndUpdate(client._id, {
         $push: { visits: visit._id },
       });
+
+      // Create audit log
+      await auditService.logCreate(
+        client,
+        req,
+        "Client",
+        `Created client: ${client.firstName + " " + client.lastName}`,
+      );
 
       res.status(201).json({
         message: "Client created successfully",
@@ -276,7 +285,14 @@ class ClientController {
         budget,
       } = req.body;
 
-      const client = await Client.findByIdAndUpdate(
+      // First fetch the original client data
+      const originalClient = await Client.findById(req.params.id);
+      if (!originalClient) {
+        return next(createError(404, "Client not found"));
+      }
+
+      // Then update the client
+      const updatedClient = await Client.findByIdAndUpdate(
         req.params.id,
         {
           firstName,
@@ -298,13 +314,27 @@ class ClientController {
         populate: { path: "remarks" },
       });
 
-      if (!client) {
-        return next(createError(404, "Client not found"));
+      if (!updatedClient) {
+        return next(
+          createError(
+            404,
+            "An unexpected error occurred while updating the client. Please try again later.",
+          ),
+        );
       }
+
+      // Create audit log with original and updated data
+      await auditService.logUpdate(
+        originalClient,
+        updatedClient,
+        req,
+        "Client",
+        `Updated client: ${updatedClient.firstName + " " + updatedClient.lastName}`,
+      );
 
       res.status(200).json({
         message: "Client updated successfully",
-        client,
+        client: updatedClient,
       });
     } catch (error) {
       next(
@@ -315,7 +345,6 @@ class ClientController {
       );
     }
   }
-
   async deleteClient(req: Request, res: Response, next: NextFunction) {
     try {
       const client = await Client.findById(req.params.id);
@@ -326,6 +355,14 @@ class ClientController {
 
       await Visit.deleteMany({ client: client._id });
       await client.deleteOne();
+
+      // Create audit log
+      await auditService.logDelete(
+        client,
+        req,
+        "Client",
+        `Deleted client: ${client.firstName + " " + client.lastName}`,
+      );
 
       res.status(200).json({
         message: "Client deleted successfully",

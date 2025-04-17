@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { RemarkType, Visit } from "../models/visit";
 import { Client } from "../models/client";
 import createError from "../utils/createError";
+import auditService from "../utils/audit-service";
 
 class VisitController {
   async createVisit(req: Request, res: Response, next: NextFunction) {
@@ -24,6 +25,14 @@ class VisitController {
         $push: { visits: visit._id },
       });
 
+      // Create audit log
+      await auditService.logCreate(
+        visit,
+        req,
+        "Visit",
+        `Created visit for client: ${client.firstName + " " + client.lastName}`,
+      );
+
       res.status(201).json({
         message: "Visit created successfully",
         visit,
@@ -40,17 +49,37 @@ class VisitController {
 
   async updateVisit(req: Request, res: Response, next: NextFunction) {
     try {
-      const visit = await Visit.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      }).populate("remarks");
-
-      if (!visit) {
+      // First fetch the original visit data
+      const originalVisit = await Visit.findById(req.params.id);
+      if (!originalVisit) {
         return next(createError(404, "Visit not found"));
       }
 
+      // Get the client information for the audit log
+      const client = await Client.findById(originalVisit.client);
+      if (!client) {
+        return next(createError(404, "Client not found"));
+      }
+
+      // Then update the visit
+      const updatedVisit = await Visit.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true },
+      ).populate("remarks");
+
+      // Create audit log with original and updated data
+      await auditService.logUpdate(
+        originalVisit,
+        updatedVisit,
+        req,
+        "Visit",
+        `Updated visit for client: ${client.firstName + " " + client.lastName}`,
+      );
+
       res.status(200).json({
         message: "Visit updated successfully",
-        visit,
+        visit: updatedVisit,
       });
     } catch (error) {
       next(
@@ -92,6 +121,14 @@ class VisitController {
       await Client.findByIdAndUpdate(clientId, {
         $pull: { visits: visit._id },
       });
+
+      // Create audit log
+      await auditService.logDelete(
+        visit,
+        req,
+        "Visit",
+        `Deleted visit for client: ${client.firstName + " " + client.lastName}`,
+      );
 
       await visit.deleteOne();
 
