@@ -35,3 +35,23 @@ export const simplifyNumber = (num: number): string => {
   // For numbers less than 1000
   return `${sign}${absoluteNum}`;
 };
+
+// This function gives us a value in what number ranges like K,L,CR
+export const getNumericRangeBase = (num: number): string => {
+  if (num === 0) return "";
+  if (!num) return ""; // handles undefined/null
+
+  const absoluteNum = Math.abs(num);
+
+  // For thousands (1,000 - 99,999)
+  if (absoluteNum >= 1000 && absoluteNum < 100000) return "1000";
+
+  // For lakhs (1,00,000 - 99,99,999)
+  if (absoluteNum >= 100000 && absoluteNum < 10000000) return "100000";
+
+  // For crores (1,00,00,000 and above)
+  if (absoluteNum >= 10000000) return "10000000";
+
+  // For numbers less than 1000 or others
+  return "";
+};
