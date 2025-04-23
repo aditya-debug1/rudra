@@ -28,6 +28,7 @@ import { companySchema } from "@/utils/zod-schema/client-partner";
 
 const DEFAULT_CP = {
   name: "",
+  ownerName: "",
   email: "",
   phoneNo: "",
   address: "",
@@ -252,7 +253,7 @@ const ClientPartnerDetails = () => {
   }
 
   return (
-    <Card className="w-[90svw] sm:w-full">
+    <Card className="w-[90svw] [@media(min-width:900px)]:w-full">
       <CardHeader className="p-4 sm:p-6">
         <CardTitle className="text-xl mb-2 sm:text-2xl">
           {clientPatner.name}

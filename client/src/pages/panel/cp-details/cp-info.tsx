@@ -21,18 +21,32 @@ export const ClientPartnerInfo = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-4">
-          <FormFieldWrapper
-            LabelText="Company Name"
-            Important={isEditable}
-            ImportantSide="right"
-          >
-            <Input
-              value={data.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              placeholder="Enter company name"
-              disabled={!isEditable}
-            />
-          </FormFieldWrapper>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0">
+            <FormFieldWrapper
+              LabelText="Company Name"
+              Important={isEditable}
+              ImportantSide="right"
+            >
+              <Input
+                value={data.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                placeholder="Enter company name"
+                disabled={!isEditable}
+              />
+            </FormFieldWrapper>
+            <FormFieldWrapper
+              LabelText="Owner Name"
+              Important={isEditable}
+              ImportantSide="right"
+            >
+              <Input
+                value={data.ownerName}
+                onChange={(e) => handleInputChange("ownerName", e.target.value)}
+                placeholder="Enter owner name"
+                disabled={!isEditable}
+              />
+            </FormFieldWrapper>
+          </div>
           <FormFieldWrapper LabelText="Email">
             <Input
               value={data.email}

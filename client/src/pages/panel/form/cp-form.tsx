@@ -36,6 +36,7 @@ export default function ClientPartnerForm() {
   const defaultValue = {
     company: {
       name: "",
+      ownerName: "",
       email: "",
       phoneNo: "",
       address: "",
@@ -95,6 +96,7 @@ export default function ClientPartnerForm() {
     const formattedData = {
       cpId: generateCPId(formData.company.name),
       name: formData.company.name,
+      ownerName: formData.company.ownerName,
       email: formData.company.email,
       phoneNo: formData.company.phoneNo,
       address: formData.company.address,
@@ -162,21 +164,38 @@ export default function ClientPartnerForm() {
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
-              <FormFieldWrapper
-                LabelText="Company Name"
-                Important
-                ImportantSide="right"
-              >
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="e.g. TechCorp Pvt Ltd"
-                  value={formData.company.name}
-                  onChange={(e) =>
-                    handleCompanyChange(e.target.name, e.target.value)
-                  }
-                />
-              </FormFieldWrapper>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormFieldWrapper
+                  LabelText="Company Name"
+                  Important
+                  ImportantSide="right"
+                >
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="e.g. TechCorp Pvt Ltd"
+                    value={formData.company.name}
+                    onChange={(e) =>
+                      handleCompanyChange(e.target.name, e.target.value)
+                    }
+                  />
+                </FormFieldWrapper>
+                <FormFieldWrapper
+                  LabelText="Owner Name"
+                  Important
+                  ImportantSide="right"
+                >
+                  <Input
+                    id="ownerName"
+                    name="ownerName"
+                    placeholder="e.g. John Doe"
+                    value={formData.company.ownerName}
+                    onChange={(e) =>
+                      handleCompanyChange(e.target.name, e.target.value)
+                    }
+                  />
+                </FormFieldWrapper>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormFieldWrapper LabelText="Email">

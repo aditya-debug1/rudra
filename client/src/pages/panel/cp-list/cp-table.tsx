@@ -37,7 +37,8 @@ export const ClientPartnerTable = ({
         <TableHeader>
           <TableRow className="hover:bg-card">
             <TableHead className="text-center">#</TableHead>
-            <TableHead className="text-center">Name</TableHead>
+            <TableHead className="text-center">Company</TableHead>
+            <TableHead className="text-center">Owner</TableHead>
             <TableHead className="text-center">Email</TableHead>
             <TableHead className="text-center">Phone No</TableHead>
             <TableHead className="text-center whitespace-nowrap">
@@ -65,6 +66,7 @@ export const ClientPartnerTable = ({
                   {firstIndex + index + 1}
                 </TableCell>
                 <TableCell className="text-center">{cp.name}</TableCell>
+                <TableCell className="text-center">{cp.ownerName}</TableCell>
                 <TableCell className="text-center">
                   {cp.email || "N/A"}
                 </TableCell>

@@ -21,6 +21,7 @@ export interface ClientPartnerType extends Document {
   _id: Types.ObjectId;
   cpId: string;
   name: string; // Company name
+  ownerName: string;
   employees: Types.ObjectId[]; // List of employee references instead of subdocuments
   email?: string; // General company email
   phoneNo?: string; // General contact number
@@ -58,6 +59,7 @@ const ClientPartnerSchema: Schema = new Schema(
   {
     cpId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
+    ownerName: { type: String, required: true },
     employees: [{ type: Schema.Types.ObjectId, ref: "CPEmployee" }], // Now stores references
     email: { type: String },
     phoneNo: { type: String },

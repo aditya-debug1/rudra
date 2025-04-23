@@ -169,6 +169,7 @@ class ClientPartnerController {
       const {
         cpId,
         name,
+        ownerName,
         email,
         phoneNo,
         address,
@@ -181,6 +182,7 @@ class ClientPartnerController {
       const clientPartner = new ClientPartner({
         cpId,
         name,
+        ownerName,
         email,
         phoneNo,
         address,
@@ -403,7 +405,6 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      console.log("reached Add employee");
       const clientPartnerId = req.params.id;
 
       // Check if client partner exists and not deleted

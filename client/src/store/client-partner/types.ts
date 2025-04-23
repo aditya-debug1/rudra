@@ -23,6 +23,7 @@ export interface ClientPartnerType {
   _id?: string;
   cpId?: string;
   name: string;
+  ownerName: string;
   email: string;
   phoneNo?: string;
   address?: string;
