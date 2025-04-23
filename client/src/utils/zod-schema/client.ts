@@ -5,7 +5,7 @@ const RemarkSchema = z.object({
   remark: z.string().min(1, "Remark is required"),
 });
 
-const VisitSchema = z.object({
+export const VisitSchema = z.object({
   date: z.date(),
   reference: z.string().min(1, "Reference is required"),
   source: z.string().min(1, "Source is required"),
