@@ -26,13 +26,21 @@ export const employeeSchema = z.object({
       message: "Alt Phone number must be 10 digits",
     }),
   position: z.string().optional(),
-  commissionPercentage: z
-    .number()
-    .optional()
-    .refine(
-      (val) => !val || (val >= 0 && val <= 100),
-      "Commission must be between 0 and 100",
-    ),
+  commissionPercentage: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? undefined : parsed;
+      }
+      return val;
+    },
+    z
+      .number()
+      .optional()
+      .refine((val) => val === undefined || (val >= 0 && val <= 100), {
+        message: "Commission must be between 0 and 100",
+      }),
+  ),
 });
 
 export const ClientPartnerSchema = z.object({

@@ -75,8 +75,6 @@ export default function ClientPartnerForm() {
   };
 
   const handleSubmit = async () => {
-    console.log("Form submitted:", formData);
-
     const validation = ClientPartnerSchema.safeParse(formData);
 
     if (!validation.success) {
