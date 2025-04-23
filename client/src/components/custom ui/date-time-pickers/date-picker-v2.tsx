@@ -37,6 +37,7 @@ export default function DatePickerV2({
   // useEffects
   useEffect(() => {
     if (defaultDate instanceof Date) setDate(defaultDate);
+    if (defaultDate == undefined) setDate(undefined);
   }, [defaultDate]);
 
   // handlers
@@ -88,7 +89,7 @@ export default function DatePickerV2({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="w-auto p-0 mx-4">
         <Calendar
           mode="single"
           selected={date}

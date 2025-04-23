@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,8 +12,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import React, { useState } from "react";
 
-type ComboboxOption = {
+export type ComboboxOption = {
   value: string;
   label: string;
 };
@@ -31,6 +31,7 @@ type ComboboxProps = {
   width?: string;
   valueSearch?: boolean; // Property to toggle search behavior
   disabled?: boolean;
+  align?: "start" | "center" | "end";
 };
 
 export const Combobox = ({
@@ -44,6 +45,7 @@ export const Combobox = ({
   width = "w-[200px]",
   valueSearch = false, // Default to false (search by label)
   disabled = false,
+  align = "start",
 }: ComboboxProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,7 +87,7 @@ export const Combobox = ({
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={`${width} p-0`}>
+      <PopoverContent className={`${width} p-0`} align={align}>
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={searchPlaceholder}

@@ -117,6 +117,9 @@ interface MultiSelectProps
    * Optional, can be used to add custom styles.
    */
   className?: string;
+
+  align?: "start" | "center" | "end";
+  /* Aligns The popover contents by default it algins to start */
 }
 
 export const MultiSelect = React.forwardRef<
@@ -135,6 +138,7 @@ export const MultiSelect = React.forwardRef<
       modalPopover = false,
       asChild = true,
       className,
+      align = "start",
       ...props
     },
     ref,
@@ -285,7 +289,7 @@ export const MultiSelect = React.forwardRef<
         </PopoverTrigger>
         <PopoverContent
           className="w-auto p-0"
-          align="start"
+          align={align}
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
         >
           <Command>
