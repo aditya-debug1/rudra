@@ -28,6 +28,8 @@ import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { toast } from "@/hooks/use-toast";
 import { CustomAxiosError } from "@/utils/types/axios";
 import EmployeeFormDialog from "./employee-form"; // Import the form dialog
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role";
 
 interface EmployeesInfoProps {
   data?: ClientPartnerType;
@@ -212,7 +214,21 @@ interface EmpActionProps {
 }
 
 const EmpAction = ({ handleDelete, cpId, employee }: EmpActionProps) => {
+  const { combinedRole } = useAuth(true);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+
+  // Permissions
+  const deleteEmployee = hasPermission(
+    combinedRole,
+    "ClientPartner",
+    "delete-cp-employee",
+  );
+  const updateEmployee = hasPermission(
+    combinedRole,
+    "ClientPartner",
+    "update-cp-employee",
+  );
+  const hasPerms = deleteEmployee || updateEmployee;
 
   // Transform the employee data to match the form's expected format
   const employeeFormData = {
@@ -231,31 +247,37 @@ const EmpAction = ({ handleDelete, cpId, employee }: EmpActionProps) => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild onClick={withStopPropagation()}>
-          <Button size="miniIcon" variant="secondary">
+          <Button size="miniIcon" variant="secondary" disabled={!hasPerms}>
             <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="mx-3">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            onClick={withStopPropagation(() => setIsUpdateDialogOpen(true))}
-          >
-            Update Employee
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={withStopPropagation(() =>
-              handleDelete(
-                cpId,
-                employee._id,
-                employee.firstName + " " + employee.lastName,
-              ),
+        {hasPerms && (
+          <DropdownMenuContent className="mx-3">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {updateEmployee && (
+              <DropdownMenuItem
+                onClick={withStopPropagation(() => setIsUpdateDialogOpen(true))}
+              >
+                Update Employee
+              </DropdownMenuItem>
             )}
-          >
-            Delete Employee
-          </DropdownMenuItem>
-        </DropdownMenuContent>
+
+            {deleteEmployee && (
+              <DropdownMenuItem
+                onClick={withStopPropagation(() =>
+                  handleDelete(
+                    cpId,
+                    employee._id,
+                    employee.firstName + " " + employee.lastName,
+                  ),
+                )}
+              >
+                Delete Employee
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        )}
       </DropdownMenu>
 
       {/* Employee Form Dialog for updating */}
