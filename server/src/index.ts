@@ -10,6 +10,7 @@ import {
   auditRoute,
   clientRoute,
   visitRoute,
+  clientPartnerRoute,
 } from "./routes";
 
 // Initialize express app
@@ -65,6 +66,7 @@ app.use("/api/role", roleRoute);
 app.use("/api/audit", auditRoute);
 app.use("/api/client", clientRoute);
 app.use("/api/visit", visitRoute);
+app.use("/api/client-partner", clientPartnerRoute);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

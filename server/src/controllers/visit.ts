@@ -1,13 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { RemarkType, Visit } from "../models/visit";
 import { Client } from "../models/client";
+import { CPEmployee } from "../models/client-partner";
 import createError from "../utils/createError";
 import auditService from "../utils/audit-service";
+import mongoose from "mongoose";
 
 class VisitController {
   async createVisit(req: Request, res: Response, next: NextFunction) {
     try {
-      const { clientId, ...visitData } = req.body;
+      const { clientId, reference, ...visitData } = req.body;
 
       const client = await Client.findById(clientId);
       if (!client) {
@@ -16,6 +18,7 @@ class VisitController {
 
       const visit = new Visit({
         ...visitData,
+        reference,
         client: clientId,
       });
 
@@ -24,6 +27,16 @@ class VisitController {
       await Client.findByIdAndUpdate(clientId, {
         $push: { visits: visit._id },
       });
+
+      // Check if reference matches a CPEmployee ID and update referredClients
+      if (reference && mongoose.Types.ObjectId.isValid(reference)) {
+        const cpEmployee = await CPEmployee.findOne({ _id: reference });
+        if (cpEmployee) {
+          await CPEmployee.findByIdAndUpdate(reference, {
+            $push: { referredClients: visit._id },
+          });
+        }
+      }
 
       // Create audit log
       await auditService.logCreate(
@@ -59,6 +72,31 @@ class VisitController {
       const client = await Client.findById(originalVisit.client);
       if (!client) {
         return next(createError(404, "Client not found"));
+      }
+
+      const { reference } = req.body;
+
+      // Check if reference is being updated
+      if (reference && reference !== originalVisit.reference) {
+        // If the original reference was a CP employee, remove the client from their referredClients
+        if (
+          originalVisit.reference &&
+          mongoose.Types.ObjectId.isValid(originalVisit.reference)
+        ) {
+          await CPEmployee.findByIdAndUpdate(originalVisit.reference, {
+            $pull: { referredClients: originalVisit._id },
+          });
+        }
+
+        if (mongoose.Types.ObjectId.isValid(reference)) {
+          // Check if new reference matches a CPEmployee ID and update referredClients
+          const cpEmployee = await CPEmployee.findOne({ _id: reference });
+          if (cpEmployee) {
+            await CPEmployee.findByIdAndUpdate(reference, {
+              $push: { referredClients: originalVisit._id },
+            });
+          }
+        }
       }
 
       // Then update the visit
@@ -116,6 +154,13 @@ class VisitController {
             "Cannot delete the only visit for this client. A client must have at least one visit.",
           ),
         );
+      }
+
+      // Remove the client from the CP employee's referredClients if applicable
+      if (visit.reference) {
+        await CPEmployee.findByIdAndUpdate(visit.reference, {
+          $pull: { referredClients: visit._id },
+        });
       }
 
       await Client.findByIdAndUpdate(clientId, {

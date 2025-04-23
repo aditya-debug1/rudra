@@ -20,8 +20,22 @@ router.get("/:id", verifyToken, ClientPartnerController.getClientPartner);
 // Update client partner
 router.put("/:id", verifyToken, ClientPartnerController.updateClientPartner);
 
-// Delete client partner
+// Soft delete client partner
 router.delete("/:id", verifyToken, ClientPartnerController.deleteClientPartner);
+
+// Hard delete client partner (admin only)
+router.delete(
+  "/:id/hard",
+  verifyToken,
+  ClientPartnerController.hardDeleteClientPartner,
+);
+
+// Restore soft-deleted client partner
+router.post(
+  "/:id/restore",
+  verifyToken,
+  ClientPartnerController.restoreClientPartner,
+);
 
 // Add employee to client partner
 router.post("/:id/employees", verifyToken, ClientPartnerController.addEmployee);
@@ -33,11 +47,25 @@ router.put(
   ClientPartnerController.updateEmployee,
 );
 
-// Remove employee
+// Soft remove employee
 router.delete(
   "/:id/employees/:employeeId",
   verifyToken,
   ClientPartnerController.removeEmployee,
+);
+
+// Hard remove employee (admin only)
+router.delete(
+  "/:id/employees/:employeeId/hard",
+  verifyToken,
+  ClientPartnerController.hardRemoveEmployee,
+);
+
+// Restore soft-deleted employee
+router.post(
+  "/:id/employees/:employeeId/restore",
+  verifyToken,
+  ClientPartnerController.restoreEmployee,
 );
 
 export default router;

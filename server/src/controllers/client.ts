@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { Client } from "../models/client";
 import { Visit } from "../models/visit";
+import { CPEmployee } from "../models/client-partner";
 import createError from "../utils/createError";
 import auditService from "../utils/audit-service";
+import mongoose from "mongoose";
 
 class ClientController {
   async createClient(req: Request, res: Response, next: NextFunction) {
@@ -38,6 +40,9 @@ class ClientController {
 
       await client.save();
 
+      // Extract reference from visitData if it exists
+      const { reference } = visitData || {};
+
       const visit = new Visit({
         ...visitData,
         client: client._id,
@@ -49,6 +54,16 @@ class ClientController {
       await Client.findByIdAndUpdate(client._id, {
         $push: { visits: visit._id },
       });
+
+      // Check if reference matches a CPEmployee ID and update referredClients
+      if (reference && mongoose.Types.ObjectId.isValid(reference)) {
+        const cpEmployee = await CPEmployee.findOne({ _id: reference });
+        if (cpEmployee) {
+          await CPEmployee.findByIdAndUpdate(reference, {
+            $push: { referredClients: visit._id },
+          });
+        }
+      }
 
       // Create audit log
       await auditService.logCreate(
@@ -219,6 +234,9 @@ class ClientController {
       countPipeline.push({ $count: "total" });
       const countResult = await Client.aggregate(countPipeline);
       const total = countResult.length > 0 ? countResult[0].total : 0;
+
+      // Sorting clients based on their latest visits
+      pipeline.push({ $sort: { "visits.0.date": -1 } });
 
       // Apply pagination
       pipeline.push(

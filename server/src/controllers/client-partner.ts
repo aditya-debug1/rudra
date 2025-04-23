@@ -1,8 +1,9 @@
-// controllers/clientPartnerController.ts
 import { NextFunction, Request, Response } from "express";
-import { ClientPartner } from "../models/client-partner";
+import { ClientPartner, CPEmployee } from "../models/client-partner";
 import mongoose from "mongoose";
 import createError from "../utils/createError";
+import auditService from "../utils/audit-service";
+import { populate } from "dotenv";
 
 class ClientPartnerController {
   // Get all client partners (exclude soft deleted ones)
@@ -18,7 +19,7 @@ class ClientPartnerController {
       const skip = (pageNumber - 1) * limitNumber;
 
       // Build query object - exclude deleted records
-      let query: any = { isDeleled: { $ne: true } };
+      let query: any = { isDeleted: { $ne: true } };
 
       // Handle search
       if (search) {
@@ -36,7 +37,7 @@ class ClientPartnerController {
 
         if (searchConditions.length > 0) {
           query = {
-            $and: [{ isDeleled: { $ne: true } }, { $and: searchConditions }],
+            $and: [{ isDeleted: { $ne: true } }, { $and: searchConditions }],
           };
         }
       }
@@ -46,6 +47,10 @@ class ClientPartnerController {
 
       // Get paginated results with search applied
       const clientPartners = await ClientPartner.find(query)
+        .populate({
+          path: "employees",
+          match: { isDeleted: { $ne: true } },
+        })
         .skip(skip)
         .limit(limitNumber);
 
@@ -75,7 +80,17 @@ class ClientPartnerController {
     try {
       const clientPartner = await ClientPartner.findOne({
         _id: req.params.id,
-        isDeleled: { $ne: true },
+        isDeleted: { $ne: true },
+      }).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
       });
 
       if (!clientPartner) {
@@ -99,31 +114,41 @@ class ClientPartnerController {
     }
   }
 
-  // Get employee references for all client partners (exclude soft deleted ones)
+  // Get employee references for all client partners (with option to include deleted ones)
   async getReference(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      // Use MongoDB aggregation to transform the data at the database level
-      const references = await ClientPartner.aggregate([
-        // Match non-deleted client partners
-        { $match: { isDeleled: { $ne: true } } },
-        // Unwind the employees array to create a document for each employee
-        { $unwind: "$employees" },
-        // Match non-deleted employees
-        { $match: { "employees.isDeleled": { $ne: true } } },
-        // Project only the fields we need
-        {
-          $project: {
-            _id: "$employees._id",
-            firstName: "$employees.firstName",
-            lastName: "$employees.lastName",
-            companyName: "$name",
-          },
-        },
-      ]);
+      // Check if we should include deleted records (defaults to false)
+      const includeDeleted = req.query.includeDeleted === "true";
+
+      // Build query conditions
+      let employeeQuery: any = {};
+      let clientPartnerQuery: any = {};
+
+      if (!includeDeleted) {
+        employeeQuery.isDeleted = { $ne: true };
+        clientPartnerQuery.isDeleted = { $ne: true };
+      }
+
+      // Get all employees with populated client partner info
+      const employees = await CPEmployee.find(employeeQuery).populate({
+        path: "clientPartnerId",
+        match: clientPartnerQuery,
+        select: "name",
+      });
+
+      // Filter out employees whose clientPartner was filtered out by the populate match
+      const references = employees
+        .filter((emp) => emp.clientPartnerId) // Only include employees with valid client partners
+        .map((emp) => ({
+          _id: emp._id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          companyName: (emp.clientPartnerId as any).name,
+        }));
 
       res.status(200).json({
         references,
@@ -139,30 +164,81 @@ class ClientPartnerController {
   }
 
   // Create client partner
-  async createClientPartner(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  async createClientPartner(req: Request, res: Response, next: NextFunction) {
     try {
-      const clientPartner = await ClientPartner.create(req.body);
+      const {
+        cpId,
+        name,
+        email,
+        phoneNo,
+        address,
+        notes,
+        website: companyWebsite,
+        employees = [],
+      } = req.body;
 
-      res.status(201).json({
-        message: "Client Partner created successfully",
-        cp: clientPartner,
+      // Create client partner
+      const clientPartner = new ClientPartner({
+        cpId,
+        name,
+        email,
+        phoneNo,
+        address,
+        notes,
+        companyWebsite,
       });
-    } catch (error) {
-      if (error instanceof mongoose.Error.ValidationError) {
-        const messages = Object.values(error.errors).map((val) => val.message);
 
-        next(createError(400, messages.join(", ")));
-        return;
+      await clientPartner.save();
+
+      // Create employees if any
+      const createdEmployees = [];
+      const employeeIds = [];
+
+      if (employees.length > 0) {
+        for (const emp of employees) {
+          const employee = new CPEmployee({
+            clientPartnerId: clientPartner._id,
+            firstName: emp.firstName,
+            lastName: emp.lastName,
+            email: emp.email,
+            phoneNo: emp.phoneNo,
+            altNo: emp.altNo,
+            position: emp.position,
+            commissionPercentage: emp.commissionPercentage,
+          });
+
+          await employee.save();
+          createdEmployees.push(employee);
+          employeeIds.push(employee._id);
+        }
+
+        // Add employee references to client partner
+        if (employeeIds.length > 0) {
+          clientPartner.employees = employeeIds;
+          await clientPartner.save();
+        }
       }
 
+      // Create audit log
+      await auditService.logCreate(
+        clientPartner,
+        req,
+        "ClientPartner",
+        `Created client partner: ${clientPartner.name} with ${employeeIds.length} employees`,
+      );
+
+      res.status(201).json({
+        message: "Client partner created successfully",
+        clientPartner,
+        employees: createdEmployees,
+      });
+    } catch (error) {
       next(
         createError(
           500,
-          error instanceof Error ? error.message : "Server Error",
+          error instanceof Error
+            ? error.message
+            : "Error creating client partner",
         ),
       );
     }
@@ -176,10 +252,20 @@ class ClientPartnerController {
   ): Promise<void> {
     try {
       const clientPartner = await ClientPartner.findOneAndUpdate(
-        { _id: req.params.id, isDeleled: { $ne: true } },
+        { _id: req.params.id, isDeleted: { $ne: true } },
         req.body,
         { new: true, runValidators: true },
-      );
+      ).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       if (!clientPartner) {
         next(createError(404, "Client partner not found"));
@@ -219,8 +305,8 @@ class ClientPartnerController {
   ): Promise<void> {
     try {
       const clientPartner = await ClientPartner.findOneAndUpdate(
-        { _id: req.params.id, isDeleled: { $ne: true } },
-        { isDeleled: true },
+        { _id: req.params.id, isDeleted: { $ne: true } },
+        { isDeleted: true },
         { new: true },
       );
 
@@ -255,19 +341,46 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const clientPartner = await ClientPartner.findByIdAndDelete(
-        req.params.id,
-      );
+      // Start a session for transaction
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-      if (!clientPartner) {
-        next(createError(404, "Client partner not found"));
-        return;
+      try {
+        // Find the client partner
+        const clientPartner = await ClientPartner.findById(
+          req.params.id,
+        ).session(session);
+
+        if (!clientPartner) {
+          await session.abortTransaction();
+          session.endSession();
+          next(createError(404, "Client partner not found"));
+          return;
+        }
+
+        // Delete all associated employees
+        await CPEmployee.deleteMany({
+          clientPartnerId: clientPartner._id,
+        }).session(session);
+
+        // Delete the client partner
+        await ClientPartner.findByIdAndDelete(req.params.id).session(session);
+
+        // Commit the transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+          message:
+            "Client Partner and all associated employees permanently deleted",
+          cpId: clientPartner._id,
+        });
+      } catch (error) {
+        // Abort transaction on error
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
       }
-
-      res.status(200).json({
-        message: "Client Partner permanently deleted",
-        cpId: clientPartner._id,
-      });
     } catch (error) {
       if (error instanceof mongoose.Error.CastError) {
         next(createError(400, "Invalid ID format"));
@@ -290,9 +403,13 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      console.log("reached Add employee");
+      const clientPartnerId = req.params.id;
+
+      // Check if client partner exists and not deleted
       const clientPartner = await ClientPartner.findOne({
-        _id: req.params.id,
-        isDeleled: { $ne: true },
+        _id: clientPartnerId,
+        isDeleted: { $ne: true },
       });
 
       if (!clientPartner) {
@@ -300,12 +417,36 @@ class ClientPartnerController {
         return;
       }
 
-      clientPartner.employees.push(req.body);
+      // Create new employee
+      const employeeData = {
+        ...req.body,
+        clientPartnerId: clientPartnerId,
+      };
+
+      const newEmployee = await CPEmployee.create(employeeData);
+
+      // Add employee reference to client partner
+      clientPartner.employees.push(newEmployee._id);
       await clientPartner.save();
+
+      // Fetch the updated client partner with populated employees
+      const updatedClientPartner = await ClientPartner.findById(
+        clientPartnerId,
+      ).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       res.status(200).json({
         message: "Client partner employee created successfully",
-        cp: clientPartner,
+        cp: updatedClientPartner,
       });
     } catch (error) {
       if (error instanceof mongoose.Error.ValidationError) {
@@ -332,9 +473,10 @@ class ClientPartnerController {
     try {
       const { id, employeeId } = req.params;
 
+      // First verify the client partner exists and is not deleted
       const clientPartner = await ClientPartner.findOne({
         _id: id,
-        isDeleled: { $ne: true },
+        isDeleted: { $ne: true },
       });
 
       if (!clientPartner) {
@@ -342,41 +484,54 @@ class ClientPartnerController {
         return;
       }
 
-      const employeeIndex = clientPartner.employees.findIndex(
-        (emp) => emp._id.toString() === employeeId && emp.isDeleted !== true,
-      );
+      // Check if the employee exists and belongs to this client partner
+      const employee = await CPEmployee.findOne({
+        _id: employeeId,
+        clientPartnerId: id,
+        isDeleted: { $ne: true },
+      });
 
-      if (employeeIndex === -1) {
+      if (!employee) {
         next(createError(404, "Employee not found"));
         return;
       }
 
-      // Type-safe approach to update employee fields
-      const employee = clientPartner.employees[employeeIndex];
-      const updatedData = req.body;
+      // Update the employee
+      const updatedEmployee = await CPEmployee.findByIdAndUpdate(
+        employeeId,
+        req.body,
+        { new: true, runValidators: true },
+      );
 
-      // Update only the fields that exist in the schema
-      if (updatedData.firstName !== undefined)
-        employee.firstName = updatedData.firstName;
-      if (updatedData.lastName !== undefined)
-        employee.lastName = updatedData.lastName;
-      if (updatedData.email !== undefined) employee.email = updatedData.email;
-      if (updatedData.phoneNo !== undefined)
-        employee.phoneNo = updatedData.phoneNo;
-      if (updatedData.altNo !== undefined) employee.altNo = updatedData.altNo;
-      if (updatedData.position !== undefined)
-        employee.position = updatedData.position;
-      if (updatedData.commissionPercentage !== undefined)
-        employee.commissionPercentage = updatedData.commissionPercentage;
-      // Don't update referredClients directly as this would require special handling
-
-      await clientPartner.save();
+      // Get the updated client partner with populated employees
+      const updatedClientPartner = await ClientPartner.findById(id).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       res.status(200).json({
         message: "Client partner employee updated successfully",
-        cp: clientPartner,
+        cp: updatedClientPartner,
       });
     } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        next(createError(400, "Invalid ID format"));
+        return;
+      }
+
+      if (error instanceof mongoose.Error.ValidationError) {
+        const messages = Object.values(error.errors).map((val) => val.message);
+        next(createError(400, messages.join(", ")));
+        return;
+      }
+
       next(
         createError(
           500,
@@ -395,9 +550,10 @@ class ClientPartnerController {
     try {
       const { id, employeeId } = req.params;
 
+      // First verify the client partner exists and is not deleted
       const clientPartner = await ClientPartner.findOne({
         _id: id,
-        isDeleled: { $ne: true },
+        isDeleted: { $ne: true },
       });
 
       if (!clientPartner) {
@@ -405,24 +561,38 @@ class ClientPartnerController {
         return;
       }
 
-      // Find the employee
-      const employeeIndex = clientPartner.employees.findIndex(
-        (emp) => emp._id.toString() === employeeId && emp.isDeleted !== true,
-      );
+      // Check if the employee exists, belongs to this client partner, and is not already deleted
+      const employee = await CPEmployee.findOne({
+        _id: employeeId,
+        clientPartnerId: id,
+        isDeleted: { $ne: true },
+      });
 
-      if (employeeIndex === -1) {
+      if (!employee) {
         next(createError(404, "Employee not found"));
         return;
       }
 
-      // Soft delete the employee by setting isDeleled flag
-      clientPartner.employees[employeeIndex].isDeleted = true;
+      // Soft delete the employee
+      employee.isDeleted = true;
+      await employee.save();
 
-      await clientPartner.save();
+      // Get the updated client partner with populated employees
+      const updatedClientPartner = await ClientPartner.findById(id).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       res.status(200).json({
         message: "Client partner employee deleted successfully",
-        cp: clientPartner,
+        cp: updatedClientPartner,
       });
     } catch (error) {
       next(
@@ -443,6 +613,7 @@ class ClientPartnerController {
     try {
       const { id, employeeId } = req.params;
 
+      // First verify the client partner exists
       const clientPartner = await ClientPartner.findById(id);
 
       if (!clientPartner) {
@@ -450,16 +621,42 @@ class ClientPartnerController {
         return;
       }
 
-      // Hard remove the employee
-      clientPartner.employees = clientPartner.employees.filter(
-        (emp) => emp._id.toString() !== employeeId,
-      );
+      // Check if the employee exists and belongs to this client partner
+      const employee = await CPEmployee.findOne({
+        _id: employeeId,
+        clientPartnerId: id,
+      });
 
+      if (!employee) {
+        next(createError(404, "Employee not found"));
+        return;
+      }
+
+      // Remove employee reference from client partner
+      clientPartner.employees = clientPartner.employees.filter(
+        (empId) => empId.toString() !== employeeId,
+      );
       await clientPartner.save();
+
+      // Hard delete the employee
+      await CPEmployee.findByIdAndDelete(employeeId);
+
+      // Get the updated client partner with populated employees
+      const updatedClientPartner = await ClientPartner.findById(id).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       res.status(200).json({
         message: "Client partner employee permanently removed",
-        cp: clientPartner,
+        cp: updatedClientPartner,
       });
     } catch (error) {
       next(
@@ -479,10 +676,20 @@ class ClientPartnerController {
   ): Promise<void> {
     try {
       const clientPartner = await ClientPartner.findOneAndUpdate(
-        { _id: req.params.id, isDeleled: true },
-        { isDeleled: false },
+        { _id: req.params.id, isDeleted: true },
+        { isDeleted: false },
         { new: true },
-      );
+      ).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       if (!clientPartner) {
         next(createError(404, "Deleted client partner not found"));
@@ -517,6 +724,7 @@ class ClientPartnerController {
     try {
       const { id, employeeId } = req.params;
 
+      // First verify the client partner exists
       const clientPartner = await ClientPartner.findById(id);
 
       if (!clientPartner) {
@@ -524,24 +732,38 @@ class ClientPartnerController {
         return;
       }
 
-      // Find the employee
-      const employeeIndex = clientPartner.employees.findIndex(
-        (emp) => emp._id.toString() === employeeId && emp.isDeleted === true,
-      );
+      // Check if the employee exists, belongs to this client partner, and is deleted
+      const employee = await CPEmployee.findOne({
+        _id: employeeId,
+        clientPartnerId: id,
+        isDeleted: true,
+      });
 
-      if (employeeIndex === -1) {
+      if (!employee) {
         next(createError(404, "Deleted employee not found"));
         return;
       }
 
-      // Restore the employee by setting isDeleled flag to false
-      clientPartner.employees[employeeIndex].isDeleted = false;
+      // Restore the employee
+      employee.isDeleted = false;
+      await employee.save();
 
-      await clientPartner.save();
+      // Get the updated client partner with populated employees
+      const updatedClientPartner = await ClientPartner.findById(id).populate({
+        path: "employees",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "referredClients",
+          populate: {
+            path: "client",
+            select: "_id firstName lastName",
+          },
+        },
+      });
 
       res.status(200).json({
         message: "Client partner employee restored successfully",
-        cp: clientPartner,
+        cp: updatedClientPartner,
       });
     } catch (error) {
       next(
