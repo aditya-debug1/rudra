@@ -15,6 +15,10 @@ export interface VisitType {
   remarks?: RemarkType[];
 }
 
+export interface PopulatedVisit extends VisitType {
+  client: Partial<ClientType>;
+}
+
 export interface ClientType {
   _id: string;
   firstName: string;

@@ -4,5 +4,14 @@ import roleRoute from "./role";
 import auditRoute from "./audit";
 import clientRoute from "./client";
 import visitRoute from "./visit";
+import clientPartnerRoute from "./client-partner";
 
-export { authRoute, userRoute, roleRoute, auditRoute, clientRoute, visitRoute };
+export {
+  authRoute,
+  userRoute,
+  roleRoute,
+  auditRoute,
+  clientRoute,
+  visitRoute,
+  clientPartnerRoute,
+};

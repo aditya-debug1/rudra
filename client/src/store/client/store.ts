@@ -5,12 +5,19 @@ import { create } from "zustand";
 interface ClientFilters {
   page: number;
   limit: number;
+  manager?: string;
   search: string;
-  status?: "lost" | "cold" | "warm" | "hot" | "booked";
+  minBudget?: number;
+  maxBudget?: number;
+  requirement?: string;
+  project?: string;
+  fromDate?: Date;
+  toDate?: Date;
   reference?: string;
   source?: string;
   relation?: string;
   closing?: string;
+  status?: "lost" | "cold" | "warm" | "hot" | "booked";
 }
 
 interface ClientStore {
@@ -40,7 +47,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     })),
   resetFilters: () =>
     set({
-      filters: { page: 1, limit: 10, search: "" },
+      filters: { page: 1, limit: 5, search: "" },
     }),
 
   // Selected client state

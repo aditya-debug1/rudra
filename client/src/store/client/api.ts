@@ -24,16 +24,19 @@ interface DeleteClientResponse {
 interface ClientFilters {
   page?: number;
   limit?: number;
+  manager?: string;
   search?: string;
-  status?: "lost" | "cold" | "warm" | "hot" | "booked";
+  minBudget?: number;
+  maxBudget?: number;
+  requirement?: string;
+  project?: string;
+  fromDate?: Date;
+  toDate?: Date;
   reference?: string;
   source?: string;
   relation?: string;
   closing?: string;
-  fromDate?: Date;
-  toDate?: Date;
-  minBudget?: number;
-  maxBudget?: number;
+  status?: "lost" | "cold" | "warm" | "hot" | "booked";
 }
 
 // Client API methods
@@ -43,31 +46,37 @@ export const clientApi = {
     const {
       page = 1,
       limit = 10,
+      manager,
       search,
-      status,
+      minBudget,
+      maxBudget,
+      requirement,
+      project,
+      fromDate,
+      toDate,
       reference,
       source,
       relation,
       closing,
-      fromDate,
-      toDate,
-      minBudget,
-      maxBudget,
+      status,
     } = filters;
 
     const queryParams = new URLSearchParams();
     queryParams.append("page", page.toString());
     queryParams.append("limit", limit.toString());
+    if (manager) queryParams.append("manager", manager);
     if (search) queryParams.append("search", search);
-    if (status) queryParams.append("status", status);
+    if (minBudget) queryParams.append("minBudget", minBudget.toString());
+    if (maxBudget) queryParams.append("maxBudget", maxBudget.toString());
+    if (requirement) queryParams.append("requirement", requirement);
+    if (project) queryParams.append("project", project);
+    if (fromDate) queryParams.append("fromDate", fromDate.toString());
+    if (toDate) queryParams.append("toDate", toDate.toString());
     if (reference) queryParams.append("reference", reference);
     if (source) queryParams.append("source", source);
     if (relation) queryParams.append("relation", relation);
     if (closing) queryParams.append("closing", closing);
-    if (fromDate) queryParams.append("fromDate", fromDate.toString());
-    if (toDate) queryParams.append("toDate", toDate.toString());
-    if (minBudget) queryParams.append("minBudget", minBudget.toString());
-    if (maxBudget) queryParams.append("maxBudget", maxBudget.toString());
+    if (status) queryParams.append("status", status);
 
     const response = await newRequest.get<GetClientsResponse>(
       `/client?${queryParams.toString()}`,
