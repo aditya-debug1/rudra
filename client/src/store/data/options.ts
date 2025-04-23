@@ -1,5 +1,8 @@
+import { ComboboxOption } from "@/components/custom ui/combobox";
+
 export const projectOptions = [
-  { label: "Rudra Kristina 1", value: "rudra_cristina_1" },
+  { label: "Rudra Kristina 1", value: "rudra_kristina_1" },
+  { label: "Rudra Palace", value: "rudra_palace" },
 ];
 
 export const requirementOptions = [
@@ -18,7 +21,11 @@ export const budgetOptions = [
   { label: "Crores", value: 10000000 },
 ];
 
-export const referenceOptions = [{ label: "Direct Walking", value: "walking" }];
+export const refDefaultOptions: ComboboxOption[] = [
+  { label: "Direct Walking", value: "walking" },
+];
+
+export const ignoreRole = ["Developer", "Super Admin"];
 
 export const statusOptions = [
   { label: "Lost", value: "lost" },
