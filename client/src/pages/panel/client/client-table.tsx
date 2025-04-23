@@ -9,7 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth } from "@/store/auth";
 import { ClientType, GetClientsResponse } from "@/store/client";
+import { RefernceListType, useClientPartners } from "@/store/client-partner";
 import { requirementOptions } from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { getLabelFromValue } from "@/utils/func/arrayUtils";
@@ -45,11 +48,29 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
   const [heights, setHeights] = useState<Record<string, number>>({});
   const contentRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const { data: managers } = useUsersSummary();
+  const { useReferenceWithDelete } = useClientPartners();
+  const { data: refData } = useReferenceWithDelete();
+
+  const { combinedRole } = useAuth(true);
+  const showDetails = hasPermission(
+    combinedRole,
+    "Clients",
+    "view-client-details",
+  );
 
   const toggleItem = (id: string) => {
     setOpenItems((prev) => ({
       [id]: !prev[id],
     }));
+  };
+
+  const getRefernceName = (
+    ref: string,
+    references: RefernceListType[] | undefined,
+  ) => {
+    if (!references || !ref) return ref;
+    const reference = references.find((r) => r._id === ref);
+    return reference ? reference.firstName + " " + reference.lastName : ref;
   };
 
   const getManagerName = (
@@ -86,13 +107,13 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
             <TableHead>Relation</TableHead>
             <TableHead>Closing</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            {showDetails && <TableHead>Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {!data?.clients?.length ? (
             <TableRow>
-              <TableCell colSpan={10} className="text-center">
+              <TableCell colSpan={showDetails ? 10 : 9} className="text-center">
                 No Client Data
               </TableCell>
             </TableRow>
@@ -109,7 +130,13 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                   >
                     <TableCell>
                       {client.visits[0]
-                        ? new Date(client.visits[0].date).toLocaleDateString()
+                        ? new Date(client.visits[0].date)
+                            .toLocaleString("en-GB", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            })
+                            .replace(",", "")
                         : "N/A"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
@@ -123,7 +150,10 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                     </TableCell>
                     <TableCell>₹{simplifyNumber(client.budget)}</TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {client.visits[0].reference}
+                      {getRefernceName(
+                        client.visits[0].reference,
+                        refData?.references,
+                      )}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {getManagerName(client.visits[0].source, managers)}
@@ -139,23 +169,28 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                         {toProperCase(client.visits[0].status ?? "N/A")}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Tooltip content="View client details">
-                        <Button
-                          variant="secondary"
-                          size="miniIcon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDetails(client._id);
-                          }}
-                        >
-                          <ChevronRight />
-                        </Button>
-                      </Tooltip>
-                    </TableCell>
+                    {showDetails && (
+                      <TableCell>
+                        <Tooltip content="View client details">
+                          <Button
+                            variant="secondary"
+                            size="miniIcon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDetails(client._id);
+                            }}
+                          >
+                            <ChevronRight />
+                          </Button>
+                        </Tooltip>
+                      </TableCell>
+                    )}
                   </TableRow>
                   <TableRow className="expandable-row">
-                    <TableCell colSpan={10} className="p-0 border-b border-t-0">
+                    <TableCell
+                      colSpan={showDetails ? 10 : 9}
+                      className="p-0 border-b border-t-0"
+                    >
                       <div
                         style={{
                           height: isOpen

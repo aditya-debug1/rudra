@@ -12,13 +12,17 @@ import {
 } from "@/components/ui/select";
 import { GetClientsResponse } from "@/store/client";
 import { toProperCase } from "@/utils/func/strUtils";
-import { FilterX } from "lucide-react";
+import { FilterX, Plus } from "lucide-react";
 import { ClientFilter } from "./client-filter";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role";
 
 type ClientStatus = "lost" | "cold" | "warm" | "hot" | "booked" | undefined;
 
 interface ClientHeaderProps {
   isFiltered: boolean;
+  setIsFiltered: (state: boolean) => void;
   searchInput: string;
   status: string;
   data?: GetClientsResponse;
@@ -27,11 +31,11 @@ interface ClientHeaderProps {
   handleClearFilter: () => void;
   handlePageChange: (page: number) => void;
 }
-
 const STATUS_OPTIONS = ["lost", "cold", "warm", "hot", "booked"] as const;
 
 export const ClientHeader = ({
   isFiltered,
+  setIsFiltered,
   searchInput,
   status,
   data,
@@ -40,14 +44,18 @@ export const ClientHeader = ({
   handleClearFilter,
   handlePageChange,
 }: ClientHeaderProps) => {
+  const navigate = useNavigate();
+  const { combinedRole } = useAuth(true);
+  const createClient = hasPermission(combinedRole, "Form", "client-form");
   const handleStatusChange = (newStatus: string) => {
     if (newStatus == "all") {
       handleSetStatus(undefined);
     } else handleSetStatus(newStatus as ClientStatus);
   };
+
   return (
     <div className="w-full flex flex-wrap gap-3 items-center justify-around md:justify-between mb-3">
-      <div className="flex gap-2">
+      <div className="flex gap-3 sm:gap-2 justify-around flex-wrap sm:flex-nowrap sm:justify-start">
         {/* Search input */}
         <Input
           type="text"
@@ -59,7 +67,7 @@ export const ClientHeader = ({
 
         {/* Status filter */}
         <Select onValueChange={handleStatusChange} value={status}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-44 sm:w-[120px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -75,23 +83,42 @@ export const ClientHeader = ({
           </SelectContent>
         </Select>
 
-        {/* Additional filters */}
-        <ClientFilter />
+        <span className="flex gap-2">
+          {/* Additional filters */}
+          <ClientFilter
+            clearFilter={handleClearFilter}
+            setIsFiltered={setIsFiltered}
+          />
 
-        {/* Clear filters button */}
-        {isFiltered && (
-          <Tooltip content="Clear filter">
-            <Button
-              className="flex-shrink-0"
-              onClick={handleClearFilter}
-              variant="outline"
-              size="icon"
-              aria-label="Clear filters"
-            >
-              <FilterX size={20} />
-            </Button>
-          </Tooltip>
-        )}
+          {/* Clear filters button */}
+          {isFiltered && (
+            <Tooltip content="Clear filter">
+              <Button
+                className="flex-shrink-0"
+                onClick={handleClearFilter}
+                variant="outline"
+                size="icon"
+                aria-label="Clear filters"
+              >
+                <FilterX size={20} />
+              </Button>
+            </Tooltip>
+          )}
+
+          {createClient && (
+            <Tooltip content="Add Client">
+              <Button
+                className="flex-shrink-0"
+                onClick={() => navigate("/panel/form/client")}
+                variant="outline"
+                size="icon"
+                aria-label="Add Clients"
+              >
+                <Plus />
+              </Button>
+            </Tooltip>
+          )}
+        </span>
       </div>
 
       {/* Pagination controls */}

@@ -103,7 +103,7 @@ const SheetSidebar: React.FC<SidebarProps> = ({
       <SheetTrigger asChild>
         <span>
           <Tooltip content="Open Sidebar">
-            <Button variant="outline" size="icon">
+            <Button className="mr-1" variant="outline" size="icon">
               <AlignLeft />
             </Button>
           </Tooltip>

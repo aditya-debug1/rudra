@@ -13,6 +13,8 @@ const UserList = lazy(() => import("@/pages/panel/users"));
 const UserDetails = lazy(() => import("@/pages/panel/user-details"));
 const ClientList = lazy(() => import("@/pages/panel/client"));
 const ClientDetails = lazy(() => import("@/pages/panel/client-details"));
+const ClientPartnerList = lazy(() => import("@/pages/panel/cp-list"));
+const ClientPartnerDetails = lazy(() => import("@/pages/panel/cp-details"));
 const Task = lazy(() => import("@/pages/panel/task"));
 const Form = lazy(() => import("@/pages/panel/form"));
 const Reports = lazy(() => import("@/pages/panel/reports"));
@@ -55,6 +57,8 @@ const MainBody: React.FC<MainProps> = ({
         return <UserList />;
       case "Clients":
         return <ClientList />;
+      case "ClientPartner":
+        return <ClientPartnerList />;
       case "Task":
         return <Task />;
       case "Form":
@@ -74,14 +78,25 @@ const MainBody: React.FC<MainProps> = ({
     { path: "analytics", element: <Maintainance />, pageName: "Analytics" },
     { path: "users/", element: <UserList />, pageName: "Users" },
     { path: "users/details/:id", element: <UserDetails />, pageName: "Users" },
-    { path: "clients/", element: <ClientList />, pageName: "Clients" },
+    { path: "clients/:pageno", element: <ClientList />, pageName: "Clients" },
     {
-      path: "clients/details/:id",
+      path: "clients/:pageno/details/:id",
       element: <ClientDetails />,
       pageName: "Clients",
     },
+    {
+      path: "client-partners/:pageno",
+      element: <ClientPartnerList />,
+      pageName: "ClientPartner",
+    },
+    {
+      path: "client-partners/:pageno/details/:id",
+      element: <ClientPartnerDetails />,
+      pageName: "ClientPartner",
+    },
     { path: "task", element: <Task />, pageName: "Task" },
     { path: "form", element: <Form />, pageName: "Form" },
+    { path: "form/:name", element: <Form />, pageName: "Form" },
     { path: "reports", element: <Reports />, pageName: "Reports" },
     { path: "settings", element: <Settings />, pageName: "Settings" },
     {

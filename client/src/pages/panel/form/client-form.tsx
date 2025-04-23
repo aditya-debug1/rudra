@@ -1,4 +1,4 @@
-import { Combobox } from "@/components/custom ui/combobox";
+import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
 import { DatePicker } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Button } from "@/components/ui/button";
@@ -22,10 +22,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ClientType, useClients, VisitType } from "@/store/client";
+import { useClientPartners } from "@/store/client-partner";
 import {
   budgetOptions,
+  ignoreRole,
   projectOptions,
-  referenceOptions,
+  refDefaultOptions,
   requirementOptions,
   statusOptions,
 } from "@/store/data/options";
@@ -33,7 +35,8 @@ import { useUsersSummary } from "@/store/users";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientSchema } from "@/utils/zod-schema/client";
-import { useState } from "react";
+import { User } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface ClientData extends Omit<ClientType, "_id" | "visits"> {
   visitData: Omit<VisitType, "client" | "_id">;
@@ -67,10 +70,13 @@ const ClientForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [remarkInput, setRemarkInput] = useState("");
   const { createClientMutation } = useClients();
+  const { useReference } = useClientPartners();
   const { toast } = useToast();
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
 
-  const ignoreRole = ["Super Admin"];
   const { data: users } = useUsersSummary();
+  const { data: refData } = useReference();
 
   const managerOptions =
     users
@@ -79,6 +85,17 @@ const ClientForm = () => {
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
       })) || [];
+
+  const refDynamicOptions: ComboboxOption[] =
+    refData?.references?.map((ref) => ({
+      label: `${ref.firstName} ${ref.lastName}${ref.companyName ? ` (${ref.companyName})` : ""}`,
+      value: ref._id,
+    })) || [];
+
+  const referenceOptions: ComboboxOption[] = [
+    ...refDefaultOptions,
+    ...refDynamicOptions,
+  ];
 
   // Define a type that represents all possible field paths including nested ones
   type ClientFieldPath =
@@ -212,7 +229,8 @@ const ClientForm = () => {
   return (
     <Card className="w-full mx-auto">
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-xl sm:text-2xl">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <User className="h-5 w-5" />
           Client Registration Form
         </CardTitle>
         <CardDescription>
@@ -237,10 +255,17 @@ const ClientForm = () => {
                 >
                   <div className="flex flex-col sm:flex-row gap-4 grow">
                     <Input
+                      ref={firstNameRef}
                       value={client.firstName}
                       onChange={(e) =>
                         handleInputChange("firstName", e.target.value)
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Tab" && e.shiftKey) {
+                          e.preventDefault();
+                          submitRef.current?.focus();
+                        }
+                      }}
                       placeholder="First Name"
                     />
                     <Input
@@ -516,7 +541,14 @@ const ClientForm = () => {
             <Button
               disabled={isSubmitting}
               type="submit"
+              ref={submitRef}
               onClick={handleSubmit}
+              onKeyDown={(e) => {
+                if (e.key === "Tab" && !e.shiftKey) {
+                  e.preventDefault(); // prevent natural tabbing
+                  firstNameRef.current?.focus();
+                }
+              }}
             >
               Save Client Information
             </Button>
