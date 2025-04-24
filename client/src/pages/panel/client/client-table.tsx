@@ -1,3 +1,4 @@
+import { ComboboxOption } from "@/components/custom ui/combobox";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { ClientType, GetClientsResponse } from "@/store/client";
 import { RefernceListType, useClientPartners } from "@/store/client-partner";
-import { requirementOptions } from "@/store/data/options";
+import { projectOptions, requirementOptions } from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { getLabelFromValue } from "@/utils/func/arrayUtils";
 import { simplifyNumber } from "@/utils/func/numberUtils.ts";
@@ -24,6 +25,7 @@ import React, { useEffect, useRef, useState } from "react";
 interface ClientTableProps {
   data?: GetClientsResponse;
   openDetails: (_id: string) => void;
+  showContactInfo: boolean;
 }
 
 function getStatusClr(status: string | null) {
@@ -43,7 +45,11 @@ function getStatusClr(status: string | null) {
   }
 }
 
-export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
+export const ClientTable = ({
+  data,
+  openDetails,
+  showContactInfo = false,
+}: ClientTableProps) => {
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [heights, setHeights] = useState<Record<string, number>>({});
   const contentRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -71,6 +77,12 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
     if (!references || !ref) return ref;
     const reference = references.find((r) => r._id === ref);
     return reference ? reference.firstName + " " + reference.lastName : ref;
+  };
+
+  const getProjectName = (value: string, projectList: ComboboxOption[]) => {
+    if (!projectList || !value) return value;
+    const project = projectList.find((p) => p.value === value);
+    return project ? project.label : value;
   };
 
   const getManagerName = (
@@ -206,32 +218,45 @@ export const ClientTable = ({ data, openDetails }: ClientTableProps) => {
                           className="p-4 bg-muted/50"
                         >
                           <div className="rounded-md bg-muted/70 p-4 shadow-sm grid grid-cols-2 items-center gap-1">
-                            <span className="flex items-center gap-3">
-                              <h4 className="text-sm font-bold">Email:</h4>
-                              <p className="text-sm">
-                                {client.email?.trim() || "N/A"}
-                              </p>
-                            </span>
-                            <span className="flex items-center gap-3">
-                              <h4 className="text-sm font-bold">Phone No:</h4>
-                              <p className="text-sm">{client.phoneNo}</p>
-                            </span>
+                            {showContactInfo && (
+                              <>
+                                <span className="flex items-center gap-3">
+                                  <h4 className="text-sm font-bold">Email:</h4>
+                                  <p className="text-sm">
+                                    {client.email?.trim() || "N/A"}
+                                  </p>
+                                </span>
+                                <span className="flex items-center gap-3">
+                                  <h4 className="text-sm font-bold">
+                                    Phone No:
+                                  </h4>
+                                  <p className="text-sm">{client.phoneNo}</p>
+                                </span>
+                              </>
+                            )}
                             <span className="flex items-center gap-3">
                               <h4 className="text-sm font-bold">Occupation:</h4>
                               <p className="text-sm">
                                 {client.occupation?.trim() || "N/A"}
                               </p>
                             </span>
-                            <span className="flex items-center gap-3">
-                              <h4 className="text-sm font-bold">Alt No:</h4>
-                              <p className="text-sm">
-                                {client.altNo?.trim() || "N/A"}
-                              </p>
-                            </span>
+
+                            {showContactInfo && (
+                              <span className="flex items-center gap-3">
+                                <h4 className="text-sm font-bold">Alt No:</h4>
+                                <p className="text-sm">
+                                  {client.altNo?.trim() || "N/A"}
+                                </p>
+                              </span>
+                            )}
+
                             <span className="col-span-2 flex items-center gap-3">
                               <h4 className="text-sm font-bold">Project:</h4>
                               <p className="text-sm">
-                                {client.project || "N/A"}
+                                {getProjectName(
+                                  client.project,
+                                  projectOptions,
+                                ) || "N/A"}
                               </p>
                             </span>
                             <span className="col-span-2 flex items-center justify-start gap-3">

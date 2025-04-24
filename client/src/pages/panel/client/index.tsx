@@ -38,6 +38,12 @@ const ClientsList = () => {
     "view-all-clients",
   );
 
+  const showContactInfo = hasPermission(
+    combinedRole,
+    "Clients",
+    "view-contact-info",
+  );
+
   const debouncedSetSearch = useDebounce((value: string) => {
     setFilters({ search: value, page: 1 });
   }, 600);
@@ -149,7 +155,11 @@ const ClientsList = () => {
           handleSetStatus={handleSetStatus}
         />
 
-        <ClientTable data={data} openDetails={handleOpenDetails} />
+        <ClientTable
+          data={data}
+          openDetails={handleOpenDetails}
+          showContactInfo={showContactInfo}
+        />
 
         {data && <ClientFooter data={data} />}
       </CardContent>
