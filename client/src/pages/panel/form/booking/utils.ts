@@ -1,0 +1,141 @@
+import { z } from "zod";
+
+const BookingSchema = z.object({
+  // Project Information
+  project: z.object({
+    name: z.string().min(1, "Project name required"),
+    by: z.string().min(1, "Builder name required"),
+    address: z.string().min(1, "Project address required"),
+  }),
+
+  // Unit Information
+  unit: z.object({
+    wing: z.string().min(1, "Wing required"),
+    floor: z.string().min(1, "Floor required"),
+    flatNo: z.string().min(1, "Flat no required"),
+    configuration: z.string().min(1, "Configuration required"),
+  }),
+
+  // Booking Details
+  payment: z.object({
+    amount: z.number().min(1, "Amount required"),
+    includedChargesNote: z.string().min(1, "Included charges note required"),
+    banks: z.array(z.string()).optional(), // Optional list of acceptable banks
+    paymentTerms: z.string().min(1, "Payment terms required"),
+  }),
+
+  // Applicant Information
+  applicants: z.object({
+    primary: z.string().min(1, "Primary applicant required"),
+    coApplicant: z.string().optional(),
+    contact: z.object({
+      phoneNo: z.string().min(1, "Phone number required"),
+      email: z.string().optional(),
+      address: z.string().min(1, "Address required"),
+      residenceNo: z.string().optional(),
+    }),
+  }),
+
+  // Payment Information
+  bookingDetails: z.object({
+    date: z.date({ required_error: "Booking date required" }),
+    bookingAmt: z.number().min(1, "Booking amount required"),
+    checkNo: z.string().min(1, "Check number required"),
+    bankName: z.string().min(1, "Bank name required"),
+    paymentDate: z.date({ required_error: "Payment date required" }),
+  }),
+});
+
+export { BookingSchema };
+
+export interface BookingType {
+  // Project Information
+  project: {
+    name: string;
+    by: string;
+    address: string;
+  };
+
+  // Unit Information
+  unit: {
+    wing: string;
+    floor: string;
+    flatNo: string;
+    configuration: string;
+  };
+
+  // Booking Details
+  payment: {
+    amount: number;
+    includedChargesNote: string;
+    banks?: string[]; // List of acceptable banks
+    paymentTerms: string;
+  };
+
+  // Applicant Information
+  applicants: {
+    primary: string;
+    coApplicant?: string;
+    contact: {
+      phoneNo: string;
+      email?: string;
+      address: string;
+      residenceNo?: string;
+    };
+  };
+
+  // Payment Information
+  bookingDetails: {
+    date: Date;
+    bookingAmt: number;
+    checkNo: string;
+    bankName: string;
+    paymentDate: Date;
+  };
+}
+
+export const ProjectList = [
+  {
+    name: "Rudra Kristina",
+    by: "Sai Lifespaces",
+    address:
+      "Survey 2/3, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
+  },
+  {
+    name: "Rudra Kristina - II",
+    by: "Sai Reality",
+    address:
+      "Survey 2/4/A & 2/4/B, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
+  },
+  {
+    name: "Rudra Kristina - III",
+    by: "Om Sai Infra",
+    address:
+      "Survey 2/2/A & 2/2/B, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
+  },
+  {
+    name: "Rudra Kristina - IV",
+    by: "Sai Kripa",
+    address:
+      "Survey 2/2/C & 2/2/D, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
+  },
+  {
+    name: "Rudra Kristina - VII",
+    by: "Sai Kripa",
+    address:
+      "Survey 6/2, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
+  },
+  {
+    name: "Rudra Dream City",
+    by: "Sai Ashirwad",
+    address: "Survey 9/5, Pisarve, Taloja Phase-I, Near Metro Station - 410208",
+  },
+];
+
+export const ChargesNoteList = [
+  "Extra Taxes & Parking",
+  "Including Taxes without Parking",
+  "Including Taxes with Stilt Parking",
+  "Including Taxes with Open Parking",
+  "Other",
+];

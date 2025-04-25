@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Building2, ReceiptText, User } from "lucide-react";
+import { Building2, ReceiptText, TicketCheck, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,7 @@ import { useAuth } from "@/store/auth/query";
 import { hasPermission } from "@/hooks/use-role";
 import ClientForm from "./client-form";
 import ClientPartnerForm from "./cp-form";
+import { BookingForm } from "./booking";
 
 type FormType = {
   id: string;
@@ -18,12 +19,12 @@ type FormType = {
   component: React.ReactNode;
 };
 
-type FormPageId = "client" | "client-partner";
+type FormPageId = "client" | "client-partner" | "booking";
 
 // Function to validate if a value is a valid form page ID
 function isValidFormPageId(value: string | undefined): value is FormPageId {
   if (!value) return false;
-  return ["client", "client-partner"].includes(value);
+  return ["client", "client-partner", "booking"].includes(value);
 }
 
 const Form = () => {
@@ -48,6 +49,13 @@ const Form = () => {
         permission: "client-partner-form",
         icon: <Building2 className="h-4 w-4 mr-2" />,
         component: <ClientPartnerForm />,
+      },
+      {
+        id: "booking",
+        label: "Booking",
+        permission: "booking-form",
+        icon: <TicketCheck className="w-4 h-4 mr-2" />,
+        component: <BookingForm />,
       },
     ],
     [],

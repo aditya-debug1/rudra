@@ -52,7 +52,7 @@ export const AdminPermissions: Permission[] = [
   },
   {
     page: "Form",
-    actions: ["client-form", "client-partner-form"],
+    actions: ["client-form", "client-partner-form", "booking-form"],
   },
   {
     page: "Reports",
@@ -168,6 +168,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     actions: [
       { value: "client-form", label: "View Client Form" },
       { value: "client-partner-form", label: "View Client Partner Form" },
+      { value: "booking-form", label: "View Booking Form" },
     ],
   },
   {
