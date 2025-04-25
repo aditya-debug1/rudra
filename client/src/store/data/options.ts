@@ -1,8 +1,12 @@
 import { ComboboxOption } from "@/components/custom ui/combobox";
 
 export const projectOptions = [
-  { label: "Rudra Kristina 1", value: "rudra_kristina_1" },
-  { label: "Rudra Palace", value: "rudra_palace" },
+  { label: "Rudra Kristina", value: "rudra_kristina" },
+  { label: "Rudra Kristina 2", value: "rudra_kristina_2" },
+  { label: "Rudra Kristina 3", value: "rudra_kristina_3" },
+  { label: "Rudra Kristina 4", value: "rudra_kristina_4" },
+  { label: "Rudra Kristina 7", value: "rudra_kristina_4" },
+  { label: "Rudra Dream City", value: "rudra_dream_city" },
 ];
 
 export const requirementOptions = [
