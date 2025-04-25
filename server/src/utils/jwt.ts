@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/dotenv";
 import { AuthLogModel } from "../models/auth";
+import User from "../models/user";
 import createError from "../utils/createError";
 
 // Extend Express Request type
@@ -30,6 +31,14 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as Payload;
 
+    // Find the user in database
+    const user = await User.findById(decoded._id).select("-password");
+
+    if (!user) {
+      res.clearCookie("Access_Token");
+      return next(createError(401, "User not found"));
+    }
+
     // Find the most recent auth log for this token
     const lastAuthLog = await AuthLogModel.findOne({
       userID: decoded._id,
@@ -40,7 +49,7 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
       return next(createError(401, "Session expired or invalidated"));
     }
 
-    if (decoded.isLocked) {
+    if (user.isLocked) {
       next(
         createError(
           401,
