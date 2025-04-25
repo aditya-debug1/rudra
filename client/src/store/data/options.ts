@@ -25,7 +25,7 @@ export const refDefaultOptions: ComboboxOption[] = [
   { label: "Direct Walking", value: "walking" },
 ];
 
-export const ignoreRole = ["Developer", "Super Admin"];
+export const ignoreRole = ["Developer", "Super Admin", "SkipRole"];
 
 export const statusOptions = [
   { label: "Lost", value: "lost" },
