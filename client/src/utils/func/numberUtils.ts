@@ -57,7 +57,10 @@ export const getNumericRangeBase = (num: number): string => {
 };
 
 export function formatToCurrency(amount: number): string {
-  return amount.toLocaleString("en-IN");
+  return amount.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function numberToWords(amount: number): string {

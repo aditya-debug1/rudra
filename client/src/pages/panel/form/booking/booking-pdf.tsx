@@ -1,3 +1,4 @@
+import ganpatiImage from "@/assets/ganpati.png";
 import {
   Document,
   Font,
@@ -7,15 +8,15 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
+import React from "react";
 import { BookingType } from "./utils";
-import ganpatiImage from "@/assets/ganpati.png";
 
 import RobotoBold from "@/fonts/roboto/Roboto-Bold.ttf";
 import RobotoBoldItalic from "@/fonts/roboto/Roboto-BoldItalic.ttf";
 import RobotoItalic from "@/fonts/roboto/Roboto-Italic.ttf";
 import RobotoRegular from "@/fonts/roboto/Roboto-Regular.ttf";
 import { formatToCurrency, numberToWords } from "@/utils/func/numberUtils";
-import { toProperCase } from "@/utils/func/strUtils";
+import { addNumberingToLines, formatAddress } from "@/utils/func/strUtils";
 
 interface BookingFormProps {
   data: BookingType;
@@ -277,7 +278,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
             />
             <LabeledText
               label="ADDRESS"
-              value={toProperCase(data.applicants.contact.address)}
+              value={formatAddress(data.applicants.contact.address)}
             />
           </View>
 
@@ -316,11 +317,28 @@ export const BookingForm = ({ data }: BookingFormProps) => {
           {/* Property Details */}
           <View style={[styles.row, styles.section]}>
             <View style={styles.col25}>
-              <LabeledText label="FLAT NO" value={data.unit.flatNo} />
+              <LabeledText
+                label={data.type == "flat" ? "FLAT NO" : "SHOP NO"}
+                value={data.unit.unitNo}
+              />
             </View>
-            <View style={styles.col25}>
-              <LabeledText label="WING" value={data.unit.wing.toUpperCase()} />
-            </View>
+            {data.type == "flat" && data.unit.wing && (
+              <View style={styles.col25}>
+                <LabeledText
+                  label="WING"
+                  value={data.unit.wing.toUpperCase()}
+                />
+              </View>
+            )}
+            {data.type == "shop" && data.unit.area && (
+              <View style={styles.col25}>
+                <LabeledText
+                  label="AREA"
+                  value={`${data.unit.area.toString()}Sq.ft.`}
+                />
+              </View>
+            )}
+
             <View style={styles.col25}>
               <LabeledText label="FLOOR" value={data.unit.floor} />
             </View>
@@ -381,61 +399,116 @@ export const BookingForm = ({ data }: BookingFormProps) => {
           </View>
 
           {/* Bank Information */}
-          <View style={styles.section}>
-            <LabeledText
-              label={
-                data.payment.banks && data.payment.banks?.length > 0
-                  ? "SELECTED BANK FOR LOAN"
-                  : "PAYMENT MODE"
-              }
-              value={data.payment.banks?.join(", ") || "SELF FUNDING"}
-            />
-          </View>
+          {data.type == "flat" && (
+            <View style={styles.section}>
+              <LabeledText
+                label={
+                  data.payment.banks && data.payment.banks?.length > 0
+                    ? "SELECTED BANK FOR LOAN"
+                    : "PAYMENT MODE"
+                }
+                value={data.payment.banks?.join(", ") || "SELF FUNDING"}
+              />
+            </View>
+          )}
 
           <View style={styles.separator} />
 
-          {/* Notes Section */}
-          <View style={[styles.row, styles.section]}>
-            {/* Extra Charges */}
-            <View style={[styles.col50, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                Extra:
-              </Text>
-              <Text>
-                1) Rs.15000 Advocate Charges at the time of Registration.
-              </Text>
-              <Text>2) Maintenance at the time of Possession.</Text>
-              <Text>
-                3) Society Charges Rs.1 Lakh at the time of Possession.
-              </Text>
-            </View>
+          {data.type == "flat" && (
+            <React.Fragment>
+              {/* Notes Section */}
+              <View style={[styles.row, styles.section]}>
+                {/* Extra Charges */}
+                <View style={[styles.col50, styles.small, styles.gap4]}>
+                  <Text
+                    style={[styles.bold, styles.underline, { fontSize: 10 }]}
+                  >
+                    Extra:
+                  </Text>
+                  <Text>
+                    1) Rs.15000 Advocate Charges at the time of Registration.
+                  </Text>
+                  <Text>2) Maintenance at the time of Possession.</Text>
+                  <Text>
+                    3) Society Charges Rs.1 Lakh at the time of Possession.
+                  </Text>
+                </View>
 
-            {/* Notes */}
-            <View style={[styles.col50, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                Note:
-              </Text>
-              <Text>
-                1) Token amount less than Rs.50,000/- is Non-Refundable.
-              </Text>
-              <Text>2) Registration within 30 days from Booking date.</Text>
-            </View>
-          </View>
+                {/* Notes */}
+                <View style={[styles.col50, styles.small, styles.gap4]}>
+                  <Text
+                    style={[styles.bold, styles.underline, { fontSize: 10 }]}
+                  >
+                    Note:
+                  </Text>
+                  <Text>
+                    1) Token amount less than Rs.50,000/- is Non-Refundable
+                    after 15 days.
+                  </Text>
+                  <Text>2) Registration within 30 days from Booking date.</Text>
+                </View>
+              </View>
 
-          {/* First Signature Block */}
-          <View style={[styles.row, styles.flexEnd, styles.mt8]}>
-            <View style={styles.signatureBlock}>
-              <View style={styles.signatureLine} />
-              <Text>APPLICANT SIGNATURE</Text>
-            </View>
-          </View>
+              {/* First Signature Block */}
+              <View style={[styles.row, styles.flexEnd, styles.mt8]}>
+                <View style={styles.signatureBlock}>
+                  <View style={styles.signatureLine} />
+                  <Text>APPLICANT SIGNATURE</Text>
+                </View>
+              </View>
+            </React.Fragment>
+          )}
+
+          {data.type == "shop" && (
+            <React.Fragment>
+              {/* Notes Section */}
+              <View style={[styles.row, styles.section]}>
+                {/* Extra Charges */}
+                <View style={[styles.col50, styles.small, styles.gap4]}>
+                  <Text
+                    style={[styles.bold, styles.underline, { fontSize: 10 }]}
+                  >
+                    EXTRA CHARGES: AT THE TIME OF REGISTRATION
+                  </Text>
+                  <Text>
+                    1) Development Charges (₹400 x {data.unit.area}Sq.ft.) = ₹
+                    {data.unit.area && 400 * data.unit.area}/-
+                  </Text>
+                  <Text>2) Society Charges = ₹1,00,000/-</Text>
+                  <Text>3) Advocate Charges = ₹15,000/-</Text>
+                  <Text>4) Maintenance at the time of Possession.</Text>
+                </View>
+
+                {/* Notes */}
+                <View style={[styles.col50, styles.small, styles.gap4]}>
+                  <Text
+                    style={[styles.bold, styles.underline, { fontSize: 10 }]}
+                  >
+                    Note:
+                  </Text>
+                  <Text>
+                    1) Token amount less than Rs.50,000/- is Non-Refundable.
+                    after 15 days.
+                  </Text>
+                </View>
+              </View>
+
+              {/* First Signature Block */}
+              <View style={[styles.row, styles.flexEnd, styles.mt8]}>
+                <View style={styles.signatureBlock}>
+                  <View style={styles.signatureLine} />
+                  <Text>APPLICANT SIGNATURE</Text>
+                </View>
+              </View>
+            </React.Fragment>
+          )}
 
           <View style={styles.separator} />
 
           {/* Payment Terms */}
           <View style={styles.section}>
             <Text style={styles.subHeading}>PAYMENT TERMS</Text>
-            <Text>{data.payment.paymentTerms}</Text>
+            <Text>{addNumberingToLines(data.payment.paymentTerms)}</Text>
           </View>
 
           <View style={styles.separator} />

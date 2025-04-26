@@ -10,6 +10,7 @@ import { hasPermission } from "@/hooks/use-role";
 import ClientForm from "./client-form";
 import ClientPartnerForm from "./cp-form";
 import { BookingForm } from "./booking";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 type FormType = {
   id: string;
@@ -32,6 +33,7 @@ const Form = () => {
   const { name } = useParams();
   const navigate = useNavigate();
   const { combinedRole } = useAuth(true);
+  const isSmall = useMediaQuery("(min-width: 524px)");
 
   // Define available forms with their configurations
   const formTypes: FormType[] = useMemo(
@@ -143,7 +145,7 @@ const Form = () => {
                     value={form.id}
                     onClick={() => handleNavigate(form.id)}
                   >
-                    {form.icon} {form.label}
+                    {form.icon} {isSmall && form.label}
                   </TabsTrigger>
                 ))}
               </TabsList>

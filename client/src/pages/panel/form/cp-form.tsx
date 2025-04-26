@@ -15,7 +15,7 @@ import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientPartnerSchema } from "@/utils/zod-schema/client-partner";
 import { Building2, Globe, User } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const generateCPId = (companyName: string): string => {
   const initials = companyName
@@ -31,6 +31,8 @@ const generateCPId = (companyName: string): string => {
 
 export default function ClientPartnerForm() {
   const { toast } = useToast();
+  const nameRef = useRef<HTMLInputElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
   const { createClientPartnerMutation } = useClientPartners();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const defaultValue = {
@@ -174,10 +176,17 @@ export default function ClientPartnerForm() {
                     id="name"
                     name="name"
                     placeholder="e.g. TechCorp Pvt Ltd"
+                    ref={nameRef}
                     value={formData.company.name}
                     onChange={(e) =>
                       handleCompanyChange(e.target.name, e.target.value)
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Tab" && e.shiftKey) {
+                        e.preventDefault();
+                        submitRef.current?.focus();
+                      }
+                    }}
                   />
                 </FormFieldWrapper>
                 <FormFieldWrapper
@@ -385,7 +394,18 @@ export default function ClientPartnerForm() {
       </div>
 
       <div className="mt-6 flex justify-end space-x-4">
-        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+        <Button
+          type="submit"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          ref={submitRef}
+          onKeyDown={(e) => {
+            if (e.key === "Tab" && !e.shiftKey) {
+              e.preventDefault(); // prevent natural tabbing
+              nameRef.current?.focus();
+            }
+          }}
+        >
           Add Client Partner
         </Button>
       </div>

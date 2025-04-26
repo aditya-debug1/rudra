@@ -1,69 +1,116 @@
 import { z } from "zod";
 
-const BookingSchema = z.object({
-  // Project Information
-  project: z.object({
-    name: z.string().min(1, "Project name required"),
-    by: z.string().min(1, "Builder name required"),
-    address: z.string().min(1, "Project address required"),
-  }),
+// Define a discriminated union for the unit based on type
+const FlatUnitSchema = z.object({
+  wing: z.string().min(1, "Wing required"),
+  floor: z.string().min(1, "Floor required"),
+  unitNo: z.string().min(1, "Flat no required"),
+  configuration: z.string().min(1, "Configuration required"),
+});
 
-  // Unit Information
-  unit: z.object({
-    wing: z.string().min(1, "Wing required"),
-    floor: z.string().min(1, "Floor required"),
-    flatNo: z.string().min(1, "Flat no required"),
-    configuration: z.string().min(1, "Configuration required"),
-  }),
+const ShopUnitSchema = z.object({
+  area: z.number().min(1, "Area required"),
+  floor: z.string().min(1, "Floor required"),
+  unitNo: z.string().min(1, "Shop no required"),
+  configuration: z.string().min(1, "Configuration required"),
+});
 
-  // Booking Details
-  payment: z.object({
-    amount: z.number().min(1, "Amount required"),
-    includedChargesNote: z.string().min(1, "Included charges note required"),
-    banks: z.array(z.string()).optional(), // Optional list of acceptable banks
-    paymentTerms: z.string().min(1, "Payment terms required"),
-  }),
-
-  // Applicant Information
-  applicants: z.object({
-    primary: z.string().min(1, "Primary applicant required"),
-    coApplicant: z.string().optional(),
-    contact: z.object({
-      phoneNo: z.string().min(1, "Phone number required"),
-      email: z.string().optional(),
-      address: z.string().min(1, "Address required"),
-      residenceNo: z.string().optional(),
+// Create a discriminated union based on type
+const BookingSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("flat"),
+    // Project Information
+    project: z.object({
+      name: z.string().min(1, "Project name required"),
+      by: z.string().min(1, "Builder name required"),
+      address: z.string().min(1, "Project address required"),
+    }),
+    // Unit Information for Flat
+    unit: FlatUnitSchema,
+    // Booking Details
+    payment: z.object({
+      amount: z.number().min(1, "Amount required"),
+      includedChargesNote: z.string().min(1, "Included charges note required"),
+      banks: z.array(z.string()).optional(), // Optional list of acceptable banks
+      paymentTerms: z.string().min(1, "Payment terms required"),
+    }),
+    // Applicant Information
+    applicants: z.object({
+      primary: z.string().min(1, "Primary applicant required"),
+      coApplicant: z.string().optional(),
+      contact: z.object({
+        phoneNo: z.string().min(1, "Phone number required"),
+        email: z.string().optional(),
+        address: z.string().min(1, "Address required"),
+        residenceNo: z.string().optional(),
+      }),
+    }),
+    // Payment Information
+    bookingDetails: z.object({
+      date: z.date({ required_error: "Booking date required" }),
+      bookingAmt: z.number().min(1, "Booking amount required"),
+      checkNo: z.string().min(1, "Check number required"),
+      bankName: z.string().min(1, "Bank name required"),
+      paymentDate: z.date({ required_error: "Payment date required" }),
     }),
   }),
-
-  // Payment Information
-  bookingDetails: z.object({
-    date: z.date({ required_error: "Booking date required" }),
-    bookingAmt: z.number().min(1, "Booking amount required"),
-    checkNo: z.string().min(1, "Check number required"),
-    bankName: z.string().min(1, "Bank name required"),
-    paymentDate: z.date({ required_error: "Payment date required" }),
+  z.object({
+    type: z.literal("shop"),
+    // Project Information
+    project: z.object({
+      name: z.string().min(1, "Project name required"),
+      by: z.string().min(1, "Builder name required"),
+      address: z.string().min(1, "Project address required"),
+    }),
+    // Unit Information for Shop
+    unit: ShopUnitSchema,
+    // Booking Details
+    payment: z.object({
+      amount: z.number().min(1, "Amount required"),
+      includedChargesNote: z.string().min(1, "Included charges note required"),
+      banks: z.array(z.string()).optional(), // Optional for shops
+      paymentTerms: z.string().min(1, "Payment terms required"),
+    }),
+    // Applicant Information
+    applicants: z.object({
+      primary: z.string().min(1, "Primary applicant required"),
+      coApplicant: z.string().optional(),
+      contact: z.object({
+        phoneNo: z.string().min(1, "Phone number required"),
+        email: z.string().optional(),
+        address: z.string().min(1, "Address required"),
+        residenceNo: z.string().optional(),
+      }),
+    }),
+    // Payment Information
+    bookingDetails: z.object({
+      date: z.date({ required_error: "Booking date required" }),
+      bookingAmt: z.number().min(1, "Booking amount required"),
+      checkNo: z.string().min(1, "Check number required"),
+      bankName: z.string().min(1, "Bank name required"),
+      paymentDate: z.date({ required_error: "Payment date required" }),
+    }),
   }),
-});
+]);
 
 export { BookingSchema };
 
 export interface BookingType {
+  type: "flat" | "shop";
   // Project Information
   project: {
     name: string;
     by: string;
     address: string;
   };
-
   // Unit Information
   unit: {
-    wing: string;
+    wing?: string;
     floor: string;
-    flatNo: string;
+    unitNo: string;
     configuration: string;
+    area?: number;
   };
-
   // Booking Details
   payment: {
     amount: number;
@@ -71,7 +118,6 @@ export interface BookingType {
     banks?: string[]; // List of acceptable banks
     paymentTerms: string;
   };
-
   // Applicant Information
   applicants: {
     primary: string;
@@ -83,7 +129,6 @@ export interface BookingType {
       residenceNo?: string;
     };
   };
-
   // Payment Information
   bookingDetails: {
     date: Date;
@@ -132,10 +177,12 @@ export const ProjectList = [
   },
 ];
 
-export const ChargesNoteList = [
+export const FlatChargesNoteList = [
   "Extra Taxes & Parking",
   "Including Taxes without Parking",
   "Including Taxes with Stilt Parking",
   "Including Taxes with Open Parking",
   "Other",
 ];
+
+export const ShopChargesNoteList = ["Extra Taxes", "Including Taxes", "Other"];
