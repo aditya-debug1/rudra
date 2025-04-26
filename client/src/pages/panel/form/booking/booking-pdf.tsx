@@ -79,7 +79,9 @@ const styles = StyleSheet.create({
   },
 
   // Column layouts
+  col45: { width: "45%" },
   col50: { width: "50%" },
+  col55: { width: "55%" },
   col33: { width: "33%" },
   col25: { width: "25%" },
 
@@ -419,7 +421,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
               {/* Notes Section */}
               <View style={[styles.row, styles.section]}>
                 {/* Extra Charges */}
-                <View style={[styles.col50, styles.small, styles.gap4]}>
+                <View style={[styles.col45, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
@@ -435,7 +437,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
                 </View>
 
                 {/* Notes */}
-                <View style={[styles.col50, styles.small, styles.gap4]}>
+                <View style={[styles.col55, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
@@ -464,7 +466,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
               {/* Notes Section */}
               <View style={[styles.row, styles.section]}>
                 {/* Extra Charges */}
-                <View style={[styles.col50, styles.small, styles.gap4]}>
+                <View style={[styles.col45, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
@@ -480,7 +482,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
                 </View>
 
                 {/* Notes */}
-                <View style={[styles.col50, styles.small, styles.gap4]}>
+                <View style={[styles.col45, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
