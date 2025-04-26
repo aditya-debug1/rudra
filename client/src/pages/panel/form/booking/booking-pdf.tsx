@@ -466,7 +466,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
               {/* Notes Section */}
               <View style={[styles.row, styles.section]}>
                 {/* Extra Charges */}
-                <View style={[styles.col45, styles.small, styles.gap4]}>
+                <View style={[styles.col50, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
@@ -482,7 +482,7 @@ export const BookingForm = ({ data }: BookingFormProps) => {
                 </View>
 
                 {/* Notes */}
-                <View style={[styles.col45, styles.small, styles.gap4]}>
+                <View style={[styles.col50, styles.small, styles.gap4]}>
                   <Text
                     style={[styles.bold, styles.underline, { fontSize: 10 }]}
                   >
