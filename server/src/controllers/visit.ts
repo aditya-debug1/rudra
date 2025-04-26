@@ -157,7 +157,7 @@ class VisitController {
       }
 
       // Remove the client from the CP employee's referredClients if applicable
-      if (visit.reference) {
+      if (mongoose.Types.ObjectId.isValid(visit.reference) && visit.reference) {
         await CPEmployee.findByIdAndUpdate(visit.reference, {
           $pull: { referredClients: visit._id },
         });
