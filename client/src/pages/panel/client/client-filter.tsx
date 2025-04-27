@@ -91,7 +91,7 @@ export const ClientFilter = ({
 
   const managerOptions =
     users
-      ?.filter((user) => !ignoreRole.includes(user.roles[0]))
+      ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
@@ -323,10 +323,10 @@ export const ClientFilter = ({
         </DrawerHeader>
         <ScrollArea className="px-4 h-[calc(100vh-250px)]">
           <FilterContent />
+          <DrawerFooter className="pt-2 pb-4">
+            <FilterFooter />
+          </DrawerFooter>
         </ScrollArea>
-        <DrawerFooter className="pt-2 pb-4">
-          <FilterFooter />
-        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   ) : (
