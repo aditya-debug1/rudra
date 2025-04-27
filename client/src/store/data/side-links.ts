@@ -6,12 +6,12 @@ type NavLinkType = {
 };
 // navLinks.js
 export const NavLinks: NavLinkType[] = [
-  /* {
+  {
     pageName: "Dashboard",
     icon: "LayoutDashboard",
     label: "Dashboard",
     to: "/dashboard",
-  }, */
+  },
   {
     pageName: "Users",
     icon: "UserRound",
@@ -37,7 +37,7 @@ export const NavLinks: NavLinkType[] = [
     to: "/task",
   }, */
   { pageName: "Form", icon: "ReceiptText", label: "Form", to: "/form" },
-  /* {
+  /*   {
     pageName: "Reports",
     icon: "TriangleAlert",
     label: "Reports",

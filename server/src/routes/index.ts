@@ -5,6 +5,7 @@ import auditRoute from "./audit";
 import clientRoute from "./client";
 import visitRoute from "./visit";
 import clientPartnerRoute from "./client-partner";
+import analyticsRoute from "./analytics";
 
 export {
   authRoute,
@@ -14,4 +15,5 @@ export {
   clientRoute,
   visitRoute,
   clientPartnerRoute,
+  analyticsRoute,
 };

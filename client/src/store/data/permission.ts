@@ -3,7 +3,7 @@ import { Permission } from "../role";
 export const AdminPermissions: Permission[] = [
   {
     page: "Dashboard",
-    actions: ["view"],
+    actions: ["view", "view-unfiltered"],
   },
   {
     page: "Users",
@@ -97,7 +97,13 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
   {
     page: "Dashboard",
     pageLabel: "Dashboard Sections",
-    actions: [{ value: "view", label: "View Dashboard" }],
+    actions: [
+      { value: "view", label: "View Dashboard" },
+      {
+        value: "view-unfiltered",
+        label: "View Dashboard Unfiltered",
+      },
+    ],
   },
   {
     page: "Users",
