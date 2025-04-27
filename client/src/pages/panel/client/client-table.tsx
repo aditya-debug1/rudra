@@ -1,4 +1,3 @@
-import { ComboboxOption } from "@/components/custom ui/combobox";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,10 @@ import { ClientType, GetClientsResponse } from "@/store/client";
 import { RefernceListType, useClientPartners } from "@/store/client-partner";
 import { projectOptions, requirementOptions } from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
-import { getLabelFromValue } from "@/utils/func/arrayUtils";
+import {
+  getLabelFromValue,
+  getSafeLabelFromValue,
+} from "@/utils/func/arrayUtils";
 import { simplifyNumber } from "@/utils/func/numberUtils.ts";
 import { toProperCase } from "@/utils/func/strUtils";
 import { ChevronRight } from "lucide-react";
@@ -77,12 +79,6 @@ export const ClientTable = ({
     if (!references || !ref) return ref;
     const reference = references.find((r) => r._id === ref);
     return reference ? reference.firstName + " " + reference.lastName : ref;
-  };
-
-  const getProjectName = (value: string, projectList: ComboboxOption[]) => {
-    if (!projectList || !value) return value;
-    const project = projectList.find((p) => p.value === value);
-    return project ? project.label : value;
   };
 
   const getManagerName = (
@@ -253,9 +249,9 @@ export const ClientTable = ({
                             <span className="col-span-2 flex items-center gap-3">
                               <h4 className="text-sm font-bold">Project:</h4>
                               <p className="text-sm">
-                                {getProjectName(
-                                  client.project,
+                                {getSafeLabelFromValue(
                                   projectOptions,
+                                  client.project,
                                 ) || "N/A"}
                               </p>
                             </span>

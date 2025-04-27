@@ -1,6 +1,29 @@
-import { useState, useEffect } from "react";
+import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
+import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
+import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useClientStore } from "@/store/client";
-import { useUsersSummary } from "@/store/users";
+import { useClientPartners } from "@/store/client-partner";
 import {
   ignoreRole,
   projectOptions,
@@ -8,29 +31,10 @@ import {
   requirementOptions,
   statusOptions,
 } from "@/store/data/options";
-import { useMediaQuery } from "@/hooks/use-media-query";
-
-// Components
-import BudgetRangeSelector from "@/components/custom ui/buget-selector";
-import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
-import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
-import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
-import { Tooltip } from "@/components/custom ui/tooltip-provider";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { ListFilter } from "lucide-react";
+import { useUsersSummary } from "@/store/users";
 import { toProperCase } from "@/utils/func/strUtils";
-import { useClientPartners } from "@/store/client-partner";
+import { ListFilter } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Types
 type FilterKey = keyof typeof initialFilters;
@@ -60,12 +64,15 @@ export const ClientFilter = ({
   clearFilter,
   setIsFiltered,
 }: ClientFilterProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Hooks
   const { filters, setFilters, resetFilters } = useClientStore();
   const { useReferenceWithDelete } = useClientPartners();
   const { data: users } = useUsersSummary();
   const { data: refData } = useReferenceWithDelete();
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
+
+  // States
+  const [isOpen, setIsOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({ ...initialFilters });
   const [appliedFilterCount, setAppliedFilterCount] = useState(0);
 
@@ -111,6 +118,7 @@ export const ClientFilter = ({
     countAppliedFilters(currentFilters);
   }, [filters]);
 
+  // Event Handlers
   // Count applied filters
   const countAppliedFilters = (filterObj: typeof initialFilters) => {
     const count = Object.entries(filterObj).reduce((total, [key, value]) => {
@@ -165,6 +173,7 @@ export const ClientFilter = ({
 
     setFilters(newFilters);
     setIsFiltered(hasActiveFilters);
+    setIsOpen(false);
   }
 
   const resetClientFilters = () => {
@@ -175,146 +184,169 @@ export const ClientFilter = ({
     setIsOpen(false);
   };
 
-  return (
+  // Filter content component to use in both Sheet and Drawer
+  const FilterContent = () => (
+    <div className="flex flex-col gap-8 py-4">
+      <FormFieldWrapper LabelText="Pick Date">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <DatePickerV2
+            placeholder="Start date"
+            className="sm:w-full"
+            defaultDate={activeFilters.fromDate}
+            onDateChange={(date) => updateFilter("fromDate", date)}
+          />
+          <DatePickerV2
+            placeholder="End date"
+            className="sm:w-full"
+            defaultDate={activeFilters.toDate}
+            onDateChange={(date) => updateFilter("toDate", date)}
+          />
+        </div>
+      </FormFieldWrapper>
+
+      <FormFieldWrapper LabelText="Select Requirement">
+        <Combobox
+          value={activeFilters.requirement}
+          options={requirementOptions}
+          onChange={(value) => updateFilter("requirement", value)}
+          width="w-full"
+          align="center"
+          placeholder="Select a requirement"
+        />
+      </FormFieldWrapper>
+
+      <FormFieldWrapper LabelText="Select Project">
+        <Combobox
+          value={activeFilters.project}
+          options={projectOptions}
+          onChange={(value) => updateFilter("project", value)}
+          width="w-full"
+          align="center"
+          placeholder="Select a project"
+        />
+      </FormFieldWrapper>
+
+      {/* <FormFieldWrapper LabelText="Select Budget Range">
+        <BudgetRangeSelector
+          onValueChange={({ minInRupees, maxInRupees }) => {
+            updateFilter("minBudget", minInRupees);
+            updateFilter("maxBudget", maxInRupees);
+          }}
+          // initialMin={activeFilters.minBudget || 0}
+          // initialMax={activeFilters.maxBudget || 0}
+        />
+      </FormFieldWrapper> */}
+
+      <FormFieldWrapper LabelText="Reference">
+        <Combobox
+          value={activeFilters.reference}
+          options={referenceOptions}
+          onChange={(value) => updateFilter("reference", value)}
+          width="w-full"
+          align="center"
+          placeholder="Select a reference"
+        />
+      </FormFieldWrapper>
+
+      {/* Manager filters */}
+      {(["source", "relation", "closing"] as const).map((type) => (
+        <FormFieldWrapper
+          LabelText={`${toProperCase(type)} Manager`}
+          key={type}
+        >
+          <Combobox
+            value={activeFilters[type as keyof typeof activeFilters] as string}
+            options={managerOptions}
+            onChange={(value) => updateFilter(type as FilterKey, value)}
+            width="w-full"
+            align="center"
+            placeholder={`Select ${type} manager`}
+          />
+        </FormFieldWrapper>
+      ))}
+
+      <FormFieldWrapper LabelText="Select Status">
+        <Combobox
+          value={activeFilters.status}
+          options={statusOptions}
+          onChange={(value) => updateFilter("status", value)}
+          width="w-full"
+          align="center"
+          placeholder="Select a status"
+        />
+      </FormFieldWrapper>
+    </div>
+  );
+
+  // Filter trigger button
+  const FilterTrigger = () => (
+    <Tooltip content="More filter options">
+      <Button className="flex-shrink-0 relative" variant="outline" size="icon">
+        <ListFilter size={20} />
+        {appliedFilterCount > 0 && (
+          <Badge className="bg-red-500 text-white absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
+            {appliedFilterCount}
+          </Badge>
+        )}
+      </Button>
+    </Tooltip>
+  );
+
+  // Filter footer with action buttons
+  const FilterFooter = () => (
+    <div className="flex gap-3 justify-end">
+      <Button
+        variant="outline"
+        onClick={() => {
+          setIsOpen(false);
+        }}
+      >
+        Close
+      </Button>
+      <Button variant="secondary" onClick={resetClientFilters}>
+        Reset
+      </Button>
+      <Button onClick={handleApplyFilter}>Apply Filter</Button>
+    </div>
+  );
+
+  return isSmallScreen ? (
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerTrigger asChild>
+        <span onClick={() => setIsOpen(true)}>
+          <FilterTrigger />
+        </span>
+      </DrawerTrigger>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader className="mb-2">
+          <DrawerTitle>Client Filter Options</DrawerTitle>
+        </DrawerHeader>
+        <ScrollArea className="px-4 h-[calc(100vh-250px)]">
+          <FilterContent />
+        </ScrollArea>
+        <DrawerFooter className="pt-2 pb-4">
+          <FilterFooter />
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  ) : (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <span>
-          <Tooltip content="More filter options">
-            <Button
-              className="flex-shrink-0 relative"
-              variant="outline"
-              size="icon"
-            >
-              <ListFilter size={20} />
-              {appliedFilterCount > 0 && (
-                <Badge className="bg-red-500 text-white absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
-                  {appliedFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </Tooltip>
+          <FilterTrigger />
         </span>
       </SheetTrigger>
-      <SheetContent
-        className="overflow-hidden"
-        side={isSmallScreen ? "bottom" : "right"}
-      >
+      <SheetContent className="overflow-hidden">
         <SheetHeader className="mb-6">
           <SheetTitle>Client Filter Options</SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-150px)] w-full pr-4">
-          <div className="flex flex-col gap-8 py-4">
-            <FormFieldWrapper LabelText="Pick Date">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <DatePickerV2
-                  placeholder="Start date"
-                  className="sm:w-full"
-                  defaultDate={activeFilters.fromDate}
-                  onDateChange={(date) => updateFilter("fromDate", date)}
-                />
-                <DatePickerV2
-                  placeholder="End date"
-                  className="sm:w-full"
-                  defaultDate={activeFilters.toDate}
-                  onDateChange={(date) => updateFilter("toDate", date)}
-                />
-              </div>
-            </FormFieldWrapper>
-
-            <FormFieldWrapper LabelText="Select Requirement">
-              <Combobox
-                value={activeFilters.requirement}
-                options={requirementOptions}
-                onChange={(value) => updateFilter("requirement", value)}
-                width="w-full"
-                align="center"
-                placeholder="Select a requirement"
-              />
-            </FormFieldWrapper>
-
-            <FormFieldWrapper LabelText="Select Project">
-              <Combobox
-                value={activeFilters.project}
-                options={projectOptions}
-                onChange={(value) => updateFilter("project", value)}
-                width="w-full"
-                align="center"
-                placeholder="Select a project"
-              />
-            </FormFieldWrapper>
-
-            <FormFieldWrapper LabelText="Select Budget Range">
-              <BudgetRangeSelector
-                onValueChange={({ minInRupees, maxInRupees }) => {
-                  updateFilter("minBudget", minInRupees);
-                  updateFilter("maxBudget", maxInRupees);
-                }}
-                // initialMin={activeFilters.minBudget || 0}
-                // initialMax={activeFilters.maxBudget || 0}
-              />
-            </FormFieldWrapper>
-
-            <FormFieldWrapper LabelText="Reference">
-              <Combobox
-                value={activeFilters.reference}
-                options={referenceOptions}
-                onChange={(value) => updateFilter("reference", value)}
-                width="w-full"
-                align="center"
-                placeholder="Select a reference"
-              />
-            </FormFieldWrapper>
-
-            {/* Manager filters */}
-            {(["source", "relation", "closing"] as const).map((type) => (
-              <FormFieldWrapper
-                LabelText={`${toProperCase(type)} Manager`}
-                key={type}
-              >
-                <Combobox
-                  value={
-                    activeFilters[type as keyof typeof activeFilters] as string
-                  }
-                  options={managerOptions}
-                  onChange={(value) => updateFilter(type as FilterKey, value)}
-                  width="w-full"
-                  align="center"
-                  placeholder={`Select ${type} manager`}
-                />
-              </FormFieldWrapper>
-            ))}
-
-            <FormFieldWrapper LabelText="Select Status">
-              <Combobox
-                value={activeFilters.status}
-                options={statusOptions}
-                onChange={(value) => updateFilter("status", value)}
-                width="w-full"
-                align="center"
-                placeholder="Select a status"
-              />
-            </FormFieldWrapper>
-          </div>
+          <FilterContent />
           <SheetFooter className="mt-4 mb-2 gap-3 sm:gap-0 pr-1">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsOpen(false);
-              }}
-            >
-              Close
-            </Button>
-            <Button variant="secondary" onClick={resetClientFilters}>
-              Reset
-            </Button>
-            <SheetClose asChild>
-              <Button onClick={handleApplyFilter}>Apply Filter</Button>
-            </SheetClose>
+            <FilterFooter />
           </SheetFooter>
         </ScrollArea>
       </SheetContent>
     </Sheet>
   );
 };
-
-export default ClientFilter;
