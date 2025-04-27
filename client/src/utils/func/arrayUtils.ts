@@ -11,3 +11,11 @@ export const getLabelFromValue = (
 ): string | undefined => {
   return options.find((option) => option.value === value)?.label;
 };
+
+export const getSafeLabelFromValue = (
+  options: { label: string; value: string }[],
+  value: string,
+): string => {
+  const labelValue = options.find((option) => option.value === value)?.label;
+  return labelValue || value;
+};
