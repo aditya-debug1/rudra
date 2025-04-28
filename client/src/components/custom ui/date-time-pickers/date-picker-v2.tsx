@@ -83,7 +83,7 @@ export default function DatePickerV2({
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date ? (
-            format(date, "PPP")
+            format(date, "MMM do, yyyy")
           ) : (
             <span>{placeholder ? placeholder : "Pick a date"}</span>
           )}
