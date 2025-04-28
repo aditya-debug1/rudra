@@ -11,6 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useClientPartners } from "@/store/client-partner";
+import {
+  capitalizeWords,
+  formatAddress,
+  toProperCase,
+} from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientPartnerSchema } from "@/utils/zod-schema/client-partner";
@@ -101,7 +106,7 @@ export default function ClientPartnerForm() {
       ownerName: formData.company.ownerName,
       email: formData.company.email,
       phoneNo: formData.company.phoneNo,
-      address: formData.company.address,
+      address: formatAddress(formData.company.address),
       notes: formData.company.notes,
       website: formData.company.companyWebsite, // Changed companyWebsite to website to match the API
       employees: [
@@ -179,7 +184,10 @@ export default function ClientPartnerForm() {
                     ref={nameRef}
                     value={formData.company.name}
                     onChange={(e) =>
-                      handleCompanyChange(e.target.name, e.target.value)
+                      handleCompanyChange(
+                        e.target.name,
+                        e.target.value.toUpperCase(),
+                      )
                     }
                     onKeyDown={(e) => {
                       if (e.key === "Tab" && e.shiftKey) {
@@ -200,7 +208,10 @@ export default function ClientPartnerForm() {
                     placeholder="e.g. John Doe"
                     value={formData.company.ownerName}
                     onChange={(e) =>
-                      handleCompanyChange(e.target.name, e.target.value)
+                      handleCompanyChange(
+                        e.target.name,
+                        capitalizeWords(e.target.value),
+                      )
                     }
                   />
                 </FormFieldWrapper>
@@ -215,7 +226,10 @@ export default function ClientPartnerForm() {
                     placeholder="john.doe@example.com"
                     value={formData.company.email}
                     onChange={(e) =>
-                      handleCompanyChange(e.target.name, e.target.value)
+                      handleCompanyChange(
+                        e.target.name,
+                        e.target.value.toLowerCase(),
+                      )
                     }
                   />
                 </FormFieldWrapper>
@@ -248,7 +262,10 @@ export default function ClientPartnerForm() {
                     value={formData.company.companyWebsite}
                     className="rounded-l-none"
                     onChange={(e) =>
-                      handleCompanyChange(e.target.name, e.target.value)
+                      handleCompanyChange(
+                        e.target.name,
+                        e.target.value.toLowerCase(),
+                      )
                     }
                   />
                 </div>
@@ -307,7 +324,10 @@ export default function ClientPartnerForm() {
                     placeholder="First Name"
                     value={formData.employee.firstName}
                     onChange={(e) =>
-                      handleEmployeeChange(e.target.name, e.target.value)
+                      handleEmployeeChange(
+                        e.target.name,
+                        capitalizeWords(e.target.value),
+                      )
                     }
                   />
                   <Input
@@ -316,7 +336,10 @@ export default function ClientPartnerForm() {
                     placeholder="Last Name"
                     value={formData.employee.lastName}
                     onChange={(e) =>
-                      handleEmployeeChange(e.target.name, e.target.value)
+                      handleEmployeeChange(
+                        e.target.name,
+                        capitalizeWords(e.target.value),
+                      )
                     }
                   />
                 </div>
@@ -330,7 +353,10 @@ export default function ClientPartnerForm() {
                   placeholder="john.doe@example.com"
                   value={formData.employee.email}
                   onChange={(e) =>
-                    handleEmployeeChange(e.target.name, e.target.value)
+                    handleEmployeeChange(
+                      e.target.name,
+                      e.target.value.toLowerCase(),
+                    )
                   }
                 />
               </FormFieldWrapper>
@@ -368,7 +394,10 @@ export default function ClientPartnerForm() {
                   placeholder="e.g. Sales Manager"
                   value={formData.employee.position}
                   onChange={(e) =>
-                    handleEmployeeChange(e.target.name, e.target.value)
+                    handleEmployeeChange(
+                      e.target.name,
+                      capitalizeWords(e.target.value),
+                    )
                   }
                 />
               </FormFieldWrapper>

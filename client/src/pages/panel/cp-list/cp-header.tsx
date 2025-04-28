@@ -85,7 +85,7 @@ export const ClientPartnerHeader = ({
           </Button>
 
           <span className="px-2 text-sm whitespace-nowrap">
-            Page 1 of 1{/* Page {data.currentPage} of {data.totalPages} */}
+            Page {data.currentPage} of {data.totalPages}
           </span>
 
           <Button

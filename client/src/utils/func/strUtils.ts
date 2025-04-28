@@ -9,7 +9,15 @@ export function formatAddress(input: string): string {
     part
       .trim()
       .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) =>
+        word
+          .split(".")
+          .map(
+            (subword) =>
+              subword.charAt(0).toUpperCase() + subword.slice(1).toLowerCase(),
+          )
+          .join("."),
+      )
       .join(" "),
   );
   return formatted.join(", ");
