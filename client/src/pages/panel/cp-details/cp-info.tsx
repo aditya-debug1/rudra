@@ -101,7 +101,7 @@ export const ClientPartnerInfo = ({
           <FormFieldWrapper LabelText="Notes" className="gap-3 flex-grow">
             <Textarea
               className="h-full lg:resize-none"
-              value={data.address}
+              value={data.notes}
               onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder={
                 isEditable ? "Additional info about company..." : "N/A"
