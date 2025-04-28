@@ -39,6 +39,7 @@ export const InstantUserForm = ({
 
   // use States
   const [isCredentialsOpen, setIsCredentialsOpen] = useState(false);
+  const [isSubmiting, setIsSubmitting] = useState(false);
   const [newUser, setNewUser] = useState<Omit<userType, "_id">>({
     username: "",
     password: "",
@@ -61,40 +62,42 @@ export const InstantUserForm = ({
   };
 
   const handleCreateUser = async () => {
-    const username = generateUsername(newUser.firstName.toLowerCase() || "");
-    const password = generatePassword();
-    const firstName = newUser.firstName ? toProperCase(newUser.firstName) : "";
-    const lastName = newUser.lastName ? toProperCase(newUser.lastName) : "";
-
-    const user = {
-      ...newUser,
-      username,
-      password,
-      firstName,
-      lastName,
-    };
-
-    const validation = InstantUserSchema.safeParse(user);
-
-    if (!validation.success) {
-      const errorMessages = formatZodErrors(validation.error.errors);
-
-      toast({
-        title: "Form Validation Error",
-        description: `Please correct the following errors:\n${errorMessages}`,
-        variant: "warning",
-      });
-      return;
-    }
-
-    setNewUser(user);
-    //Actual user creation logic goes here
     try {
+      setIsSubmitting(true);
+
+      const username = generateUsername(newUser.firstName.toLowerCase() || "");
+      const password = generatePassword();
+      const firstName = newUser.firstName
+        ? toProperCase(newUser.firstName)
+        : "";
+      const lastName = newUser.lastName ? toProperCase(newUser.lastName) : "";
+      const user = {
+        ...newUser,
+        username,
+        password,
+        firstName,
+        lastName,
+      };
+
+      const validation = InstantUserSchema.safeParse(user);
+      if (!validation.success) {
+        const errorMessages = formatZodErrors(validation.error.errors);
+        toast({
+          title: "Form Validation Error",
+          description: `Please correct the following errors:\n${errorMessages}`,
+          variant: "warning",
+        });
+        return;
+      }
+
+      setNewUser(user);
       await createUserMutation.mutateAsync(user);
+
       toast({
         title: "Success",
         description: "User created successfully",
       });
+
       onOpenChange(false);
       setIsCredentialsOpen(true);
     } catch (error) {
@@ -111,6 +114,8 @@ export const InstantUserForm = ({
           description: "Failed to create user. Please try again.",
           variant: "destructive",
         });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -176,7 +181,9 @@ export const InstantUserForm = ({
             <DialogClose asChild>
               <Button variant="secondary">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleCreateUser}>Create</Button>
+            <Button onClick={handleCreateUser} disabled={isSubmiting}>
+              Create
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
