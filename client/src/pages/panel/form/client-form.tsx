@@ -32,6 +32,7 @@ import {
   statusOptions,
 } from "@/store/data/options";
 import { useUsersSummary } from "@/store/users";
+import { capitalizeWords, formatAddress } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientSchema } from "@/utils/zod-schema/client";
@@ -168,6 +169,7 @@ const ClientForm = () => {
         typeof client.budget === "string"
           ? parseFloat(client.budget) * budgetUnit
           : client.budget * budgetUnit,
+      address: client.address ? formatAddress(client.address) : client.address,
       // Handle null fields in visitData
       visitData: {
         ...client.visitData,
@@ -258,7 +260,10 @@ const ClientForm = () => {
                       ref={firstNameRef}
                       value={client.firstName}
                       onChange={(e) =>
-                        handleInputChange("firstName", e.target.value)
+                        handleInputChange(
+                          "firstName",
+                          capitalizeWords(e.target.value),
+                        )
                       }
                       onKeyDown={(e) => {
                         if (e.key === "Tab" && e.shiftKey) {
@@ -271,7 +276,10 @@ const ClientForm = () => {
                     <Input
                       value={client.lastName}
                       onChange={(e) =>
-                        handleInputChange("lastName", e.target.value)
+                        handleInputChange(
+                          "lastName",
+                          capitalizeWords(e.target.value),
+                        )
                       }
                       placeholder="LastName Name"
                     />
@@ -282,7 +290,10 @@ const ClientForm = () => {
                   <Input
                     value={client.occupation}
                     onChange={(e) =>
-                      handleInputChange("occupation", e.target.value)
+                      handleInputChange(
+                        "occupation",
+                        capitalizeWords(e.target.value),
+                      )
                     }
                     placeholder="Software Engineer"
                   />
@@ -291,7 +302,9 @@ const ClientForm = () => {
                 <FormFieldWrapper className="gap-3" LabelText="Email">
                   <Input
                     value={client.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("email", e.target.value.toLowerCase())
+                    }
                     placeholder="john.doe@example.com"
                   />
                 </FormFieldWrapper>
