@@ -120,7 +120,6 @@ export default function ClientPartnerForm() {
 
     // Actual client creation logic goes here
     try {
-      console.log(formattedData);
       setIsSubmitting(true);
       await createClientPartnerMutation.mutateAsync(formattedData);
 
