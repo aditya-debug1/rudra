@@ -11,11 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useClientPartners } from "@/store/client-partner";
-import {
-  capitalizeWords,
-  formatAddress,
-  toProperCase,
-} from "@/utils/func/strUtils";
+import { capitalizeWords, formatAddress } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientPartnerSchema } from "@/utils/zod-schema/client-partner";
