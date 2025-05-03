@@ -1,79 +1,9 @@
 import mongoose from "mongoose";
-import { DB_URI, SUPER_ADMIN_USERNAME } from "./config/dotenv";
+import { DB_URI, DEV_USERNAME } from "./config/dotenv";
 import Role from "./models/role";
 import User from "./models/user";
 import bcrypt from "bcrypt";
-
-const defaultSuperAdminPermissions = [
-  {
-    page: "Dashboard",
-    actions: ["view"],
-  },
-  {
-    page: "Users",
-    actions: [
-      "view-users",
-      "reset-password",
-      "create-user",
-      "lock-user",
-      "view-details",
-      "update-user",
-      "delete-user",
-    ],
-  },
-  {
-    page: "Clients",
-    actions: [
-      "view-clients",
-      "delete-client",
-      "update-client",
-      "view-client-details",
-      "create-visits",
-      "update-visits",
-      "delete-visits",
-      "create-remarks",
-      "delete-remarks",
-      "view-all-clients",
-      "view-contact-info",
-    ],
-  },
-  {
-    page: "ClientPartner",
-    actions: [
-      "view-client-partner",
-      "create-client-partner",
-      "update-client-partner",
-      "delete-client-partner",
-      "view-cp-details",
-      "create-cp-employee",
-      "update-cp-employee",
-      "delete-cp-employee",
-    ],
-  },
-  {
-    page: "Task",
-    actions: ["view", "create", "delete", "update"],
-  },
-  {
-    page: "Form",
-    actions: ["client-form", "client-partner-form"],
-  },
-  {
-    page: "Reports",
-    actions: ["users-report"],
-  },
-  {
-    page: "Settings",
-    actions: [
-      "create-role",
-      "update-role",
-      "view-role",
-      "delete-role",
-      "change-precedence",
-      "view-audit",
-    ],
-  },
-];
+import { defaultRootPermissions } from "./utils/rolePermissions";
 
 const seedDatabase = async () => {
   try {
@@ -84,13 +14,13 @@ const seedDatabase = async () => {
     // Create a temporary system user for created/updated by references
     const systemUserId = new mongoose.Types.ObjectId();
 
-    // Create super admin role
-    const superAdminRole = await Role.findOneAndUpdate(
-      { name: "Super Admin" },
+    // Create developer role
+    const devRole = await Role.findOneAndUpdate(
+      { name: "Developer" },
       {
-        name: "Super Admin",
+        name: "Developer",
         precedence: 1, // Highest precedence
-        permissions: defaultSuperAdminPermissions,
+        permissions: defaultRootPermissions,
         createdBy: systemUserId,
         updatedBy: systemUserId,
       },
@@ -101,21 +31,21 @@ const seedDatabase = async () => {
       },
     );
 
-    if (!superAdminRole) {
-      throw new Error("Failed to create super admin role");
+    if (!devRole) {
+      throw new Error("Failed to create developer role");
     }
 
-    const password = "super123";
+    const password = "dev123";
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const superAdminUser = await User.findOneAndUpdate(
-      { username: SUPER_ADMIN_USERNAME },
+    const devUser = await User.findOneAndUpdate(
+      { username: DEV_USERNAME },
       {
-        username: SUPER_ADMIN_USERNAME,
+        username: DEV_USERNAME,
         password: hashedPassword, // Change password form will appear after first login
-        firstName: "Super",
-        lastName: "Admin",
-        roles: ["Super Admin"],
+        firstName: "Dev",
+        lastName: "User",
+        roles: ["Developer"],
         isLocked: false,
         permissions: {}, // Individual permissions can be added here if needed
         settings: {
@@ -130,18 +60,18 @@ const seedDatabase = async () => {
       },
     );
 
-    if (!superAdminUser) {
-      throw new Error("Failed to create super admin user");
+    if (!devUser) {
+      throw new Error("Failed to create dev user");
     }
 
-    // Update the role's created/updated by fields with the actual super admin user
-    await Role.findByIdAndUpdate(superAdminRole._id, {
-      createdBy: superAdminUser._id,
-      updatedBy: superAdminUser._id,
+    // Update the role's created/updated by fields with the actual developer user
+    await Role.findByIdAndUpdate(devRole._id, {
+      createdBy: devUser._id,
+      updatedBy: devUser._id,
     });
 
-    console.log("Super admin role & user created successfully");
-    console.log(`Username: ${superAdminUser.username} \nPassword: ${password}`);
+    console.log("Developer role & user created successfully");
+    console.log(`Username: ${devUser.username} \nPassword: ${password}`);
 
     await mongoose.connection.close();
     console.log("Database connection closed");

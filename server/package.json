@@ -6,7 +6,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "seed": "ts-node src/seed.ts"
+    "seed": "ts-node src/seed.ts",
+    "roleSeed": "ts-node src/roleSeed.ts"
   },
   "keywords": [],
   "author": "Aditya",
