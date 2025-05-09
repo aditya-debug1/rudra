@@ -12,6 +12,7 @@ import {
   visitRoute,
   clientPartnerRoute,
   analyticsRoute,
+  inventoryRoute,
 } from "./routes";
 
 // Initialize express app
@@ -69,6 +70,7 @@ app.use("/api/client", clientRoute);
 app.use("/api/visit", visitRoute);
 app.use("/api/client-partner", clientPartnerRoute);
 app.use("/api/analytics", analyticsRoute);
+app.use("/api/inventory", inventoryRoute);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

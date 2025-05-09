@@ -38,17 +38,22 @@ export const ToggleGroup: React.FC<ToggleGroupProps> = ({
 
   return (
     <div
-      className={cn(`flex items-center overflow-hidden rounded-md border-2`, className)}
+      className={cn(
+        "flex items-center overflow-hidden rounded-md border-2",
+        className,
+      )}
       {...props}
     >
       {options.map((option, index) => (
         <button
           key={index}
           className={cn(
-            `${BtnStyles} ${
-              option.value === currOption ? "bg-primary text-secondary hover:bg-primary" : ""
-            } ${index < options.length - 1 ? "border-r-2" : ""}`,
-            btnClassName
+            "text-sm p-1.5 font-semibold transition-colors duration-200 hover:bg-muted/80 flex-1",
+            option.value === currOption
+              ? "bg-primary text-secondary hover:bg-primary"
+              : "",
+            index < options.length - 1 ? "border-r-2" : "",
+            btnClassName,
           )}
           onClick={() => handleBtnClick(option.value)}
         >
@@ -58,5 +63,3 @@ export const ToggleGroup: React.FC<ToggleGroupProps> = ({
     </div>
   );
 };
-
-const BtnStyles = "text-sm p-1.5 px-3 font-semibold transition-all hover:bg-muted/80";
