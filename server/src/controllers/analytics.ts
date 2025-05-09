@@ -37,8 +37,8 @@ class analyticsController {
         managerFilter = {
           $or: [
             { source: manager },
-            { relation: manager },
-            { closing: manager },
+            // { relation: manager },
+            // { closing: manager },
           ],
         };
       }
