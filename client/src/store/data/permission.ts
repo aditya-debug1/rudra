@@ -3,7 +3,7 @@ import { Permission } from "../role";
 export const AdminPermissions: Permission[] = [
   {
     page: "Dashboard",
-    actions: ["view", "view-unfiltered"],
+    actions: ["view-dashboard", "view-dashboard-unfiltered"],
   },
   {
     page: "Users",
@@ -48,15 +48,31 @@ export const AdminPermissions: Permission[] = [
   },
   {
     page: "Task",
-    actions: ["view", "create", "delete", "update"],
+    actions: ["view-task", "create-task", "delete-task", "update-task"],
+  },
+  {
+    page: "Inventory",
+    actions: [
+      "view-inventory",
+      "create-inventory",
+      "view-inventory-details",
+      "delete-inventory",
+      "update-inventory",
+      "update-unit-status",
+    ],
   },
   {
     page: "Form",
-    actions: ["client-form", "client-partner-form", "booking-form"],
+    actions: [
+      "client-form",
+      "client-partner-form",
+      "booking-form",
+      "cancellation-form",
+    ],
   },
   {
     page: "Reports",
-    actions: ["users-report"],
+    actions: ["client-report", "inventory-report", "booking-report"],
   },
   {
     page: "Settings",
@@ -74,11 +90,11 @@ export const AdminPermissions: Permission[] = [
 export const DefaultPermissions: Permission[] = [
   {
     page: "Dashboard",
-    actions: ["view"],
+    actions: ["view-dashboard"],
   },
   {
     page: "Task",
-    actions: ["view", "create", "delete", "update"],
+    actions: ["view-task", "create-task", "delete-task", "update-task"],
   },
 ];
 
@@ -98,9 +114,9 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     page: "Dashboard",
     pageLabel: "Dashboard Sections",
     actions: [
-      { value: "view", label: "View Dashboard" },
+      { value: "view-dashboard", label: "View Dashboard" },
       {
-        value: "view-unfiltered",
+        value: "view-dashboard-unfiltered",
         label: "View Dashboard Unfiltered",
       },
     ],
@@ -122,10 +138,10 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     page: "Task",
     pageLabel: "Task Sections",
     actions: [
-      { value: "view", label: "View Task" },
-      { value: "create", label: "Create Task" },
-      { value: "delete", label: "Delete Task" },
-      { value: "update", label: "Update Task" },
+      { value: "view-task", label: "View Task" },
+      { value: "create-task", label: "Create Task" },
+      { value: "delete-task", label: "Delete Task" },
+      { value: "update-task", label: "Update Task" },
     ],
   },
   {
@@ -169,18 +185,35 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     ],
   },
   {
+    page: "Inventory",
+    pageLabel: "Inventory Sections",
+    actions: [
+      { value: "view-inventory", label: "View Inventory" },
+      { value: "create-inventory", label: "Create Inventory" },
+      { value: "view-inventory-details", label: "View Inventory Details" },
+      { value: "delete-inventory", label: "Delete Inventory" },
+      { value: "update-inventory", label: "Update Inventory" },
+      { value: "update-unit-status", label: "Update Unit Status" },
+    ],
+  },
+  {
     page: "Form",
     pageLabel: "Form Sections",
     actions: [
       { value: "client-form", label: "View Client Form" },
       { value: "client-partner-form", label: "View Client Partner Form" },
       { value: "booking-form", label: "View Booking Form" },
+      { value: "cancellation-form", label: "View Cancellation Form" },
     ],
   },
   {
     page: "Reports",
     pageLabel: "Report Sections",
-    actions: [{ value: "users-report", label: "View User Reports" }],
+    actions: [
+      { value: "client-report", label: "View Client Reports" },
+      { value: "inventory-report", label: "View Inventory Reports" },
+      { value: "booking-report", label: "View Booking Reports" },
+    ],
   },
   {
     page: "Settings",

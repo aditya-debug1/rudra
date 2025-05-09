@@ -15,7 +15,7 @@ const Dashboard = () => {
   const showUnfiltered = hasPermission(
     combinedRole,
     "Dashboard",
-    "view-unfiltered",
+    "view-dashboard-unfiltered",
   );
   const manager = showUnfiltered ? undefined : currUser?.username;
 

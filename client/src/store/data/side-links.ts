@@ -36,13 +36,19 @@ export const NavLinks: NavLinkType[] = [
     label: "Task",
     to: "/task",
   }, */
+  {
+    pageName: "Inventory",
+    icon: "Inbox",
+    label: "Inventory",
+    to: "/inventory",
+  },
   { pageName: "Form", icon: "ReceiptText", label: "Form", to: "/form" },
-  /*   {
+  {
     pageName: "Reports",
     icon: "TriangleAlert",
     label: "Reports",
     to: "/reports",
-  }, */
+  },
   {
     pageName: "Settings",
     icon: "Bolt",
