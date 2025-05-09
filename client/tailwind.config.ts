@@ -71,6 +71,8 @@ module.exports = {
     "grid-cols-[1fr,auto]",
     "grid-cols-[1fr,auto,auto]",
     "grid-cols-[1fr,auto,auto,auto]",
+    "lg:grid-cols-4",
+    "lg:grid-cols-5",
   ],
   plugins: [require("tailwindcss-animate")],
 };
