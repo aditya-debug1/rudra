@@ -4,15 +4,16 @@ import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { DB_URI, FRONTEND_URL, PORT } from "./config/dotenv";
 import {
-  authRoute,
-  userRoute,
-  roleRoute,
-  auditRoute,
-  clientRoute,
-  visitRoute,
-  clientPartnerRoute,
   analyticsRoute,
+  auditRoute,
+  authRoute,
+  clientBookingRoute,
+  clientPartnerRoute,
+  clientRoute,
   inventoryRoute,
+  roleRoute,
+  userRoute,
+  visitRoute,
 } from "./routes";
 
 // Initialize express app
@@ -67,6 +68,7 @@ app.use("/api/user", userRoute);
 app.use("/api/role", roleRoute);
 app.use("/api/audit", auditRoute);
 app.use("/api/client", clientRoute);
+app.use("/api/client-booking", clientBookingRoute);
 app.use("/api/visit", visitRoute);
 app.use("/api/client-partner", clientPartnerRoute);
 app.use("/api/analytics", analyticsRoute);

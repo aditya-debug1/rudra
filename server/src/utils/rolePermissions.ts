@@ -1,7 +1,7 @@
 export const defaultRootPermissions = [
   {
     page: "Dashboard",
-    actions: ["view", "view-unfiltered"],
+    actions: ["view-dashboard", "view-dashboard-unfiltered"],
   },
   {
     page: "Users",
@@ -46,19 +46,31 @@ export const defaultRootPermissions = [
   },
   {
     page: "Task",
-    actions: ["view", "create", "delete", "update"],
+    actions: ["view-task", "create-task", "delete-task", "update-task"],
   },
   {
     page: "Inventory",
-    actions: ["view-inventory"],
+    actions: [
+      "view-inventory",
+      "create-inventory",
+      "view-inventory-details",
+      "delete-inventory",
+      "update-inventory",
+      "update-unit-status",
+    ],
   },
   {
     page: "Form",
-    actions: ["client-form", "client-partner-form", "booking-form"],
+    actions: [
+      "client-form",
+      "client-partner-form",
+      "booking-form",
+      "cancellation-form",
+    ],
   },
   {
     page: "Reports",
-    actions: ["users-report"],
+    actions: ["client-report", "inventory-report", "booking-report"],
   },
   {
     page: "Settings",

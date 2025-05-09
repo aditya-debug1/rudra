@@ -38,7 +38,7 @@ class AuditLogController {
       }
 
       // Apply specific filters
-      if (source) query.source = new RegExp(String(source), "i");
+      if (source) query.source = source;
       if (userId) query["actor.userId"] = userId;
       if (action) query["event.action"] = action;
 
