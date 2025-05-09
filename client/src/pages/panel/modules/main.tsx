@@ -16,6 +16,10 @@ const ClientDetails = lazy(() => import("@/pages/panel/client-details"));
 const ClientPartnerList = lazy(() => import("@/pages/panel/cp-list"));
 const ClientPartnerDetails = lazy(() => import("@/pages/panel/cp-details"));
 const Task = lazy(() => import("@/pages/panel/task"));
+const Inventory = lazy(() => import("@/pages/panel/inventoy"));
+const InventoryForm = lazy(
+  () => import("@/pages/panel/inventoy/inventory-form"),
+);
 const Form = lazy(() => import("@/pages/panel/form"));
 const Reports = lazy(() => import("@/pages/panel/reports"));
 const Settings = lazy(() => import("@/pages/panel/settings"));
@@ -61,6 +65,8 @@ const MainBody: React.FC<MainProps> = ({
         return <ClientPartnerList />;
       case "Task":
         return <Task />;
+      case "Inventory":
+        return <Inventory />;
       case "Form":
         return <Form />;
       case "Reports":
@@ -97,6 +103,21 @@ const MainBody: React.FC<MainProps> = ({
     { path: "task", element: <Task />, pageName: "Task" },
     { path: "form", element: <Form />, pageName: "Form" },
     { path: "form/:name", element: <Form />, pageName: "Form" },
+    {
+      path: "inventory/",
+      element: <Inventory />,
+      pageName: "Inventory",
+    },
+    {
+      path: "inventory/:pageno",
+      element: <Inventory />,
+      pageName: "Inventory",
+    },
+    {
+      path: "inventory/form",
+      element: <InventoryForm />,
+      pageName: "Inventory",
+    },
     { path: "reports", element: <Reports />, pageName: "Reports" },
     { path: "settings", element: <Settings />, pageName: "Settings" },
     {
