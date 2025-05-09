@@ -1,0 +1,54 @@
+export type unitStatus =
+  | "reserved"
+  | "available"
+  | "booked"
+  | "registered"
+  | "canceled"
+  | "investor"
+  | "not-for-sale";
+
+export interface ProjectType {
+  _id?: string;
+  name: string;
+  by: string;
+  location: string;
+  description: string;
+  startDate: Date;
+  completionDate?: Date;
+  status: "planning" | "under-construction" | "completed";
+  commercialUnitPlacement: "projectLevel" | "wingLevel";
+  wings: WingType[];
+  commercialFloors?: FloorType[];
+}
+
+export interface WingType {
+  _id?: string;
+  projectId?: string; // Reference to parent project
+  name: string; // e.g., "A Wing", "East Wing"
+  commercialFloors?: FloorType[];
+  floors: FloorType[];
+  unitsPerFloor: number; // Maximum number of base units possible per floor
+  headerFloorIndex: number; //Floor index that will be used as table header when creating a availability chart
+}
+
+export interface FloorType {
+  _id?: string;
+  wingId?: string; // Reference to parent wing
+  projectId?: string; // Reference to parent project
+  type: "residential" | "commercial"; // field to indicate floor type
+  displayNumber: number; // The actual floor number as displayed (e.g., 2nd floor)
+  showArea: boolean;
+  units: UnitType[];
+}
+
+export interface UnitType {
+  _id?: string;
+  floorId?: string; // Reference to parent floor
+  unitNumber: string; // The actual unit number displayed (e.g., "101", "A2")
+  area: number; // Square footage
+  configuration: string; // 1BHK, 2BHK, 3BHK, Shop, Office, etc.
+  unitSpan: number; // Number of base units this unit spans (default is 1)
+  status: unitStatus;
+  reservedByOrReason?: string; // Stores customer name or amenity reason for unavailability
+  referenceId?: string; // Reference to customer who booked this unit
+}
