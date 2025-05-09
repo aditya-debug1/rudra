@@ -111,7 +111,14 @@ export default function AuditLogPage() {
   };
 
   const actionOptions = ["create", "update", "delete", "locked", "unlocked"];
-  const sourceOptions = ["Users", "Roles"];
+  const sourceOptions = [
+    "Users",
+    "Roles",
+    "Client",
+    "Visit",
+    "ClientPartner",
+    "Inventory",
+  ];
 
   if (isLoading) return <AuditSkeleton />;
 
