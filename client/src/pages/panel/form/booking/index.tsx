@@ -1,3 +1,4 @@
+import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
@@ -23,18 +24,22 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateClientBooking } from "@/store/client-booking/query";
+import {
+  useCreateClientBooking,
+  useUpdateClientBooking,
+} from "@/store/client-booking/query";
 import { useClientPartners } from "@/store/client-partner";
 import {
   budgetOptions,
   ignoreRole,
   refDefaultOptions,
 } from "@/store/data/options";
-import { ProjectType, unitStatus, useInventory } from "@/store/inventory";
+import { unitStatus, useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { getOrdinal } from "@/utils/func/numberUtils";
 import { toProperCase } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
+import { CustomAxiosError } from "@/utils/types/axios";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import { TicketCheck } from "lucide-react";
 import { useState } from "react";
@@ -68,117 +73,31 @@ export const BookingForm = () => {
   const { useProjectsStructure } = useInventory();
   const { data: projectsData } = useProjectsStructure();
   const mutateCreateClientBooking = useCreateClientBooking();
+  const mutateUpdateClientBooking = useUpdateClientBooking();
+  const { useReference } = useClientPartners();
+  const { data: users } = useUsersSummary();
+  const { data: refData } = useReference();
+  const dialog = useAlertDialog({
+    alertType: "Warn",
+    iconName: "TicketCheck",
+    title: "Update Booking",
+    description: "Are you sure you want to update this booking?",
+    actionLabel: "Update",
+    cancelLabel: "Cancel",
+  });
+
+  // states
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientId, setClientId] = useState<string | null>(null);
   const [amountUnit, setAmountUnit] = useState<number>(100000);
   const [bookingUnit, setBookingUnit] = useState<number>(1000);
   const [charges, setCharges] = useState<string>("");
-  const [formType, setFormType] = useState<"flat" | "shop">("flat");
+  const [formType, setFormType] = useState<"residential" | "commercial">(
+    "residential",
+  );
   const [finalizedBooking, setFinalizedBooking] = useState<BookingType | null>(
     null,
   );
-  const flatStatusFilter: unitStatus[] = ["available", "canceled"];
-
-  // Add this function inside the BookingForm component
-  const getFilteredProjectsData = () => {
-    if (!projectsData?.data) return [];
-
-    // Deep clone the projects to avoid mutating the original data
-    const filteredProjects = JSON.parse(
-      JSON.stringify(projectsData.data),
-    ) as ProjectType[];
-
-    return filteredProjects
-      .map((project) => {
-        // Filter commercial floors at project level if applicable
-        if (
-          project.commercialUnitPlacement === "projectLevel" &&
-          project.commercialFloors
-        ) {
-          project.commercialFloors = project.commercialFloors
-            .map((floor) => ({
-              ...floor,
-              units: floor.units.filter((unit) =>
-                flatStatusFilter.includes(unit.status),
-              ),
-            }))
-            .filter((floor) => floor.units.length > 0);
-        }
-
-        // Filter wings and their floors
-        project.wings = project.wings
-          .map((wing) => {
-            // Filter residential floors
-            wing.floors = wing.floors
-              .map((floor) => ({
-                ...floor,
-                units: floor.units.filter((unit) =>
-                  flatStatusFilter.includes(unit.status),
-                ),
-              }))
-              .filter((floor) => floor.units.length > 0);
-
-            // Filter commercial floors at wing level if applicable
-            if (
-              project.commercialUnitPlacement === "wingLevel" &&
-              wing.commercialFloors
-            ) {
-              wing.commercialFloors = wing.commercialFloors
-                .map((floor) => ({
-                  ...floor,
-                  units: floor.units.filter((unit) =>
-                    flatStatusFilter.includes(unit.status),
-                  ),
-                }))
-                .filter((floor) => floor.units.length > 0);
-            }
-
-            return wing;
-          })
-          .filter((wing) => {
-            const hasResidentialFloors = wing.floors.length > 0;
-            const hasCommercialFloors =
-              wing.commercialFloors && wing.commercialFloors.length > 0;
-            return hasResidentialFloors || hasCommercialFloors;
-          });
-
-        return project;
-      })
-      .filter((project) => {
-        const hasWings = project.wings.length > 0;
-        const hasCommercialFloors =
-          project.commercialUnitPlacement === "projectLevel" &&
-          project.commercialFloors &&
-          project.commercialFloors.length > 0;
-
-        return hasWings || hasCommercialFloors;
-      });
-  };
-
-  // Replace the existing projects assignment with this:
-  const projects = getFilteredProjectsData();
-  const { useReference } = useClientPartners();
-
-  const { data: users } = useUsersSummary();
-  const { data: refData } = useReference();
-
-  const managerOptions =
-    users
-      ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
-      .map((user) => ({
-        label: `${user.firstName} ${user.lastName}`,
-        value: user.username,
-      })) || [];
-
-  const refDynamicOptions: ComboboxOption[] =
-    refData?.references?.map((ref) => ({
-      label: `${ref.firstName} ${ref.lastName}${ref.companyName ? ` (${ref.companyName})` : ""}`,
-      value: ref._id,
-    })) || [];
-
-  const referenceOptions: ComboboxOption[] = [
-    ...refDefaultOptions,
-    ...refDynamicOptions,
-  ];
-
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [selectedSM, setSelectedSM] = useState("rathod");
   const [selectedCP, setSelectedCP] = useState("681ca3ce1c7693d6b3218309");
@@ -195,7 +114,7 @@ export const BookingForm = () => {
       floor: "",
       unitNo: "",
       configuration: "",
-      ...(formType === "flat" ? { wing: "" } : { area: 0 }),
+      ...(formType === "residential" ? { wing: "" } : { area: 0 }),
     },
     payment: {
       amount: 0,
@@ -223,26 +142,82 @@ export const BookingForm = () => {
     },
   });
 
-  // Derived values
-  const ChargesNoteList =
-    formType === "flat" ? FlatChargesNoteList : ShopChargesNoteList;
-  const projectOptions =
-    projects?.map((p) => ({ label: p.name, value: p.name! })) || [];
+  // Helper functions
+  const getFilteredProjectsData = () => {
+    const flatStatusFilter: unitStatus[] = ["available", "canceled"];
+    if (!projectsData?.data) return [];
+
+    return projectsData.data
+      .map((project) => {
+        const filteredProject = { ...project };
+
+        if (formType === "residential") {
+          // Filter residential wings and floors
+          filteredProject.wings = project.wings
+            .map((wing) => ({
+              ...wing,
+              floors: wing.floors
+                .map((floor) => ({
+                  ...floor,
+                  units: floor.units.filter((unit) =>
+                    flatStatusFilter.includes(unit.status),
+                  ),
+                }))
+                .filter((floor) => floor.units.length > 0),
+            }))
+            .filter((wing) => wing.floors.length > 0);
+
+          filteredProject.commercialFloors = [];
+        } else {
+          // Handle commercial units
+          if (project.commercialUnitPlacement === "projectLevel") {
+            filteredProject.wings = [];
+            filteredProject.commercialFloors = project.commercialFloors
+              ?.map((floor) => ({
+                ...floor,
+                units: floor.units.filter((unit) =>
+                  flatStatusFilter.includes(unit.status),
+                ),
+              }))
+              .filter((floor) => floor.units.length > 0);
+          } else {
+            filteredProject.wings = project.wings
+              .map((wing) => ({
+                ...wing,
+                commercialFloors: wing.commercialFloors
+                  ?.map((floor) => ({
+                    ...floor,
+                    units: floor.units.filter((unit) =>
+                      flatStatusFilter.includes(unit.status),
+                    ),
+                  }))
+                  .filter((floor) => floor.units.length > 0),
+              }))
+              .filter((wing) => wing.commercialFloors?.length);
+
+            filteredProject.commercialFloors = [];
+          }
+        }
+
+        return filteredProject;
+      })
+      .filter((project) =>
+        formType === "residential"
+          ? project.wings.length > 0
+          : project.commercialUnitPlacement === "projectLevel"
+            ? project.commercialFloors?.length
+            : project.wings.length > 0,
+      );
+  };
 
   const getProjectData = () =>
     projects?.find((p) => p.name === bookingData.project.name);
-
-  const wingOptions =
-    getProjectData()?.wings.map((w) => ({
-      label: `Wing ${w.name}`,
-      value: w.name,
-    })) || [];
 
   const getFloors = () => {
     const project = getProjectData();
     if (!project) return;
 
-    const isFlat = formType === "flat";
+    const isFlat = formType === "residential";
     const isProjectLevel =
       !isFlat && project.commercialUnitPlacement === "projectLevel";
     const wing = project.wings.find((w) => w.name === bookingData.unit.wing);
@@ -253,15 +228,6 @@ export const BookingForm = () => {
         ? project.commercialFloors
         : wing?.commercialFloors;
   };
-
-  const floorOptions =
-    getFloors()?.map((f) => ({
-      label:
-        f.displayNumber === 0
-          ? "Ground Floor"
-          : `${getOrdinal(f.displayNumber)} Floor`,
-      value: f.displayNumber.toString(),
-    })) || [];
 
   const getUnits = () => {
     const floors = getFloors();
@@ -274,6 +240,57 @@ export const BookingForm = () => {
     }));
   };
 
+  const findUnit = (unitNo: string) => {
+    const floors = getFloors();
+    const floor = floors?.find(
+      (f) => f.displayNumber === Number(bookingData.unit.floor),
+    );
+    return floor?.units.find((u) => u.unitNumber == unitNo);
+  };
+
+  // variables
+  const projects = getFilteredProjectsData();
+
+  const managerOptions =
+    users
+      ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
+      .map((user) => ({
+        label: `${user.firstName} ${user.lastName}`,
+        value: user.username,
+      })) || [];
+
+  const refDynamicOptions: ComboboxOption[] =
+    refData?.references?.map((ref) => ({
+      label: `${ref.firstName} ${ref.lastName}${ref.companyName ? ` (${ref.companyName})` : ""}`,
+      value: ref._id,
+    })) || [];
+
+  const referenceOptions: ComboboxOption[] = [
+    ...refDefaultOptions,
+    ...refDynamicOptions,
+  ];
+
+  // Derived values
+  const ChargesNoteList =
+    formType === "residential" ? FlatChargesNoteList : ShopChargesNoteList;
+  const projectOptions =
+    projects?.map((p) => ({ label: p.name, value: p.name! })) || [];
+
+  const wingOptions =
+    getProjectData()?.wings.map((w) => ({
+      label: `Wing ${w.name}`,
+      value: w.name,
+    })) || [];
+
+  const floorOptions =
+    getFloors()?.map((f) => ({
+      label:
+        f.displayNumber === 0
+          ? "Ground Floor"
+          : `${getOrdinal(f.displayNumber)} Floor`,
+      value: f.displayNumber.toString(),
+    })) || [];
+
   const unitOptions = getUnits() || [];
   const chargesOptions = ChargesNoteList.map((charge) => ({
     label: charge,
@@ -285,8 +302,8 @@ export const BookingForm = () => {
     value: bank,
   }));
 
-  // Handlers
-  const handleFormTypeChange = (type: "flat" | "shop") => {
+  // Event Handlers
+  const handleFormTypeChange = (type: "residential" | "commercial") => {
     setFormType(type);
     setBookingData((prev) => ({
       ...prev,
@@ -295,17 +312,9 @@ export const BookingForm = () => {
         floor: "",
         unitNo: "",
         configuration: "",
-        ...(type === "flat" ? { wing: "" } : { area: 0 }),
+        ...(type === "residential" ? { wing: "" } : { area: 0 }),
       },
     }));
-  };
-
-  const findUnit = (unitNo: string) => {
-    const floors = getFloors();
-    const floor = floors?.find(
-      (f) => f.displayNumber === Number(bookingData.unit.floor),
-    );
-    return floor?.units.find((u) => u.unitNumber == unitNo);
   };
 
   const handleUnitChange = (unitNo: string) => {
@@ -321,7 +330,7 @@ export const BookingForm = () => {
       unit.configuration.toUpperCase(),
     );
     handleInputChange(["unit", "unitNo"], unit.unitNumber);
-    if (formType === "shop") {
+    if (formType === "commercial") {
       handleInputChange(["unit", "area"], unit.area);
     }
   };
@@ -363,7 +372,7 @@ export const BookingForm = () => {
         configuration: "",
       },
     }));
-    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+    if (formType == "commercial") handleInputChange(["unit", "area"], 0);
   };
 
   const handleWingChange = (wingName: string) => {
@@ -371,14 +380,14 @@ export const BookingForm = () => {
     handleInputChange(["unit", "floor"], "");
     handleInputChange(["unit", "unitNo"], "");
     handleInputChange(["unit", "configuration"], "");
-    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+    if (formType == "commercial") handleInputChange(["unit", "area"], 0);
   };
 
   const handleFloorChange = (floorNo: string) => {
     handleInputChange(["unit", "floor"], floorNo);
     handleInputChange(["unit", "unitNo"], "");
     handleInputChange(["unit", "configuration"], "");
-    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+    if (formType == "commercial") handleInputChange(["unit", "area"], 0);
   };
 
   const handleChargesNoteChange = (value: string) => {
@@ -424,10 +433,13 @@ export const BookingForm = () => {
     ) {
       return { isValid: false, message: "Booking details are incomplete" };
     }
-    if (data.type === "flat" && !data.unit.wing?.trim()) {
+    if (data.type === "residential" && !data.unit.wing?.trim()) {
       return { isValid: false, message: "Wing is required for flats" };
     }
-    if (data.type === "shop" && (!data.unit.area || data.unit.area <= 0)) {
+    if (
+      data.type === "commercial" &&
+      (!data.unit.area || data.unit.area <= 0)
+    ) {
       return { isValid: false, message: "Area is required for shops" };
     }
 
@@ -485,36 +497,71 @@ export const BookingForm = () => {
       return;
     }
 
-    await mutateCreateClientBooking.mutateAsync({
-      date: newBooking.bookingDetails.date,
-      applicant: newBooking.applicants.primary,
-      coApplicant: newBooking.applicants.coApplicant,
-      status: "booked",
-      project: newBooking.project.name,
-      wing: newBooking.unit.wing,
-      floor: newBooking.unit.floor,
-      unit: selectedUnitId,
-      phoneNo: newBooking.applicants.contact.phoneNo,
-      altNo: newBooking.applicants.contact.residenceNo,
-      email: newBooking.applicants.contact.email,
-      address: newBooking.applicants.contact.address,
-      paymentType: selectedPaymentType,
-      paymentStatus: "Token Received",
-      bookingAmt: newBooking.bookingDetails.bookingAmt,
-      dealTerms: newBooking.payment.includedChargesNote,
-      paymentTerms: newBooking.payment.paymentTerms,
-      salesManager: selectedSM,
-      clientPartner: selectedCP,
-    });
+    try {
+      function finishBooking() {
+        setFinalizedBooking(newBooking);
+        openPdfInNewTab(newBooking);
 
-    setFinalizedBooking(newBooking);
-    openPdfInNewTab(newBooking);
+        toast({
+          title: "Success",
+          description: "Form validated successfully. PDF opened in new tab.",
+          variant: "success",
+        });
+      }
 
-    toast({
-      title: "Success",
-      description: "Form validated successfully. PDF opened in new tab.",
-      variant: "success",
-    });
+      setIsSubmitting(true);
+      const formattedData = {
+        date: newBooking.bookingDetails.date,
+        applicant: newBooking.applicants.primary,
+        coApplicant: newBooking.applicants.coApplicant,
+        status: "booked",
+        project: newBooking.project.name,
+        wing: newBooking.unit.wing,
+        floor: newBooking.unit.floor,
+        unit: selectedUnitId,
+        phoneNo: newBooking.applicants.contact.phoneNo,
+        altNo: newBooking.applicants.contact.residenceNo,
+        email: newBooking.applicants.contact.email,
+        address: newBooking.applicants.contact.address,
+        paymentType: selectedPaymentType,
+        paymentStatus: "Token Received",
+        bookingAmt: newBooking.bookingDetails.bookingAmt,
+        dealTerms: newBooking.payment.includedChargesNote,
+        paymentTerms: newBooking.payment.paymentTerms,
+        salesManager: selectedSM,
+        clientPartner: selectedCP,
+      };
+
+      if (!clientId) {
+        const booking =
+          await mutateCreateClientBooking.mutateAsync(formattedData);
+        setClientId(booking.data._id);
+        finishBooking();
+      } else {
+        dialog.show({
+          onAction: async () => {
+            await mutateUpdateClientBooking.mutateAsync({
+              id: clientId,
+              updateData: formattedData,
+            });
+            finishBooking();
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      const err = error as CustomAxiosError;
+      toast({
+        title: "Error Occured",
+        description:
+          err.response?.data.error ||
+          err.message ||
+          "Failed to submit form unkown error occured!",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -533,14 +580,14 @@ export const BookingForm = () => {
           {/* Form Type Selection */}
           <div className="flex gap-4">
             <Button
-              variant={formType === "flat" ? "default" : "outline"}
-              onClick={() => handleFormTypeChange("flat")}
+              variant={formType === "residential" ? "default" : "outline"}
+              onClick={() => handleFormTypeChange("residential")}
             >
               Residential
             </Button>
             <Button
-              variant={formType === "shop" ? "default" : "outline"}
-              onClick={() => handleFormTypeChange("shop")}
+              variant={formType === "commercial" ? "default" : "outline"}
+              onClick={() => handleFormTypeChange("commercial")}
             >
               Commercial
             </Button>
@@ -648,7 +695,7 @@ export const BookingForm = () => {
 
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-6 sm:gap-1 grow">
-                  {(formType === "flat" ||
+                  {(formType === "residential" ||
                     projects?.find((p) => p.name === bookingData.project.name)
                       ?.commercialUnitPlacement === "wingLevel") && (
                     <FormFieldWrapper
@@ -675,7 +722,7 @@ export const BookingForm = () => {
                   >
                     <Combobox
                       disabled={
-                        formType === "flat"
+                        formType === "residential"
                           ? !bookingData.unit.wing
                           : projects?.find(
                                 (p) => p.name === bookingData.project.name,
@@ -688,7 +735,7 @@ export const BookingForm = () => {
                       placeholder="Select Floor"
                       width="w-full"
                       onChange={handleFloorChange}
-                      align={formType === "flat" ? "end" : "start"}
+                      align={formType === "residential" ? "end" : "start"}
                     />
                   </FormFieldWrapper>
                 </div>
@@ -754,7 +801,7 @@ export const BookingForm = () => {
           <div className="space-y-6 pt-6 border-t">
             <h3 className="text-lg font-medium">Payment Information</h3>
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 ${formType === "flat" ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-4`}
+              className={`grid grid-cols-1 md:grid-cols-2 ${formType === "residential" ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-4`}
             >
               <FormFieldWrapper
                 className="gap-3"
@@ -823,7 +870,7 @@ export const BookingForm = () => {
                   )}
                 </div>
               </FormFieldWrapper>
-              {formType === "flat" && (
+              {formType === "residential" && (
                 <FormFieldWrapper LabelText="Banks for loan" className="gap-3">
                   <MultiSelect
                     defaultValue={bookingData.payment.banks}
@@ -1045,10 +1092,15 @@ export const BookingForm = () => {
           </PDFDownloadLink>
         )}
 
-        <Button className="w-full sm:w-auto" onClick={handleSubmit}>
-          Preview in New Tab
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {clientId ? "Update & Preview" : "Submit & Preview"}
         </Button>
       </CardFooter>
+      <dialog.AlertDialog />
     </Card>
   );
 };

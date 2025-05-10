@@ -1,0 +1,72 @@
+// Type for a single client booking
+export interface ClientBooking {
+  _id: string;
+  date: Date;
+  applicant: string;
+  coApplicant?: string;
+  status: string;
+  project: string;
+  wing?: string;
+  floor: string;
+  unit: {
+    unitNumber: string;
+    area: string;
+    configuration: string;
+  };
+  phoneNo: string;
+  altNo?: string;
+  email?: string;
+  address?: string;
+  paymentType: "regular-payment" | "down-payment";
+  paymentStatus: string;
+  bookingAmt: number;
+  dealTerms: string;
+  paymentTerms: string;
+  salesManager: string;
+  clientPartner:
+    | {
+        name: string;
+      }
+    | string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Type for paginated booking response
+export interface ClientBookingPaginatedResponse {
+  success: boolean;
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  limitNumber: number;
+  data: ClientBooking[];
+}
+
+// Type for single booking response
+export interface ClientBookingResponse {
+  success: boolean;
+  data: ClientBooking;
+}
+
+// Type for booking creation/update
+export interface ClientBookingCreateUpdateData {
+  date?: Date;
+  applicant: string;
+  coApplicant?: string;
+  status: string;
+  project: string;
+  wing?: string;
+  floor: string;
+  unit: string; // Unit ID
+  phoneNo: string;
+  altNo?: string;
+  email?: string;
+  address?: string;
+  paymentType: "regular-payment" | "down-payment";
+  paymentStatus: string;
+  bookingAmt: number;
+  dealTerms: string;
+  paymentTerms: string;
+  salesManager: string;
+  clientPartner: string; // ClientPartner ID
+}

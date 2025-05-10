@@ -14,7 +14,7 @@ router.get("/", verifyToken, clientBookingController.getAll);
 router.get("/:id", verifyToken, clientBookingController.getById);
 
 // Update client booking
-router.patch("/:id", verifyToken, clientBookingController.update);
+router.put("/:id", verifyToken, clientBookingController.update);
 
 // Delete client booking
 router.delete("/:id", verifyToken, clientBookingController.delete);

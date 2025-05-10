@@ -18,7 +18,7 @@ const ShopUnitSchema = z.object({
 // Create a discriminated union based on type
 const BookingSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal("flat"),
+    type: z.literal("residential"),
     // Project Information
     project: z.object({
       name: z.string().min(1, "Project name required"),
@@ -55,7 +55,7 @@ const BookingSchema = z.discriminatedUnion("type", [
     }),
   }),
   z.object({
-    type: z.literal("shop"),
+    type: z.literal("commercial"),
     // Project Information
     project: z.object({
       name: z.string().min(1, "Project name required"),
@@ -97,7 +97,7 @@ const BookingSchema = z.discriminatedUnion("type", [
 export { BookingSchema };
 
 export interface BookingType {
-  type: "flat" | "shop";
+  type: "residential" | "commercial";
   // Project Information
   project: {
     name: string;

@@ -359,19 +359,19 @@ const BookingFormPage = ({
         <View style={styles.col20}>
           <LabeledText
             label={
-              data.type == "flat"
+              data.type == "residential"
                 ? "FLAT NO"
                 : `${data.unit.configuration.toUpperCase()} NO`
             }
             value={data.unit.unitNo}
           />
         </View>
-        {data.type == "flat" && data.unit.wing && (
+        {data.type == "residential" && data.unit.wing && (
           <View style={styles.col20}>
             <LabeledText label="WING" value={data.unit.wing.toUpperCase()} />
           </View>
         )}
-        {data.type == "shop" && data.unit.area && (
+        {data.type == "commercial" && data.unit.area && (
           <View style={styles.col20}>
             <LabeledText
               label="AREA"
@@ -446,7 +446,7 @@ const BookingFormPage = ({
       </View>
 
       {/* Bank Information */}
-      {data.type == "flat" && (
+      {data.type == "residential" && (
         <View style={styles.section}>
           <LabeledText
             label={
@@ -461,7 +461,7 @@ const BookingFormPage = ({
 
       <View style={styles.separator} />
 
-      {data.type == "flat" && (
+      {data.type == "residential" && (
         <React.Fragment>
           {/* Notes Section */}
           <View style={[styles.row, styles.section]}>
@@ -502,7 +502,7 @@ const BookingFormPage = ({
         </React.Fragment>
       )}
 
-      {data.type == "shop" && (
+      {data.type == "commercial" && (
         <React.Fragment>
           {/* Notes Section */}
           <View style={[styles.row, styles.section]}>

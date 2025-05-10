@@ -1,3 +1,4 @@
+import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { Combobox } from "@/components/custom ui/combobox";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
@@ -12,12 +13,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateClientBooking } from "@/store/client-booking/query";
-import {
-  ProjectType,
-  unitStatus,
-  UnitType,
-  useInventory,
-} from "@/store/inventory";
+import { unitStatus, UnitType, useInventory } from "@/store/inventory";
 import { getOrdinal } from "@/utils/func/numberUtils";
 import { toProperCase } from "@/utils/func/strUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
@@ -52,100 +48,8 @@ export const CancellationDataSchema = z.object({
   holder: z.string(),
 });
 
-export const CancellationForm = () => {
-  // Hooks
-  const { toast } = useToast();
-  const { useProjectsStructure, updateUnitStatusMutation } = useInventory();
-  const { data: projectsData } = useProjectsStructure();
-  const updateClientBookingMutation = useUpdateClientBooking();
-
-  const flatStatusFilter: unitStatus[] = ["booked", "registered", "investor"];
-
-  // Add this function inside the BookingForm component
-  const getFilteredProjectsData = () => {
-    if (!projectsData?.data) return [];
-
-    // Deep clone the projects to avoid mutating the original data
-    const filteredProjects = JSON.parse(
-      JSON.stringify(projectsData.data),
-    ) as ProjectType[];
-
-    return filteredProjects
-      .map((project) => {
-        // Filter commercial floors at project level if applicable
-        if (
-          project.commercialUnitPlacement === "projectLevel" &&
-          project.commercialFloors
-        ) {
-          project.commercialFloors = project.commercialFloors
-            .map((floor) => ({
-              ...floor,
-              units: floor.units.filter((unit) =>
-                flatStatusFilter.includes(unit.status),
-              ),
-            }))
-            .filter((floor) => floor.units.length > 0);
-        }
-
-        // Filter wings and their floors
-        project.wings = project.wings
-          .map((wing) => {
-            // Filter residential floors
-            wing.floors = wing.floors
-              .map((floor) => ({
-                ...floor,
-                units: floor.units.filter((unit) =>
-                  flatStatusFilter.includes(unit.status),
-                ),
-              }))
-              .filter((floor) => floor.units.length > 0);
-
-            // Filter commercial floors at wing level if applicable
-            if (
-              project.commercialUnitPlacement === "wingLevel" &&
-              wing.commercialFloors
-            ) {
-              wing.commercialFloors = wing.commercialFloors
-                .map((floor) => ({
-                  ...floor,
-                  units: floor.units.filter((unit) =>
-                    flatStatusFilter.includes(unit.status),
-                  ),
-                }))
-                .filter((floor) => floor.units.length > 0);
-            }
-
-            return wing;
-          })
-          .filter((wing) => {
-            const hasResidentialFloors = wing.floors.length > 0;
-            const hasCommercialFloors =
-              wing.commercialFloors && wing.commercialFloors.length > 0;
-            return hasResidentialFloors || hasCommercialFloors;
-          });
-
-        return project;
-      })
-      .filter((project) => {
-        const hasWings = project.wings.length > 0;
-        const hasCommercialFloors =
-          project.commercialUnitPlacement === "projectLevel" &&
-          project.commercialFloors &&
-          project.commercialFloors.length > 0;
-
-        return hasWings || hasCommercialFloors;
-      });
-  };
-
-  // Replace the existing projects assignment with this:
-  const projects = getFilteredProjectsData();
-
-  // states and variable
-  const [formType, setFormType] = useState<"residential" | "commercial">(
-    "residential",
-  );
-  const [selectedUnit, setSelectedUnit] = useState<UnitType | undefined>();
-  const DEFAULT_VALUE = {
+function DEFAULT_VALUE(formType: "residential" | "commercial") {
+  return {
     project: {
       name: "",
       by: "",
@@ -163,25 +67,98 @@ export const CancellationForm = () => {
     date: new Date(),
     holder: "",
   };
+}
+export const CancellationForm = () => {
+  // Hooks
+  const { toast } = useToast();
+  const { useProjectsStructure, updateUnitStatusMutation } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
+  const updateClientBookingMutation = useUpdateClientBooking();
+  const dialog = useAlertDialog({
+    alertType: "Danger",
+    iconName: "TicketX",
+    title: "Cancel Booking",
+    description: "Are you sure you want to cancel this booking?",
+    actionLabel: "Confirm",
+    cancelLabel: "Cancel",
+  });
 
-  const [cancellationData, setCancellationData] = useState(DEFAULT_VALUE);
+  // states
+  const [formType, setFormType] = useState<"residential" | "commercial">(
+    "residential",
+  );
+  const [selectedUnit, setSelectedUnit] = useState<UnitType | undefined>();
+  const [cancellationData, setCancellationData] = useState(
+    DEFAULT_VALUE(formType),
+  );
 
-  const showWing =
-    formType === "residential" ||
-    projects?.find((p) => p.name === cancellationData.project.name)
-      ?.commercialUnitPlacement === "wingLevel";
+  // Helper Functions
+  const getFilteredProjectsData = () => {
+    const flatStatusFilter: unitStatus[] = ["booked", "registered", "investor"];
+    if (!projectsData?.data) return [];
 
-  const projectOptions =
-    projects?.map((p) => ({ label: p.name, value: p.name! })) || [];
+    return projectsData.data
+      .map((project) => {
+        const filteredProject = { ...project };
 
-  const getProjectData = () =>
-    projects?.find((p) => p.name === cancellationData.project.name);
+        if (formType === "residential") {
+          // Filter residential wings and floors
+          filteredProject.wings = project.wings
+            .map((wing) => ({
+              ...wing,
+              floors: wing.floors
+                .map((floor) => ({
+                  ...floor,
+                  units: floor.units.filter((unit) =>
+                    flatStatusFilter.includes(unit.status),
+                  ),
+                }))
+                .filter((floor) => floor.units.length > 0),
+            }))
+            .filter((wing) => wing.floors.length > 0);
 
-  const wingOptions =
-    getProjectData()?.wings.map((w) => ({
-      label: `Wing ${w.name}`,
-      value: w.name,
-    })) || [];
+          filteredProject.commercialFloors = [];
+        } else {
+          // Handle commercial units
+          if (project.commercialUnitPlacement === "projectLevel") {
+            filteredProject.wings = [];
+            filteredProject.commercialFloors = project.commercialFloors
+              ?.map((floor) => ({
+                ...floor,
+                units: floor.units.filter((unit) =>
+                  flatStatusFilter.includes(unit.status),
+                ),
+              }))
+              .filter((floor) => floor.units.length > 0);
+          } else {
+            filteredProject.wings = project.wings
+              .map((wing) => ({
+                ...wing,
+                commercialFloors: wing.commercialFloors
+                  ?.map((floor) => ({
+                    ...floor,
+                    units: floor.units.filter((unit) =>
+                      flatStatusFilter.includes(unit.status),
+                    ),
+                  }))
+                  .filter((floor) => floor.units.length > 0),
+              }))
+              .filter((wing) => wing.commercialFloors?.length);
+
+            filteredProject.commercialFloors = [];
+          }
+        }
+
+        return filteredProject;
+      })
+      .filter((project) =>
+        formType === "residential"
+          ? project.wings.length > 0
+          : project.commercialUnitPlacement === "projectLevel"
+            ? project.commercialFloors?.length
+            : project.wings.length > 0,
+      );
+  };
 
   const getFloors = () => {
     const project = getProjectData();
@@ -201,15 +178,6 @@ export const CancellationForm = () => {
         : wing?.commercialFloors;
   };
 
-  const floorOptions =
-    getFloors()?.map((f) => ({
-      label:
-        f.displayNumber === 0
-          ? "Ground Floor"
-          : `${getOrdinal(f.displayNumber)} Floor`,
-      value: f.displayNumber.toString(),
-    })) || [];
-
   const getUnits = () => {
     const floors = getFloors();
     const floor = floors?.find(
@@ -222,12 +190,49 @@ export const CancellationForm = () => {
     }));
   };
 
+  const findUnit = (unitNo: string) => {
+    const floors = getFloors();
+    const floor = floors?.find(
+      (f) => f.displayNumber === Number(cancellationData.property.floorNo),
+    );
+    return floor?.units.find((u) => u.unitNumber == unitNo);
+  };
+
+  // variables
+  const projects = getFilteredProjectsData();
+
+  const showWing =
+    formType === "residential" ||
+    projects?.find((p) => p.name === cancellationData.project.name)
+      ?.commercialUnitPlacement === "wingLevel";
+
+  const projectOptions =
+    projects?.map((p) => ({ label: p.name, value: p.name! })) || [];
+
+  const getProjectData = () =>
+    projects?.find((p) => p.name === cancellationData.project.name);
+
+  const wingOptions =
+    getProjectData()?.wings.map((w) => ({
+      label: `Wing ${w.name}`,
+      value: w.name,
+    })) || [];
+
+  const floorOptions =
+    getFloors()?.map((f) => ({
+      label:
+        f.displayNumber === 0
+          ? "Ground Floor"
+          : `${getOrdinal(f.displayNumber)} Floor`,
+      value: f.displayNumber.toString(),
+    })) || [];
+
   const unitOptions = getUnits() || [];
 
   // Event Handlers
   const handleFormTypeChange = (type: "residential" | "commercial") => {
     setFormType(type);
-    setCancellationData(DEFAULT_VALUE);
+    setCancellationData(DEFAULT_VALUE(type));
   };
 
   const handleProjectChange = (value: string) => {
@@ -245,14 +250,6 @@ export const CancellationForm = () => {
         type: formType == "residential" ? "flat" : "shop",
       },
     });
-  };
-
-  const findUnit = (unitNo: string) => {
-    const floors = getFloors();
-    const floor = floors?.find(
-      (f) => f.displayNumber === Number(cancellationData.property.floorNo),
-    );
-    return floor?.units.find((u) => u.unitNumber == unitNo);
   };
 
   const handlePropertyChange = (
@@ -315,30 +312,41 @@ export const CancellationForm = () => {
       return;
     }
 
-    try {
-      await openPdfInNewTab(cancellationData);
-      if (selectedUnit?._id) {
-        await updateUnitStatusMutation.mutateAsync({
-          unitId: selectedUnit._id!,
-          status: "canceled",
-        });
-      }
+    dialog.show({
+      config: {
+        description: `You are about to cancel the booking for ${selectedUnit?.reservedByOrReason}. Do you want to proceed?`,
+      },
+      onAction: async () => {
+        try {
+          if (selectedUnit?._id) {
+            await updateUnitStatusMutation.mutateAsync({
+              unitId: selectedUnit._id!,
+              status: "canceled",
+            });
+          }
 
-      if (selectedUnit?.referenceId) {
-        await updateClientBookingMutation.mutateAsync({
-          id: selectedUnit.referenceId,
-          updateData: { status: "canceled" },
-        });
-      }
-    } catch (error) {
-      const err = error as CustomAxiosError;
-      console.log(err);
-      toast({
-        title: "Error Occurred",
-        description: err.response?.data.error || err.message,
-        variant: "destructive",
-      });
-    }
+          if (selectedUnit?.referenceId) {
+            await updateClientBookingMutation.mutateAsync({
+              id: selectedUnit.referenceId,
+              updateData: { status: "canceled" },
+            });
+          }
+
+          await openPdfInNewTab(cancellationData);
+        } catch (error) {
+          const err = error as CustomAxiosError;
+          console.log(err);
+          toast({
+            title: "Error Occurred",
+            description:
+              err.response?.data.error ||
+              err.message ||
+              "Failed to cancel the booking! An unknown error occurred.",
+            variant: "destructive",
+          });
+        }
+      },
+    });
   };
 
   return (
@@ -457,8 +465,9 @@ export const CancellationForm = () => {
         </div>
       </CardContent>
       <CardFooter className="justify-end">
-        <Button onClick={handleSubmit}>Preview PDF</Button>
+        <Button onClick={handleSubmit}>Cancel Booking</Button>
       </CardFooter>
+      <dialog.AlertDialog />
     </Card>
   );
 };
