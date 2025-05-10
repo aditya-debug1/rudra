@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Client } from "../models/client";
-import createError from "../utils/createError";
 import { VisitType } from "../models/visit";
+import createError from "../utils/createError";
 
 type StatusKey = "hot" | "warm" | "cold" | "lost" | "booked";
 
@@ -15,19 +15,27 @@ class analyticsController {
       // Extract query parameters for potential filtering
       const { startDate, endDate, manager } = req.query;
 
+      // Initialize the status counts
+      const statusCounts = {
+        hot: 0,
+        warm: 0,
+        cold: 0,
+        lost: 0,
+        booked: 0,
+      };
+
       // Build date filter if dates are provided
-      const dateFilter: any = {};
+      let dateFilter: { $gte?: Date; $lte?: Date } = {};
       if (startDate || endDate) {
-        dateFilter.date = {};
         if (startDate) {
           const start = new Date(startDate as string);
           start.setHours(0, 0, 0, 0);
-          dateFilter.date.$gte = start;
+          dateFilter.$gte = start;
         }
         if (endDate) {
           const end = new Date(endDate as string);
           end.setHours(23, 59, 59, 999);
-          dateFilter.date.$lte = end;
+          dateFilter.$lte = end;
         }
       }
 
@@ -43,40 +51,41 @@ class analyticsController {
         };
       }
 
-      // Combine filters
-      const combinedFilter = {
-        ...dateFilter,
-        ...managerFilter,
-      };
-
-      // Fetch all clients with their latest visit
+      // Get all clients with their visits (get ALL visits)
       const clients = await Client.find().populate<{ visits: VisitType[] }>({
         path: "visits",
-        options: { sort: { date: -1 }, limit: 1 },
-        match:
-          Object.keys(combinedFilter).length > 0 ? combinedFilter : undefined,
+        options: { sort: { date: -1 } }, // Sort by date descending
+        match: managerFilter, // Apply only manager filter here
       });
 
-      // Initialize the status counts
-      const statusCounts = {
-        hot: 0,
-        warm: 0,
-        cold: 0,
-        lost: 0,
-        booked: 0,
-      };
-
-      // Count clients by their most recent visit status
+      // Process each client
       for (const client of clients) {
         if (!client.visits || client.visits.length === 0) {
-          // Skip clients with no visits instead of counting them
           continue;
         }
 
-        // Get the status from the most recent visit
-        const lastVisit = client.visits[0];
-        const status = lastVisit.status;
+        // Only consider the latest visit for each client
+        const latestVisit = client.visits[0]; // Already sorted by date descending
 
+        // Check if the latest visit falls within our date filter
+        if (startDate || endDate) {
+          const visitDate = new Date(latestVisit.date);
+
+          if (startDate) {
+            const start = new Date(startDate as string);
+            start.setHours(0, 0, 0, 0);
+            if (visitDate < start) continue; // Skip if visit is before start date
+          }
+
+          if (endDate) {
+            const end = new Date(endDate as string);
+            end.setHours(23, 59, 59, 999);
+            if (visitDate > end) continue; // Skip if visit is after end date
+          }
+        }
+
+        // Count this client's status if the latest visit is within the date range
+        const status = latestVisit.status;
         if (isValidStatus(status)) {
           statusCounts[status]++;
         }
