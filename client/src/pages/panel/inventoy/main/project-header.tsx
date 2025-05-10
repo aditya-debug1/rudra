@@ -62,7 +62,12 @@ export const ProjectHeader = ({
 
         {createInventory && (
           <Tooltip content="Add Project">
-            <Button variant="outline" size="icon" onClick={handleAddProject}>
+            <Button
+              variant="outline"
+              className="flex-shrink-0"
+              size="icon"
+              onClick={handleAddProject}
+            >
               <Plus />
             </Button>
           </Tooltip>
