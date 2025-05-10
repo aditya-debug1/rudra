@@ -243,7 +243,7 @@ export const ClientFilter = ({
           options={referenceOptions}
           onChange={(value) => updateFilter("reference", value)}
           width="w-full"
-          align="center"
+          align={isSmallScreen ? "center" : "end"}
           placeholder="Select a reference"
         />
       </FormFieldWrapper>
