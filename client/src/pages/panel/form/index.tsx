@@ -1,6 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Building2, ReceiptText, TicketCheck, User } from "lucide-react";
+import {
+  Building2,
+  ReceiptText,
+  TicketCheck,
+  TicketX,
+  User,
+} from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +17,7 @@ import ClientForm from "./client-form";
 import ClientPartnerForm from "./cp-form";
 import { BookingForm } from "./booking";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { CancellationForm } from "./cancellation";
 
 type FormType = {
   id: string;
@@ -20,12 +27,14 @@ type FormType = {
   component: React.ReactNode;
 };
 
-type FormPageId = "client" | "client-partner" | "booking";
+type FormPageId = "client" | "client-partner" | "booking" | "cancellation";
 
 // Function to validate if a value is a valid form page ID
 function isValidFormPageId(value: string | undefined): value is FormPageId {
   if (!value) return false;
-  return ["client", "client-partner", "booking"].includes(value);
+  return ["client", "client-partner", "booking", "cancellation"].includes(
+    value,
+  );
 }
 
 const Form = () => {
@@ -42,22 +51,31 @@ const Form = () => {
         id: "client",
         label: "Client",
         permission: "client-form",
-        icon: <User className="w-4 h-4 mr-2" />,
+        icon: <User className="w-4 h-4 [@media(min-width:524px)]:mr-2" />,
         component: <ClientForm />,
       },
       {
         id: "client-partner",
         label: "Client Partner",
         permission: "client-partner-form",
-        icon: <Building2 className="h-4 w-4 mr-2" />,
+        icon: <Building2 className="h-4 w-4 [@media(min-width:524px)]:mr-2" />,
         component: <ClientPartnerForm />,
       },
       {
         id: "booking",
         label: "Booking",
         permission: "booking-form",
-        icon: <TicketCheck className="w-4 h-4 mr-2" />,
+        icon: (
+          <TicketCheck className="w-4 h-4 [@media(min-width:524px)]:mr-2" />
+        ),
         component: <BookingForm />,
+      },
+      {
+        id: "cancellation",
+        label: "Cancellation",
+        permission: "cancellation-form",
+        icon: <TicketX className="w-4 h-4 [@media(min-width:524px)]:mr-2" />,
+        component: <CancellationForm />,
       },
     ],
     [],

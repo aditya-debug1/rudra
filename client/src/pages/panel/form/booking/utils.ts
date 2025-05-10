@@ -89,6 +89,7 @@ const BookingSchema = z.discriminatedUnion("type", [
       checkNo: z.string().min(1, "Check number required"),
       bankName: z.string().min(1, "Bank name required"),
       paymentDate: z.date({ required_error: "Payment date required" }),
+      av: z.string(),
     }),
   }),
 ]);
@@ -136,6 +137,7 @@ export interface BookingType {
     checkNo: string;
     bankName: string;
     paymentDate: Date;
+    av: string;
   };
 }
 
@@ -148,7 +150,7 @@ export const ProjectList = [
   },
   {
     name: "Rudra Kristina - II",
-    by: "Sai Reality",
+    by: "Sai Realty",
     address:
       "Survey 2/4/A & 2/4/B, Koynawele, RTO Road, Taloja-II, Panvel, Dist. Raigad-410208",
   },

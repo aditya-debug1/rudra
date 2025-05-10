@@ -1,4 +1,4 @@
-import { Combobox } from "@/components/custom ui/combobox";
+import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { MultiSelect } from "@/components/custom ui/multi-select";
@@ -23,7 +23,17 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { budgetOptions } from "@/store/data/options";
+import { useCreateClientBooking } from "@/store/client-booking/query";
+import { useClientPartners } from "@/store/client-partner";
+import {
+  budgetOptions,
+  ignoreRole,
+  refDefaultOptions,
+} from "@/store/data/options";
+import { ProjectType, unitStatus, useInventory } from "@/store/inventory";
+import { useUsersSummary } from "@/store/users";
+import { getOrdinal } from "@/utils/func/numberUtils";
+import { toProperCase } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import { TicketCheck } from "lucide-react";
@@ -33,10 +43,8 @@ import {
   BookingSchema,
   BookingType,
   FlatChargesNoteList,
-  ProjectList,
   ShopChargesNoteList,
 } from "./utils";
-import { toProperCase } from "@/utils/func/strUtils";
 
 const BankList = [
   "SBI",
@@ -51,10 +59,15 @@ const BankList = [
   "AAVAS",
   "SUNDARAM",
   "OTHERS",
-];
+] as const;
+
+type paymentType = "regular-payment" | "down-payment";
 
 export const BookingForm = () => {
   const { toast } = useToast();
+  const { useProjectsStructure } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
+  const mutateCreateClientBooking = useCreateClientBooking();
   const [amountUnit, setAmountUnit] = useState<number>(100000);
   const [bookingUnit, setBookingUnit] = useState<number>(1000);
   const [charges, setCharges] = useState<string>("");
@@ -62,6 +75,115 @@ export const BookingForm = () => {
   const [finalizedBooking, setFinalizedBooking] = useState<BookingType | null>(
     null,
   );
+  const flatStatusFilter: unitStatus[] = ["available", "canceled"];
+
+  // Add this function inside the BookingForm component
+  const getFilteredProjectsData = () => {
+    if (!projectsData?.data) return [];
+
+    // Deep clone the projects to avoid mutating the original data
+    const filteredProjects = JSON.parse(
+      JSON.stringify(projectsData.data),
+    ) as ProjectType[];
+
+    return filteredProjects
+      .map((project) => {
+        // Filter commercial floors at project level if applicable
+        if (
+          project.commercialUnitPlacement === "projectLevel" &&
+          project.commercialFloors
+        ) {
+          project.commercialFloors = project.commercialFloors
+            .map((floor) => ({
+              ...floor,
+              units: floor.units.filter((unit) =>
+                flatStatusFilter.includes(unit.status),
+              ),
+            }))
+            .filter((floor) => floor.units.length > 0);
+        }
+
+        // Filter wings and their floors
+        project.wings = project.wings
+          .map((wing) => {
+            // Filter residential floors
+            wing.floors = wing.floors
+              .map((floor) => ({
+                ...floor,
+                units: floor.units.filter((unit) =>
+                  flatStatusFilter.includes(unit.status),
+                ),
+              }))
+              .filter((floor) => floor.units.length > 0);
+
+            // Filter commercial floors at wing level if applicable
+            if (
+              project.commercialUnitPlacement === "wingLevel" &&
+              wing.commercialFloors
+            ) {
+              wing.commercialFloors = wing.commercialFloors
+                .map((floor) => ({
+                  ...floor,
+                  units: floor.units.filter((unit) =>
+                    flatStatusFilter.includes(unit.status),
+                  ),
+                }))
+                .filter((floor) => floor.units.length > 0);
+            }
+
+            return wing;
+          })
+          .filter((wing) => {
+            const hasResidentialFloors = wing.floors.length > 0;
+            const hasCommercialFloors =
+              wing.commercialFloors && wing.commercialFloors.length > 0;
+            return hasResidentialFloors || hasCommercialFloors;
+          });
+
+        return project;
+      })
+      .filter((project) => {
+        const hasWings = project.wings.length > 0;
+        const hasCommercialFloors =
+          project.commercialUnitPlacement === "projectLevel" &&
+          project.commercialFloors &&
+          project.commercialFloors.length > 0;
+
+        return hasWings || hasCommercialFloors;
+      });
+  };
+
+  // Replace the existing projects assignment with this:
+  const projects = getFilteredProjectsData();
+  const { useReference } = useClientPartners();
+
+  const { data: users } = useUsersSummary();
+  const { data: refData } = useReference();
+
+  const managerOptions =
+    users
+      ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
+      .map((user) => ({
+        label: `${user.firstName} ${user.lastName}`,
+        value: user.username,
+      })) || [];
+
+  const refDynamicOptions: ComboboxOption[] =
+    refData?.references?.map((ref) => ({
+      label: `${ref.firstName} ${ref.lastName}${ref.companyName ? ` (${ref.companyName})` : ""}`,
+      value: ref._id,
+    })) || [];
+
+  const referenceOptions: ComboboxOption[] = [
+    ...refDefaultOptions,
+    ...refDynamicOptions,
+  ];
+
+  const [selectedUnitId, setSelectedUnitId] = useState("");
+  const [selectedSM, setSelectedSM] = useState("rathod");
+  const [selectedCP, setSelectedCP] = useState("681ca3ce1c7693d6b3218309");
+  const [selectedPaymentType, setSelectedPaymentType] =
+    useState<paymentType>("regular-payment");
   const [bookingData, setBookingData] = useState<BookingType>({
     type: formType,
     project: {
@@ -97,146 +219,239 @@ export const BookingForm = () => {
       checkNo: "",
       bankName: "",
       paymentDate: new Date(),
+      av: "0",
     },
   });
 
+  // Derived values
   const ChargesNoteList =
-    bookingData.type == "flat" ? FlatChargesNoteList : ShopChargesNoteList;
+    formType === "flat" ? FlatChargesNoteList : ShopChargesNoteList;
+  const projectOptions =
+    projects?.map((p) => ({ label: p.name, value: p.name! })) || [];
 
-  const projectOptions = ProjectList.map((project) => {
-    return { label: project.name, value: project.name };
-  });
+  const getProjectData = () =>
+    projects?.find((p) => p.name === bookingData.project.name);
 
-  const chargesOptions = ChargesNoteList.map((charge) => {
-    return { label: charge, value: charge };
-  });
+  const wingOptions =
+    getProjectData()?.wings.map((w) => ({
+      label: `Wing ${w.name}`,
+      value: w.name,
+    })) || [];
 
-  const bankOptions = BankList.map((bank) => {
-    return { label: bank, value: bank };
-  });
+  const getFloors = () => {
+    const project = getProjectData();
+    if (!project) return;
 
-  // Handle form type change (flat or shop)
+    const isFlat = formType === "flat";
+    const isProjectLevel =
+      !isFlat && project.commercialUnitPlacement === "projectLevel";
+    const wing = project.wings.find((w) => w.name === bookingData.unit.wing);
+
+    return isFlat
+      ? wing?.floors
+      : isProjectLevel
+        ? project.commercialFloors
+        : wing?.commercialFloors;
+  };
+
+  const floorOptions =
+    getFloors()?.map((f) => ({
+      label:
+        f.displayNumber === 0
+          ? "Ground Floor"
+          : `${getOrdinal(f.displayNumber)} Floor`,
+      value: f.displayNumber.toString(),
+    })) || [];
+
+  const getUnits = () => {
+    const floors = getFloors();
+    const floor = floors?.find(
+      (f) => f.displayNumber === Number(bookingData.unit.floor),
+    );
+    return floor?.units.map((u) => ({
+      label: `${floor.type == "commercial" ? toProperCase(u.configuration) : "Unit"} ${u.unitNumber}`,
+      value: u.unitNumber.toString(),
+    }));
+  };
+
+  const unitOptions = getUnits() || [];
+  const chargesOptions = ChargesNoteList.map((charge) => ({
+    label: charge,
+    value: charge,
+  }));
+
+  const bankOptions = BankList.map((bank) => ({
+    label: bank,
+    value: bank,
+  }));
+
+  // Handlers
   const handleFormTypeChange = (type: "flat" | "shop") => {
     setFormType(type);
-
-    // Reset unit data and update structure based on type
     setBookingData((prev) => ({
       ...prev,
-      type: type,
+      type,
       unit: {
-        floor: prev.unit.floor,
-        unitNo: prev.unit.unitNo,
-        configuration: prev.unit.configuration,
+        floor: "",
+        unitNo: "",
+        configuration: "",
         ...(type === "flat" ? { wing: "" } : { area: 0 }),
       },
     }));
   };
 
-  // Event Handlers
-  function handleInputChange(
+  const findUnit = (unitNo: string) => {
+    const floors = getFloors();
+    const floor = floors?.find(
+      (f) => f.displayNumber === Number(bookingData.unit.floor),
+    );
+    return floor?.units.find((u) => u.unitNumber == unitNo);
+  };
+
+  const handleUnitChange = (unitNo: string) => {
+    if (!unitNo) return;
+
+    const unit = findUnit(unitNo);
+    if (!unit) return;
+
+    setSelectedUnitId(unit._id!);
+
+    handleInputChange(
+      ["unit", "configuration"],
+      unit.configuration.toUpperCase(),
+    );
+    handleInputChange(["unit", "unitNo"], unit.unitNumber);
+    if (formType === "shop") {
+      handleInputChange(["unit", "area"], unit.area);
+    }
+  };
+
+  const handleInputChange = (
     path: string[],
     value: string[] | string | number | Date,
-  ) {
+  ) => {
     setBookingData((prev) => {
       const updated = { ...prev };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let current: any = updated;
 
-      // Traverse until the second last key
       for (let i = 0; i < path.length - 1; i++) {
         current[path[i]] = { ...current[path[i]] };
         current = current[path[i]];
       }
 
       current[path[path.length - 1]] = value;
-
       return updated;
     });
-  }
+  };
 
-  function handleAmountChange(unit: string) {
-    setAmountUnit(Number(unit));
-  }
-
-  function handleBookingAmountChange(unit: string) {
-    setBookingUnit(Number(unit));
-  }
-
-  function handleProjectChange(projectName: string) {
-    const project = ProjectList.find((p) => p.name === projectName);
-
+  const handleProjectChange = (projectName: string) => {
+    const project = projects?.find((p) => p.name === projectName);
     if (!project) return;
 
     setBookingData((prev) => ({
       ...prev,
-      project: project,
+      project: {
+        name: project.name,
+        by: project.by,
+        address: project.location,
+      },
+      unit: {
+        wing: "",
+        floor: "",
+        unitNo: "",
+        configuration: "",
+      },
     }));
-  }
+    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+  };
 
-  function handleManualValidation(d: BookingType) {
-    if (!d.project.name.trim()) return false;
-    if (
-      !d.unit.unitNo.trim() ||
-      !d.unit.floor.trim() ||
-      !d.unit.configuration.trim()
-    )
-      return false;
-    if (
-      !d.applicants.primary.trim() ||
-      !d.applicants.contact.address.trim() ||
-      !d.applicants.contact.phoneNo.trim()
-    )
-      return false;
-    if (
-      !d.payment.paymentTerms.trim() ||
-      !d.payment.includedChargesNote.trim() ||
-      d.payment.amount <= 0
-    )
-      return false;
-    if (
-      !d.bookingDetails.date ||
-      !d.bookingDetails.checkNo.trim() ||
-      !d.bookingDetails.bankName.trim() ||
-      d.bookingDetails.bookingAmt <= 0 ||
-      !d.bookingDetails.paymentDate
-    )
-      return false;
+  const handleWingChange = (wingName: string) => {
+    handleInputChange(["unit", "wing"], wingName);
+    handleInputChange(["unit", "floor"], "");
+    handleInputChange(["unit", "unitNo"], "");
+    handleInputChange(["unit", "configuration"], "");
+    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+  };
 
-    // Type-specific validation
-    if (d.type === "flat" && (!d.unit.wing || !d.unit.wing.trim()))
-      return false;
-    if (d.type === "shop" && (!d.unit.area || d.unit.area <= 0)) return false;
+  const handleFloorChange = (floorNo: string) => {
+    handleInputChange(["unit", "floor"], floorNo);
+    handleInputChange(["unit", "unitNo"], "");
+    handleInputChange(["unit", "configuration"], "");
+    if (formType == "shop") handleInputChange(["unit", "area"], 0);
+  };
 
-    return true;
-  }
-
-  function handleChargesNoteChange(value: string) {
-    if (value !== "Other") {
-      setBookingData((prev) => ({
-        ...prev,
-        payment: {
-          amount: bookingData.payment.amount,
-          banks: bookingData.payment.banks,
-          paymentTerms: bookingData.payment.paymentTerms,
-          includedChargesNote: value,
-        },
-      }));
-    } else handleInputChange(["payment", "includedChargesNote"], "");
+  const handleChargesNoteChange = (value: string) => {
     setCharges(value);
-  }
+    if (value !== "Other") {
+      handleInputChange(["payment", "includedChargesNote"], value);
+    }
+  };
 
-  async function openPdfInNewTab(bookingData: BookingType) {
-    // Generate the PDF blob
-    const blob = await pdf(<PdfFlatBookingForm data={bookingData} />).toBlob();
+  const validateForm = (
+    data: BookingType,
+  ): { isValid: boolean; message?: string } => {
+    if (!data.project.name.trim()) {
+      return { isValid: false, message: "Project name is required" };
+    }
+    if (
+      !data.unit.unitNo.trim() ||
+      !data.unit.floor.trim() ||
+      !data.unit.configuration.trim()
+    ) {
+      return { isValid: false, message: "Unit details are incomplete" };
+    }
+    if (
+      !data.applicants.primary.trim() ||
+      !data.applicants.contact.address.trim() ||
+      !data.applicants.contact.phoneNo.trim()
+    ) {
+      return { isValid: false, message: "Applicant information is incomplete" };
+    }
+    if (
+      !data.payment.paymentTerms.trim() ||
+      !data.payment.includedChargesNote.trim() ||
+      data.payment.amount <= 0
+    ) {
+      return { isValid: false, message: "Payment information is incomplete" };
+    }
+    if (
+      !data.bookingDetails.date ||
+      !data.bookingDetails.checkNo.trim() ||
+      !data.bookingDetails.bankName.trim() ||
+      data.bookingDetails.bookingAmt <= 0 ||
+      !data.bookingDetails.paymentDate
+    ) {
+      return { isValid: false, message: "Booking details are incomplete" };
+    }
+    if (data.type === "flat" && !data.unit.wing?.trim()) {
+      return { isValid: false, message: "Wing is required for flats" };
+    }
+    if (data.type === "shop" && (!data.unit.area || data.unit.area <= 0)) {
+      return { isValid: false, message: "Area is required for shops" };
+    }
 
-    // Create a URL for the blob
-    const blobUrl = URL.createObjectURL(blob);
+    return { isValid: true };
+  };
 
-    // Open in a new tab
-    window.open(blobUrl, "_blank");
-  }
+  const openPdfInNewTab = async (bookingData: BookingType) => {
+    try {
+      const blob = await pdf(
+        <PdfFlatBookingForm data={bookingData} />,
+      ).toBlob();
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank");
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "PDF Generation Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
 
-  function handleSubmit() {
+  const handleSubmit = async () => {
     const newBooking: BookingType = {
       ...bookingData,
       payment: {
@@ -249,20 +464,19 @@ export const BookingForm = () => {
       },
     };
 
-    if (!handleManualValidation(newBooking)) {
+    const validation = validateForm(newBooking);
+    if (!validation.isValid) {
       toast({
         title: "Form Validation Error",
-        description: `Please fill all the fields`,
+        description: validation.message || "Please fill all required fields",
         variant: "warning",
       });
       return;
     }
 
-    const validation = BookingSchema.safeParse(newBooking);
-
-    if (!validation.success) {
-      const errorMessages = formatZodErrors(validation.error.errors);
-
+    const schemaValidation = BookingSchema.safeParse(newBooking);
+    if (!schemaValidation.success) {
+      const errorMessages = formatZodErrors(schemaValidation.error.errors);
       toast({
         title: "Form Validation Error",
         description: `Please correct the following errors:\n${errorMessages}`,
@@ -271,11 +485,29 @@ export const BookingForm = () => {
       return;
     }
 
-    console.log("Validation Passed");
-    // Save the finalized booking data for download link
-    setFinalizedBooking(newBooking);
+    await mutateCreateClientBooking.mutateAsync({
+      date: newBooking.bookingDetails.date,
+      applicant: newBooking.applicants.primary,
+      coApplicant: newBooking.applicants.coApplicant,
+      status: "booked",
+      project: newBooking.project.name,
+      wing: newBooking.unit.wing,
+      floor: newBooking.unit.floor,
+      unit: selectedUnitId,
+      phoneNo: newBooking.applicants.contact.phoneNo,
+      altNo: newBooking.applicants.contact.residenceNo,
+      email: newBooking.applicants.contact.email,
+      address: newBooking.applicants.contact.address,
+      paymentType: selectedPaymentType,
+      paymentStatus: "Token Received",
+      bookingAmt: newBooking.bookingDetails.bookingAmt,
+      dealTerms: newBooking.payment.includedChargesNote,
+      paymentTerms: newBooking.payment.paymentTerms,
+      salesManager: selectedSM,
+      clientPartner: selectedCP,
+    });
 
-    // Open the PDF in a new tab
+    setFinalizedBooking(newBooking);
     openPdfInNewTab(newBooking);
 
     toast({
@@ -283,7 +515,7 @@ export const BookingForm = () => {
       description: "Form validated successfully. PDF opened in new tab.",
       variant: "success",
     });
-  }
+  };
 
   return (
     <Card className="w-full mx-auto">
@@ -293,7 +525,7 @@ export const BookingForm = () => {
           Booking Form
         </CardTitle>
         <CardDescription>
-          Enter applicant details and other informations
+          Enter applicant details and other information
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
@@ -304,13 +536,13 @@ export const BookingForm = () => {
               variant={formType === "flat" ? "default" : "outline"}
               onClick={() => handleFormTypeChange("flat")}
             >
-              Flat
+              Residential
             </Button>
             <Button
               variant={formType === "shop" ? "default" : "outline"}
               onClick={() => handleFormTypeChange("shop")}
             >
-              Shop
+              Commercial
             </Button>
           </div>
 
@@ -416,56 +648,49 @@ export const BookingForm = () => {
 
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-6 sm:gap-1 grow">
-                  <FormFieldWrapper
-                    className="gap-3 w-full"
-                    LabelText="Floor"
-                    Important
-                    ImportantSide="right"
-                  >
-                    <Input
-                      value={bookingData.unit.floor}
-                      placeholder="Enter Floor"
-                      onChange={(e) =>
-                        handleInputChange(["unit", "floor"], e.target.value)
-                      }
-                    />
-                  </FormFieldWrapper>
-
-                  {formType === "flat" ? (
+                  {(formType === "flat" ||
+                    projects?.find((p) => p.name === bookingData.project.name)
+                      ?.commercialUnitPlacement === "wingLevel") && (
                     <FormFieldWrapper
                       className="gap-3 w-full"
                       LabelText="Wing"
                       Important
                       ImportantSide="right"
                     >
-                      <Input
+                      <Combobox
+                        disabled={!bookingData.project.name}
+                        options={wingOptions}
                         value={bookingData.unit.wing || ""}
-                        placeholder="Enter Wing"
-                        onChange={(e) =>
-                          handleInputChange(["unit", "wing"], e.target.value)
-                        }
-                      />
-                    </FormFieldWrapper>
-                  ) : (
-                    <FormFieldWrapper
-                      className="gap-3 w-full"
-                      LabelText="Area (sq.ft)"
-                      Important
-                      ImportantSide="right"
-                    >
-                      <Input
-                        type="number"
-                        value={bookingData.unit.area || 0}
-                        placeholder="Enter Area"
-                        onChange={(e) =>
-                          handleInputChange(
-                            ["unit", "area"],
-                            Number(e.target.value),
-                          )
-                        }
+                        placeholder="Select Wing"
+                        width="w-full"
+                        onChange={handleWingChange}
                       />
                     </FormFieldWrapper>
                   )}
+                  <FormFieldWrapper
+                    className="gap-3 w-full"
+                    LabelText="Floor"
+                    Important
+                    ImportantSide="right"
+                  >
+                    <Combobox
+                      disabled={
+                        formType === "flat"
+                          ? !bookingData.unit.wing
+                          : projects?.find(
+                                (p) => p.name === bookingData.project.name,
+                              )?.commercialUnitPlacement === "projectLevel"
+                            ? !bookingData.project.name
+                            : !bookingData.unit.wing
+                      }
+                      options={floorOptions}
+                      value={bookingData.unit.floor || ""}
+                      placeholder="Select Floor"
+                      width="w-full"
+                      onChange={handleFloorChange}
+                      align={formType === "flat" ? "end" : "start"}
+                    />
+                  </FormFieldWrapper>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6 sm:gap-1 grow">
                   <FormFieldWrapper
@@ -474,12 +699,14 @@ export const BookingForm = () => {
                     Important
                     ImportantSide="right"
                   >
-                    <Input
-                      value={bookingData.unit.unitNo}
-                      placeholder={`Enter ${toProperCase(formType)} No`}
-                      onChange={(e) =>
-                        handleInputChange(["unit", "unitNo"], e.target.value)
-                      }
+                    <Combobox
+                      disabled={!bookingData.unit.floor}
+                      options={unitOptions}
+                      value={bookingData.unit.unitNo || ""}
+                      placeholder="Select Unit"
+                      width="w-full"
+                      onChange={handleUnitChange}
+                      align="start"
                     />
                   </FormFieldWrapper>
                   <FormFieldWrapper
@@ -490,9 +717,8 @@ export const BookingForm = () => {
                   >
                     <Input
                       value={bookingData.unit.configuration}
-                      placeholder={
-                        formType === "flat" ? "e.g. 2BHK" : "e.g. Retail"
-                      }
+                      placeholder={"N/A"}
+                      disabled
                       onChange={(e) =>
                         handleInputChange(
                           ["unit", "configuration"],
@@ -551,24 +777,19 @@ export const BookingForm = () => {
                   />
                   <Select
                     value={amountUnit.toString()}
-                    onValueChange={handleAmountChange}
+                    onValueChange={(value) => setAmountUnit(Number(value))}
                   >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Budget Units" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent align="center">
                       <SelectGroup>
                         <SelectLabel>Units</SelectLabel>
-                        {budgetOptions.map((unit, index) => {
-                          return (
-                            <SelectItem
-                              value={unit.value.toString()}
-                              key={index}
-                            >
-                              {unit.label}
-                            </SelectItem>
-                          );
-                        })}
+                        {budgetOptions.map((unit, index) => (
+                          <SelectItem value={unit.value.toString()} key={index}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -576,7 +797,7 @@ export const BookingForm = () => {
               </FormFieldWrapper>
               <FormFieldWrapper
                 className="gap-3"
-                LabelText="Charges Note"
+                LabelText="Deal Terms"
                 Important
                 ImportantSide="right"
               >
@@ -591,7 +812,7 @@ export const BookingForm = () => {
                     <Input
                       className="w-full mt-2 sm:mt-0"
                       value={bookingData.payment.includedChargesNote}
-                      placeholder="Enter your charges note"
+                      placeholder="Enter your deal terms"
                       onChange={(e) =>
                         handleInputChange(
                           ["payment", "includedChargesNote"],
@@ -670,24 +891,19 @@ export const BookingForm = () => {
                   />
                   <Select
                     value={bookingUnit.toString()}
-                    onValueChange={handleBookingAmountChange}
+                    onValueChange={(value) => setBookingUnit(Number(value))}
                   >
                     <SelectTrigger className="w-32 shrink-0">
                       <SelectValue placeholder="Units" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent align="center">
                       <SelectGroup>
                         <SelectLabel>Units</SelectLabel>
-                        {budgetOptions.map((unit, index) => {
-                          return (
-                            <SelectItem
-                              value={unit.value.toString()}
-                              key={index}
-                            >
-                              {unit.label}
-                            </SelectItem>
-                          );
-                        })}
+                        {budgetOptions.map((unit, index) => (
+                          <SelectItem value={unit.value.toString()} key={index}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -742,6 +958,74 @@ export const BookingForm = () => {
                   onDateChange={(e) => {
                     handleInputChange(["bookingDetails", "paymentDate"], e);
                   }}
+                />
+              </FormFieldWrapper>
+              <FormFieldWrapper
+                className="gap-3"
+                LabelText="Agreement Value"
+                Important
+                ImportantSide="right"
+              >
+                <Input
+                  placeholder="Enter value"
+                  value={bookingData.bookingDetails.av}
+                  onChange={(e) => {
+                    handleInputChange(["bookingDetails", "av"], e.target.value);
+                  }}
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper
+                className="gap-3"
+                LabelText="Payment Type"
+                Important
+                ImportantSide="right"
+              >
+                <Select
+                  value={selectedPaymentType}
+                  onValueChange={(e) =>
+                    setSelectedPaymentType(e as paymentType)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select payment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="regular-payment">
+                        Regular Payment
+                      </SelectItem>
+                      <SelectItem value="down-payment">Down Payment</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </FormFieldWrapper>
+              <FormFieldWrapper
+                className="gap-3"
+                LabelText="Sales Manager"
+                Important
+                ImportantSide="right"
+              >
+                <Combobox
+                  value={selectedSM}
+                  options={managerOptions}
+                  onChange={(e) => setSelectedSM(e)}
+                  width="w-full"
+                  placeholder="Select Sales Manager"
+                />
+              </FormFieldWrapper>
+              <FormFieldWrapper
+                className="gap-3"
+                LabelText="Client Partner"
+                Important
+                ImportantSide="right"
+              >
+                <Combobox
+                  value={selectedCP}
+                  options={referenceOptions}
+                  onChange={(e) => setSelectedCP(e)}
+                  width="w-full"
+                  placeholder="Select Client Partner"
                 />
               </FormFieldWrapper>
             </div>
