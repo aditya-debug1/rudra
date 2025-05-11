@@ -7,16 +7,19 @@ export type unitStatus =
   | "investor"
   | "not-for-sale";
 
+export type projectStatus = "planning" | "under-construction" | "completed";
+export type commercialUnitPlacementType = "projectLevel" | "wingLevel";
+
 export interface ProjectType {
   _id?: string;
   name: string;
   by: string;
   location: string;
   description: string;
-  startDate: Date;
-  completionDate?: Date;
-  status: "planning" | "under-construction" | "completed";
-  commercialUnitPlacement: "projectLevel" | "wingLevel";
+  startDate: string;
+  completionDate?: string;
+  status: projectStatus;
+  commercialUnitPlacement: commercialUnitPlacementType;
   wings: WingType[];
   commercialFloors?: FloorType[];
 }

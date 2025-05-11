@@ -90,15 +90,23 @@ export const ProjectSection = ({
         >
           <DatePickerV2
             className="sm:w-full"
-            defaultDate={project.startDate}
-            onDateChange={(e) => onProjectChange("startDate", e)}
+            defaultDate={
+              project.startDate ? new Date(project.startDate) : undefined
+            }
+            onDateChange={(e) => onProjectChange("startDate", e.toISOString())}
           />
         </FormFieldWrapper>
         <FormFieldWrapper className="gap-3" LabelText="Project Completion Date">
           <DatePickerV2
             className="sm:w-full"
-            defaultDate={project.completionDate}
-            onDateChange={(e) => onProjectChange("completionDate", e)}
+            defaultDate={
+              project.completionDate
+                ? new Date(project.completionDate)
+                : undefined
+            }
+            onDateChange={(e) =>
+              onProjectChange("completionDate", e.toISOString())
+            }
           />
         </FormFieldWrapper>
         <FormFieldWrapper

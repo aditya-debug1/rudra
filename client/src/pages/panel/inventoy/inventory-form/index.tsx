@@ -1,11 +1,4 @@
-import { useEffect, useState } from "react";
-import { Box } from "lucide-react";
-import {
-  FloorType,
-  ProjectType,
-  useInventory,
-  WingType,
-} from "@/store/inventory";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,25 +7,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
+import {
+  FloorType,
+  ProjectType,
+  useInventory,
+  WingType,
+} from "@/store/inventory";
+import { formatZodMessagesOnly } from "@/utils/func/zodUtils";
+import { projectSchema } from "@/utils/zod-schema/inventory";
+import { Box } from "lucide-react";
+import { useEffect, useState } from "react";
 import { ProjectSection } from "./project-section";
 import { WingSection } from "./wing-section";
-import { Button } from "@/components/ui/button";
-import { projectSchema } from "@/utils/zod-schema/inventory";
-import { toast } from "@/hooks/use-toast";
-import { formatZodMessagesOnly } from "@/utils/func/zodUtils";
 
-import { AvailabilityPDF } from "@/pdf-templates/inventory-chart";
-import { pdf } from "@react-pdf/renderer";
-import { CustomAxiosError } from "@/utils/types/axios";
-import { CommercialSection } from "./commercial-section";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { AvailabilityPDF } from "@/pdf-templates/inventory-chart";
+import { CustomAxiosError } from "@/utils/types/axios";
+import { pdf } from "@react-pdf/renderer";
+import { CommercialSection } from "./commercial-section";
 
 const DEFAULT_PROJECT: ProjectType = {
   name: "",
   by: "",
   location: "",
   description: "",
-  startDate: new Date(),
+  startDate: new Date().toISOString(),
   status: "planning",
   commercialUnitPlacement: "projectLevel",
   wings: [],

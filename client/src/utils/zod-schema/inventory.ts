@@ -89,8 +89,8 @@ const projectSchema = z
     by: z.string().min(1, "Project by is required"),
     location: z.string().min(1, "Project location is required"),
     description: z.string(),
-    startDate: z.date(),
-    completionDate: z.date().optional(),
+    startDate: z.string(),
+    completionDate: z.string().optional(),
     status: projectStatusSchema,
     commercialUnitPlacement: commercialUnitPlacementSchema,
     wings: z
@@ -129,12 +129,12 @@ const projectSchema = z
   });
 
 export {
-  unitStatusSchema,
-  projectStatusSchema,
-  floorTypeSchema,
   commercialUnitPlacementSchema,
-  unitSchema,
   floorSchema,
-  wingSchema,
+  floorTypeSchema,
   projectSchema,
+  projectStatusSchema,
+  unitSchema,
+  unitStatusSchema,
+  wingSchema,
 };
