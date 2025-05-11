@@ -1,8 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
+import { CPEmployee } from "../models/client-partner";
 import ClientBooking, { ClientBookingType } from "../models/clientBooking";
 import { Unit } from "../models/inventory";
 import createError from "../utils/createError";
+
+interface ClientPartner {
+  _id: string;
+  name: string;
+}
+
+interface CPEmployeePopulated {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  clientPartnerId: ClientPartner | mongoose.Types.ObjectId;
+}
 
 export class ClientBookingController {
   /**
@@ -58,7 +71,11 @@ export class ClientBookingController {
 
       // First, fetch all bookings
       const bookings = await ClientBooking.find()
-        .populate("unit", "unitNumber area configuration") // Customize based on Unit model fields
+        .populate({
+          path: "unit",
+          select: "unitNumber area configuration",
+          model: "Unit",
+        })
         .skip(skip)
         .limit(limit)
         .sort({ date: -1 });
@@ -74,12 +91,35 @@ export class ClientBookingController {
             mongoose.Types.ObjectId.isValid(booking.clientPartner)
           ) {
             try {
-              const populatedBooking = await ClientBooking.findById(booking._id)
-                .populate("clientPartner", "name")
-                .lean();
-              return populatedBooking;
+              // Use the typed version with populated fields
+              const clientPartner = (await CPEmployee.findById(
+                booking.clientPartner,
+              ).populate(
+                "clientPartnerId",
+                "name",
+              )) as unknown as CPEmployeePopulated;
+
+              if (clientPartner) {
+                let clientPartnerName = "Unknown";
+
+                // Type guard to check if clientPartnerId is an object with a name property
+                if (
+                  clientPartner.clientPartnerId &&
+                  typeof clientPartner.clientPartnerId === "object" &&
+                  "name" in clientPartner.clientPartnerId
+                ) {
+                  clientPartnerName = clientPartner.clientPartnerId.name;
+                }
+
+                const newBooking = {
+                  ...bookingObj,
+                  clientPartner: `${clientPartner.firstName} ${clientPartner.lastName} (${clientPartnerName})`,
+                };
+                return newBooking;
+              }
             } catch (err) {
               // If population fails, return the original booking
+              console.error("Error populating clientPartner:", err);
               return bookingObj;
             }
           }
@@ -88,7 +128,6 @@ export class ClientBookingController {
       );
 
       const total = await ClientBooking.countDocuments();
-
       res.status(200).json({
         success: true,
         total,
@@ -106,7 +145,6 @@ export class ClientBookingController {
       );
     }
   }
-
   /**
    * Get a single client booking by ID
    */
@@ -122,12 +160,18 @@ export class ClientBookingController {
         return next(createError(400, "Invalid booking ID format"));
       }
 
-      // First, find the booking without populating clientPartner
-      const booking = await ClientBooking.findById(id).populate("unit");
+      // First, find the booking
+      const booking = await ClientBooking.findById(id).populate({
+        path: "unit",
+        select: "unitNumber area configuration",
+        model: "Unit",
+      });
 
       if (!booking) {
         return next(createError(404, "Booking not found"));
       }
+
+      const bookingObj = booking.toObject();
 
       // Then, conditionally populate clientPartner if it's a valid ObjectId
       if (
@@ -135,16 +179,38 @@ export class ClientBookingController {
         mongoose.Types.ObjectId.isValid(booking.clientPartner)
       ) {
         try {
-          await booking.populate("clientPartner", "name");
+          // Use the typed version with populated fields
+          const clientPartner = (await CPEmployee.findById(
+            booking.clientPartner,
+          ).populate(
+            "clientPartnerId",
+            "name",
+          )) as unknown as CPEmployeePopulated;
+
+          if (clientPartner) {
+            let clientPartnerName = "Unknown";
+
+            // Type guard to check if clientPartnerId is an object with a name property
+            if (
+              clientPartner.clientPartnerId &&
+              typeof clientPartner.clientPartnerId === "object" &&
+              "name" in clientPartner.clientPartnerId
+            ) {
+              clientPartnerName = clientPartner.clientPartnerId.name;
+            }
+
+            // Update the booking object with formatted clientPartner information
+            bookingObj.clientPartner = `${clientPartner.firstName} ${clientPartner.lastName} (${clientPartnerName})`;
+          }
         } catch (err) {
           // If population fails, continue with the original booking
-          console.log("Failed to populate clientPartner:", err);
+          console.error("Error populating clientPartner:", err);
         }
       }
 
       res.status(200).json({
         success: true,
-        data: booking,
+        data: bookingObj,
       });
     } catch (error) {
       next(

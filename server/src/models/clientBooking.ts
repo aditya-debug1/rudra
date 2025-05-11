@@ -116,7 +116,7 @@ const ClientBookingSchema: Schema = new Schema(
     clientPartner: {
       type: Schema.Types.Mixed, // Use Mixed type to allow both ObjectId and String
       required: true,
-      ref: "ClientPartner", // Reference will only be used when it's an ObjectId
+      ref: "CPEmployee", // Reference will only be used when it's an ObjectId
       validate: {
         validator: function (v: any) {
           // Valid if it's a string or a valid ObjectId
