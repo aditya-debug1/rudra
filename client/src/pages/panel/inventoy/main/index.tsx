@@ -3,6 +3,7 @@ import { CenterWrapper } from "@/components/custom ui/center-page";
 import ErrorCard from "@/components/custom ui/error-display";
 import { Loader } from "@/components/custom ui/loader";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ import { ProjectSummaryType, useInventory } from "@/store/inventory";
 import { useInventoryStore } from "@/store/inventory/store";
 import { toProperCase } from "@/utils/func/strUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // For React Router
 import { ProjectHeader } from "./project-header";
@@ -95,9 +97,9 @@ export default function ProjectsTable() {
     setIsFiltered(false);
   };
 
-  /* const handleOpenDetails = (id: string) => {
+  const handleOpenDetails = (id: string) => {
     navigate(`details/${id}`);
-  }; */
+  };
 
   // Error handling
   if (error) {
@@ -168,7 +170,7 @@ export default function ProjectsTable() {
                 <TableHead className="text-center whitespace-nowrap">
                   Available Commercial
                 </TableHead>
-                {/* <TableHead className="text-center">Actions</TableHead> */}
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -190,7 +192,9 @@ export default function ProjectsTable() {
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge className={getStatusColor(project.status)}>
-                        {toProperCase(project.status.replace("-", " "))}
+                        {project.status == "under-construction"
+                          ? "U/C"
+                          : toProperCase(project.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
@@ -225,12 +229,16 @@ export default function ProjectsTable() {
                         %)
                       </span>
                     </TableCell>
-                    {/* <TableCell className="text-center">
-                      <Button variant="secondary" className="h-8 w-8 p-0">
+                    <TableCell className="text-center">
+                      <Button
+                        variant="secondary"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleOpenDetails(project._id)}
+                      >
                         <span className="sr-only">Open menu</span>
                         <ChevronRight className="h-5 w-5" />
                       </Button>
-                    </TableCell> */}
+                    </TableCell>
                   </TableRow>
                 ))
               )}

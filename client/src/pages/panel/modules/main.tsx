@@ -17,6 +17,7 @@ const ClientPartnerList = lazy(() => import("@/pages/panel/cp-list"));
 const ClientPartnerDetails = lazy(() => import("@/pages/panel/cp-details"));
 const Task = lazy(() => import("@/pages/panel/task"));
 const Inventory = lazy(() => import("@/pages/panel/inventoy"));
+const InventoryDetails = lazy(() => import("@/pages/panel/inventoy/details"));
 const InventoryForm = lazy(
   () => import("@/pages/panel/inventoy/inventory-form"),
 );
@@ -111,6 +112,11 @@ const MainBody: React.FC<MainProps> = ({
     {
       path: "inventory/:pageno",
       element: <Inventory />,
+      pageName: "Inventory",
+    },
+    {
+      path: "inventory/:pageno/details/:id",
+      element: <InventoryDetails />,
       pageName: "Inventory",
     },
     {

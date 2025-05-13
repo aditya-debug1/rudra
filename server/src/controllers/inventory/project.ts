@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import { Project, Wing, Floor, Unit } from "../../models/inventory"; // Adjust path as needed
-import createError from "../../utils/createError";
+import { Floor, Project, Unit, Wing } from "../../models/inventory"; // Adjust path as needed
 import auditService from "../../utils/audit-service";
+import createError from "../../utils/createError";
 
 type UnitPayload = {
   unitNumber: string;
@@ -316,8 +316,10 @@ class ProjectController {
 
           // Process units in memory
           for (const floor of floors) {
-            const floorUnits = allUnits.filter((unit) =>
-              unit.floorId.equals(floor._id),
+            const floorUnits = allUnits.filter(
+              (unit) =>
+                unit.floorId.equals(floor._id) &&
+                unit.status !== "not-for-sale",
             );
             const availableUnits = floorUnits.filter(
               (unit) => unit.status === "available",

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { Unit, UnitType, Floor } from "../../models/inventory"; // Adjust path as needed
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
+import { Floor, Unit, UnitType } from "../../models/inventory"; // Adjust path as needed
 import createError from "../../utils/createError";
 
 class UnitController {
@@ -271,7 +271,9 @@ class UnitController {
 
       const updateObj: any = { status };
 
-      if (reservedByOrReason) {
+      if (status === "available") {
+        updateObj.reservedByOrReason = null;
+      } else if (reservedByOrReason) {
         updateObj.reservedByOrReason =
           reservedByOrReason || existingUnit.reservedByOrReason;
       }

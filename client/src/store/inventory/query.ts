@@ -1,6 +1,6 @@
 // src/hooks/useInventory.ts
-import { inventoryApi, UnitFilters } from "./api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { inventoryApi, UnitFilters } from "./api";
 
 // Central hook for inventory-related queries and mutations
 export const useInventory = () => {
@@ -163,6 +163,7 @@ export const useInventory = () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
       // Project stats might have changed
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project"] });
       queryClient.invalidateQueries({ queryKey: ["projectsStructure"] });
     },
     onError: (error) => {

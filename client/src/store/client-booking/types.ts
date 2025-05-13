@@ -23,11 +23,7 @@ export interface ClientBooking {
   dealTerms: string;
   paymentTerms: string;
   salesManager: string;
-  clientPartner:
-    | {
-        name: string;
-      }
-    | string;
+  clientPartner: string;
   createdAt: Date;
   updatedAt: Date;
 }
