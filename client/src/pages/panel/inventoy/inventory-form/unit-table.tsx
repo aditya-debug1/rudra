@@ -28,6 +28,7 @@ const residentialConfig = [
   "3bhk",
   "1bhk+t",
   "2bhk+t",
+  "3bhk+t",
   "terrace",
 ];
 const commercialConfig = ["shop", "office"];

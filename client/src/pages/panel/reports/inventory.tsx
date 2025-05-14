@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
-import { Download, FileBox, Loader2 } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
+import { Download, FileBox, Loader2 } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 
 // Components
 import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Hooks and state
 import { toast } from "@/hooks/use-toast";
@@ -124,7 +124,7 @@ export function InventoryReport() {
           <FileBox className="text-gray-500 h-5 w-5" />
           <span className="text-sm text-muted-foreground font-medium">PDF</span>
         </div>
-        <CardTitle className="mt-4">Inventory Chart</CardTitle>
+        <CardTitle className="mt-4">Availability Chart</CardTitle>
         <CardDescription>
           Detailed availability chart in PDF format
         </CardDescription>

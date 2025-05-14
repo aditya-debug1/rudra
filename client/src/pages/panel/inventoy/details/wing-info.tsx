@@ -1,4 +1,5 @@
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -132,7 +133,7 @@ function FloorTable({ wing }: { wing: WingType }) {
   return (
     <div className="border rounded-md overflow-hidden">
       <Scroller
-        className="max-h-96"
+        className="max-h-[36rem]"
         withNavigation
         hideScrollbar
         scrollStep={80}
@@ -325,6 +326,27 @@ function WingCard({
   );
 }
 
+const getStatusColor = (status: unitStatus) => {
+  switch (status) {
+    case "canceled":
+      return "bg-destructive text-destructive-foreground hover:bg-destructive";
+    case "not-for-sale":
+      return "bg-orange-300 text-orange-600 hover:bg-orange-300";
+    case "investor":
+      return "bg-blue-600 text-slate-50 hover:bg-blue-600";
+    case "reserved":
+      return "bg-green-500 text-slate-50 hover:bg-green-500";
+    case "booked":
+      return "bg-yellow-300/90 text-yellow-700 hover:bg-yellow-300/90";
+    case "registered":
+      return "bg-green-700 text-slate-50 hover:bg-green-700";
+    case "available":
+      return;
+    default:
+      return;
+  }
+};
+
 type unitDataType = {
   _id: string;
   unitNo: string;
@@ -376,7 +398,9 @@ function UnitTable({ units }: { units: UnitType[] }) {
                 {unit.reservedByOrReason || "N/A"}
               </TableCell>
               <TableCell className="text-center font-medium">
-                {unit.status}
+                <Badge className={`${getStatusColor(unit.status)}`}>
+                  {unit.status.toUpperCase().replace(/-/g, " ")}
+                </Badge>
               </TableCell>
               <TableCell className="text-center font-medium">
                 <DropdownMenu>
