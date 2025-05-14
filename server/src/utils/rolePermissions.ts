@@ -70,7 +70,12 @@ export const defaultRootPermissions = [
   },
   {
     page: "Reports",
-    actions: ["client-report", "inventory-report", "booking-report"],
+    actions: [
+      "user-report",
+      "client-report",
+      "inventory-report",
+      "booking-report",
+    ],
   },
   {
     page: "Settings",

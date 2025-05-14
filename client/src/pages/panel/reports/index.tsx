@@ -1,9 +1,10 @@
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth } from "@/store/auth";
 import { useEffect } from "react";
 import { ClientReport } from "./client";
 import { InventoryReport } from "./inventory";
-import { useAuth } from "@/store/auth";
-import { hasPermission } from "@/hooks/use-role";
+import { UserReport } from "./user";
 
 const Reports = () => {
   // Hooks
@@ -26,6 +27,7 @@ const Reports = () => {
 
   return (
     <div className="w-full grid place-items-center grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+      {showReport("user-report") && <UserReport />}
       {showReport("client-report") && <ClientReport />}
       {showReport("inventory-report") && <InventoryReport />}
     </div>
