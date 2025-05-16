@@ -101,8 +101,8 @@ export const BookingForm = () => {
     null,
   );
   const [selectedUnitId, setSelectedUnitId] = useState("");
-  const [selectedSM, setSelectedSM] = useState("rathod");
-  const [selectedCP, setSelectedCP] = useState("681ca3ce1c7693d6b3218309");
+  const [selectedSM, setSelectedSM] = useState("");
+  const [selectedCP, setSelectedCP] = useState("");
   const [selectedPaymentType, setSelectedPaymentType] =
     useState<paymentType>("regular-payment");
   const [bookingData, setBookingData] = useState<BookingType>({
@@ -253,13 +253,15 @@ export const BookingForm = () => {
   // variables
   const projects = getFilteredProjectsData();
 
-  const managerOptions =
-    users
+  const managerOptions = [
+    { label: "N/A", value: "N/A" },
+    ...(users
       ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
-      })) || [];
+      })) || []),
+  ];
 
   const refDynamicOptions: ComboboxOption[] =
     refData?.references?.map((ref) => ({
@@ -479,7 +481,7 @@ export const BookingForm = () => {
     };
 
     const validation = validateForm(newBooking);
-    if (!validation.isValid) {
+    if (!validation.isValid || !selectedCP.length || !selectedSM.length) {
       toast({
         title: "Form Validation Error",
         description: validation.message || "Please fill all required fields",
