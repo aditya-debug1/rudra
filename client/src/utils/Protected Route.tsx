@@ -4,6 +4,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { CustomAxiosError } from "./types/axios";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,7 +13,8 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading, heartbeat, logout } = useAuth(true);
   const location = useLocation();
-  const errorMessage = heartbeat.error?.response?.data?.error as string;
+  const heartbeatError = heartbeat.error as CustomAxiosError | null;
+  const errorMessage = heartbeatError?.response?.data?.error;
 
   useEffect(() => {
     // Handle session expiration
