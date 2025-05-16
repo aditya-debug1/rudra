@@ -68,9 +68,10 @@ export const useAuth = (enabled = false) => {
     },
     enabled,
     retry: false,
-    refetchInterval: 10_000,
+    refetchInterval: 15_000,
     gcTime: Infinity,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     refetchOnMount: true,
   });
 
