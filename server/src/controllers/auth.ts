@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/user";
-import { AuthLogModel } from "../models/auth";
-import createError from "../utils/createError";
 import { JWT_SECRET, NODE_ENV } from "../config/dotenv";
+import { AuthLogModel } from "../models/auth";
+import User from "../models/user";
+import createError from "../utils/createError";
 
 class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
@@ -46,12 +46,19 @@ class AuthController {
         algorithm: "HS256",
       });
 
-      // Create login log entry
+      // Clear any existing session for this user
+      await AuthLogModel.updateMany(
+        { userID: user._id, action: "login" },
+        { $set: { invalidated: true } },
+      );
+
+      // Create new login log entry
       await AuthLogModel.create({
         action: "login",
         userID: user._id,
         username: user.username,
         sessionID: token, // Using JWT token as sessionID
+        invalidated: false,
       });
 
       const isProdution = NODE_ENV === "production";
@@ -81,6 +88,12 @@ class AuthController {
     try {
       const token = req.cookies.Access_Token;
 
+      // Mark the session as invalidated
+      await AuthLogModel.updateOne(
+        { sessionID: token },
+        { $set: { invalidated: true } },
+      );
+
       // Create logout log entry
       await AuthLogModel.create({
         action: "logout",
@@ -108,6 +121,15 @@ class AuthController {
           error instanceof Error ? error.message : "Logout failed",
         ),
       );
+    }
+  }
+
+  async heartbeat(req: Request, res: Response, next: NextFunction) {
+    try {
+      // If `verifyToken` middleware succeeds, session is valid
+      res.status(200).json({ success: true, message: "Session active" });
+    } catch (error) {
+      next(createError(401, "Session check failed"));
     }
   }
 

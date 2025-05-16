@@ -1,12 +1,12 @@
+import { toast } from "@/hooks/use-toast";
+import { roleApi } from "@/store/role";
 import { userType } from "@/store/users";
 import newRequest from "@/utils/func/request";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { roleApi } from "@/store/role";
-import { LoginData } from "./types";
 import { useAuthStore } from "./store";
-import { toast } from "@/hooks/use-toast";
+import { LoginData } from "./types";
 
 export const useAuth = (enabled = false) => {
   const navigate = useNavigate();
@@ -15,6 +15,11 @@ export const useAuth = (enabled = false) => {
 
   const login = useMutation({
     mutationFn: async (credentials: LoginData) => {
+      // Cancel any ongoing heartbeat queries before login
+      queryClient.cancelQueries({ queryKey: ["heartbeat"] });
+      // Remove any stale session data
+      queryClient.removeQueries({ queryKey: ["heartbeat"] });
+
       const response = await newRequest.post("/auth/login", credentials);
       return response.data.data as userType;
     },
@@ -28,14 +33,15 @@ export const useAuth = (enabled = false) => {
         navigate(`/auth/register-user/${userData._id}`);
       } else {
         navigate("/panel/");
-
         // Fetch combined role after user data
         const combinedRole = await roleApi.getCombinedRole(userData.roles);
-
         // Setting current user's combined role
         setCombinedRole(combinedRole);
       }
+
+      // Invalidate and refetch after login is successful
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["heartbeat"] });
     },
   });
 
@@ -47,10 +53,25 @@ export const useAuth = (enabled = false) => {
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ["current-user"] });
+      queryClient.removeQueries({ queryKey: ["heartbeat"] });
     },
     onError: () => {
       navigate("/auth/login");
     },
+  });
+
+  const heartbeat = useQuery({
+    queryKey: ["heartbeat"],
+    queryFn: async () => {
+      const response = await newRequest.get("/auth/heartbeat");
+      return response;
+    },
+    enabled,
+    retry: false,
+    refetchInterval: 10_000,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   const {
@@ -63,23 +84,20 @@ export const useAuth = (enabled = false) => {
       try {
         const response = await newRequest.post("/auth/current-user");
         const userData = response.data.data;
-
         // Fetch combined role after user data
         const combinedRole = await roleApi.getCombinedRole(userData.roles);
-
         // Setting current user and combined role
         setUser(userData);
         setCombinedRole(combinedRole);
-
         return userData;
       } catch (error) {
         const Err = error as CustomAxiosError;
-
         toast({
           title: "Error occurred!",
           description: Err.response?.data.error,
           variant: "destructive",
         });
+        throw error; // Rethrow to trigger error handling
       }
     },
     enabled,
@@ -89,6 +107,7 @@ export const useAuth = (enabled = false) => {
   });
 
   return {
+    heartbeat,
     user: currentUser,
     isLoading,
     login: login.mutate,

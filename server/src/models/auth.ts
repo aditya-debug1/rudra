@@ -1,38 +1,47 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 // Interface for the AuthLog document
 export interface AuthLog extends Document {
-  action: "login" | "logout";
+  action: "login" | "logout" | "register" | "password-change";
   userID: string;
   username: string;
   sessionID: string;
+  invalidated: boolean;
   timestamp: Date;
 }
 
 // Create the schema
-const AuthLogSchema = new Schema({
-  action: {
-    type: String,
-    enum: ["login", "logout"],
-    required: true,
+const AuthLogSchema = new mongoose.Schema(
+  {
+    action: {
+      type: String,
+      required: true,
+      enum: ["login", "logout", "register", "password-change"],
+    },
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    sessionID: {
+      type: String,
+      required: true,
+    },
+    invalidated: {
+      type: Boolean,
+      default: false,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  userID: {
-    type: String,
-    required: true,
-  },
-  username: {
-    type: String,
-    required: true,
-  },
-  sessionID: {
-    type: String,
-    required: true,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true },
+);
 
 // Add indexes
 // Compound index for userID and timestamp for efficient user history queries

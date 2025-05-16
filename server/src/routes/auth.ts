@@ -7,6 +7,9 @@ const router = express.Router();
 // Login user
 router.post("/login", AuthController.login);
 
+// Session Heartbeat
+router.get("/heartbeat", verifyToken, AuthController.heartbeat);
+
 // Logout user
 router.post("/logout", verifyToken, AuthController.logout);
 
