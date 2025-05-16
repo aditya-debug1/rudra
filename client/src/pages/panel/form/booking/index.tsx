@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useToast } from "@/hooks/use-toast";
 import {
   useCreateClientBooking,
@@ -77,6 +78,7 @@ export const BookingForm = () => {
   const { useReference } = useClientPartners();
   const { data: users } = useUsersSummary();
   const { data: refData } = useReference();
+  const isSmallScreen = useMediaQuery("(max-width: 1024px)");
   const dialog = useAlertDialog({
     alertType: "Warn",
     iconName: "TicketCheck",
@@ -1073,6 +1075,7 @@ export const BookingForm = () => {
                   onChange={(e) => setSelectedCP(e)}
                   width="w-full"
                   placeholder="Select Client Partner"
+                  align={isSmallScreen ? "start" : "end"}
                 />
               </FormFieldWrapper>
             </div>
