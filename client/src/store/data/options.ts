@@ -26,6 +26,7 @@ export const budgetOptions = [
 ];
 
 export const refDefaultOptions: ComboboxOption[] = [
+  { label: "Not Available", value: "N/A" },
   { label: "Direct Walking", value: "walking" },
 ];
 
