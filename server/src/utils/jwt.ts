@@ -24,7 +24,6 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies instead of headers
     const token = req.cookies.Access_Token;
-
     if (!token) {
       return next(createError(401, "Access denied. No token provided"));
     }
@@ -33,18 +32,18 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 
     // Find the user in database
     const user = await User.findById(decoded._id).select("-password");
-
     if (!user) {
       res.clearCookie("Access_Token");
       return next(createError(401, "User not found"));
     }
 
-    // Find the most recent auth log for this token
+    // Find the most recent auth log for this token and make sure it's not invalidated
     const lastAuthLog = await AuthLogModel.findOne({
-      userID: decoded._id,
-    }).sort({ timestamp: -1 });
+      sessionID: token,
+      invalidated: { $ne: true },
+    });
 
-    if (!lastAuthLog || lastAuthLog?.sessionID !== token) {
+    if (!lastAuthLog) {
       res.clearCookie("Access_Token");
       return next(createError(401, "Session expired or invalidated"));
     }
@@ -58,9 +57,12 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
       );
       return;
     }
+
     req.user = decoded;
     next();
   } catch (error) {
+    // Clear the cookie if token verification fails
+    res.clearCookie("Access_Token");
     next(createError(401, "Invalid token"));
   }
 };
