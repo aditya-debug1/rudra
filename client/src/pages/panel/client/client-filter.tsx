@@ -34,7 +34,7 @@ import {
 import { useUsersSummary } from "@/store/users";
 import { toProperCase } from "@/utils/func/strUtils";
 import { ListFilter } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 // Types
 type FilterKey = keyof typeof initialFilters;
@@ -56,13 +56,15 @@ const initialFilters = {
 };
 
 interface ClientFilterProps {
-  clearFilter: () => void;
-  setIsFiltered: (state: boolean) => void;
+  clearFilter?: () => void;
+  setIsFiltered?: (state: boolean) => void;
+  children?: ReactNode;
 }
 
 export const ClientFilter = ({
   clearFilter,
   setIsFiltered,
+  children,
 }: ClientFilterProps) => {
   // Hooks
   const { filters, setFilters, resetFilters } = useClientStore();
@@ -172,7 +174,7 @@ export const ClientFilter = ({
     });
 
     setFilters(newFilters);
-    setIsFiltered(hasActiveFilters);
+    if (setIsFiltered) setIsFiltered(hasActiveFilters);
     setIsOpen(false);
   }
 
@@ -180,7 +182,7 @@ export const ClientFilter = ({
     setActiveFilters({ ...initialFilters });
     setAppliedFilterCount(0);
     resetFilters();
-    clearFilter();
+    if (clearFilter) clearFilter();
     setIsOpen(false);
   };
 
@@ -279,18 +281,27 @@ export const ClientFilter = ({
   );
 
   // Filter trigger button
-  const FilterTrigger = () => (
-    <Tooltip content="More filter options">
-      <Button className="flex-shrink-0 relative" variant="outline" size="icon">
-        <ListFilter size={20} />
-        {appliedFilterCount > 0 && (
-          <Badge className="bg-red-500 text-white absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
-            {appliedFilterCount}
-          </Badge>
-        )}
-      </Button>
-    </Tooltip>
-  );
+
+  const FilterTrigger = () => {
+    return children ? (
+      children
+    ) : (
+      <Tooltip content="More filter options">
+        <Button
+          className="flex-shrink-0 relative"
+          variant="outline"
+          size="icon"
+        >
+          <ListFilter size={20} />
+          {appliedFilterCount > 0 && (
+            <Badge className="bg-red-500 text-white absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
+              {appliedFilterCount}
+            </Badge>
+          )}
+        </Button>
+      </Tooltip>
+    );
+  };
 
   // Filter footer with action buttons
   const FilterFooter = () => (
@@ -313,7 +324,7 @@ export const ClientFilter = ({
   return isSmallScreen ? (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <span onClick={() => setIsOpen(true)}>
+        <span onClick={() => setIsOpen(true)} className="w-full">
           <FilterTrigger />
         </span>
       </DrawerTrigger>
@@ -332,7 +343,7 @@ export const ClientFilter = ({
   ) : (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <span>
+        <span className="w-full">
           <FilterTrigger />
         </span>
       </SheetTrigger>
