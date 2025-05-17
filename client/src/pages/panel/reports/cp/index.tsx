@@ -46,7 +46,7 @@ export function ClientPartnerReport() {
           className="w-full mt-2"
           variant="default"
           onClick={handleDownload}
-          disabled={isLoading}
+          disabled={isLoading || data?.clientPartners.length === 0}
         >
           <Download className="h-4 w-4 mr-2" />
           Download Report
