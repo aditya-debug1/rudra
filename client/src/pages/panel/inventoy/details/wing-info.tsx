@@ -35,6 +35,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth } from "@/store/auth";
 import {
   FloorType,
   unitStatus,
@@ -361,6 +363,14 @@ function UnitTable({ units }: { units: UnitType[] }) {
     unitNo: "",
     status: "available",
   });
+  const { combinedRole } = useAuth(true);
+  const updateUnitStatus = hasPermission(
+    combinedRole,
+    "Inventory",
+    "update-unit-status",
+  );
+
+  const hasPerms = updateUnitStatus;
 
   const handleSetStatus = (data: unitDataType) => {
     setSelectedUnitData(data);
@@ -379,7 +389,9 @@ function UnitTable({ units }: { units: UnitType[] }) {
             <TableHead className="text-center font-medium">Area</TableHead>
             <TableHead className="text-center font-medium">Holder</TableHead>
             <TableHead className="text-center font-medium">Status</TableHead>
-            <TableHead className="text-center font-medium">Action</TableHead>
+            {hasPerms && (
+              <TableHead className="text-center font-medium">Action</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -402,30 +414,34 @@ function UnitTable({ units }: { units: UnitType[] }) {
                   {unit.status.toUpperCase().replace(/-/g, " ")}
                 </Badge>
               </TableCell>
-              <TableCell className="text-center font-medium">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="miniIcon">
-                      <MoreHorizontalIcon />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>Unit Options</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleSetStatus({
-                          _id: unit._id!,
-                          status: unit.status,
-                          unitNo: unit.unitNumber,
-                          reservedByOrReason: unit.reservedByOrReason,
-                        })
-                      }
-                    >
-                      Change Status
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+              {hasPerms && (
+                <TableCell className="text-center font-medium">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="miniIcon">
+                        <MoreHorizontalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Unit Options</DropdownMenuLabel>
+                      {updateUnitStatus && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleSetStatus({
+                              _id: unit._id!,
+                              status: unit.status,
+                              unitNo: unit.unitNumber,
+                              reservedByOrReason: unit.reservedByOrReason,
+                            })
+                          }
+                        >
+                          Change Status
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

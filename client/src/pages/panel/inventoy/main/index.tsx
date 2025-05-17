@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
+import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { ProjectSummaryType, useInventory } from "@/store/inventory";
 import { useInventoryStore } from "@/store/inventory/store";
@@ -56,9 +57,14 @@ export default function ProjectsTable() {
   const { useProjectsList } = useInventory();
   const { pageno } = useParams();
   const PageNo = Number(pageno) || 1;
-  const { logout: handleLogout } = useAuth(true);
+  const { logout: handleLogout, combinedRole } = useAuth(true);
   const { filters, setFilters, resetFilters } = useInventoryStore();
   const { data: projectsData, isLoading, error } = useProjectsList(filters);
+  const viewInventoryDetails = hasPermission(
+    combinedRole,
+    "Inventory",
+    "view-inventory-details",
+  );
 
   // States
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -170,7 +176,9 @@ export default function ProjectsTable() {
                 <TableHead className="text-center whitespace-nowrap">
                   Available Commercial
                 </TableHead>
-                <TableHead className="text-center">Actions</TableHead>
+                {viewInventoryDetails && (
+                  <TableHead className="text-center">Actions</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -229,16 +237,18 @@ export default function ProjectsTable() {
                         %)
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="secondary"
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleOpenDetails(project._id)}
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <ChevronRight className="h-5 w-5" />
-                      </Button>
-                    </TableCell>
+                    {viewInventoryDetails && (
+                      <TableCell className="text-center">
+                        <Button
+                          variant="secondary"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleOpenDetails(project._id)}
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <ChevronRight className="h-5 w-5" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
