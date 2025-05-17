@@ -73,6 +73,7 @@ export const defaultRootPermissions = [
     actions: [
       "user-report",
       "client-report",
+      "cp-report",
       "inventory-report",
       "inventory-summary-report",
       "booking-report",

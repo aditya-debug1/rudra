@@ -3,6 +3,7 @@ import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { useEffect } from "react";
 import { ClientReport } from "./client";
+import { ClientPartnerReport } from "./cp";
 import { InventoryReport } from "./inventory";
 import { InventorySummaryReport } from "./inventory-summary";
 import { UserReport } from "./user";
@@ -30,6 +31,7 @@ const Reports = () => {
     <div className="w-full grid place-items-center grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {showReport("user-report") && <UserReport />}
       {showReport("client-report") && <ClientReport />}
+      {showReport("cp-report") && <ClientPartnerReport />}
       {showReport("inventory-report") && <InventoryReport />}
       {showReport("inventory-summary-report") && <InventorySummaryReport />}
     </div>

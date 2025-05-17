@@ -75,6 +75,7 @@ export const AdminPermissions: Permission[] = [
     actions: [
       "user-report",
       "client-report",
+      "cp-report",
       "inventory-report",
       "inventory-summary-report",
       "booking-report",
@@ -218,6 +219,7 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
     actions: [
       { value: "user-report", label: "View User Reports" },
       { value: "client-report", label: "View Client Reports" },
+      { value: "cp-report", label: "View Client Partner Reports" },
       { value: "inventory-report", label: "View Inventory Reports" },
       {
         value: "inventory-summary-report",
