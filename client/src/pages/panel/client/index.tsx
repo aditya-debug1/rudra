@@ -1,18 +1,18 @@
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import ErrorCard from "@/components/custom ui/error-display";
+import { Loader } from "@/components/custom ui/loader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBreadcrumb, useBreadcrumbStore } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth, useAuthStore } from "@/store/auth";
 import { useClients, useClientStore } from "@/store/client";
+import { CustomAxiosError } from "@/utils/types/axios";
 import { useEffect, useState } from "react";
-import { ClientTable } from "./client-table";
+import { useNavigate, useParams } from "react-router-dom";
 import { ClientFooter } from "./client-footer";
 import { ClientHeader } from "./client-header";
-import { useNavigate, useParams } from "react-router-dom";
-import { CenterWrapper } from "@/components/custom ui/center-page";
-import { Loader } from "@/components/custom ui/loader";
-import { CustomAxiosError } from "@/utils/types/axios";
-import ErrorCard from "@/components/custom ui/error-display";
-import { useAuth, useAuthStore } from "@/store/auth";
-import { hasPermission } from "@/hooks/use-role";
+import { ClientTable } from "./client-table";
 
 const ClientsList = () => {
   // Hooks
@@ -89,6 +89,7 @@ const ClientsList = () => {
 
   useEffect(() => {
     handlePageChange(PageNo);
+    resetFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [PageNo]);
 

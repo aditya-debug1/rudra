@@ -1,5 +1,5 @@
 import { pdf } from "@react-pdf/renderer";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileChartPie, Loader2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 // Components
@@ -121,7 +121,7 @@ export function InventorySummaryReport() {
     <Card className="w-72 flex flex-col h-full shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <FileSpreadsheet className="text-gray-500 h-5 w-5" />
+          <FileChartPie className="text-gray-500 h-5 w-5" />
           <span className="text-sm text-muted-foreground font-medium">PDF</span>
         </div>
         <CardTitle className="mt-4">Inventory Summary</CardTitle>
