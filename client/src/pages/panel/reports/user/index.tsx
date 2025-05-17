@@ -77,7 +77,7 @@ export function UserReport() {
           className="w-full"
         />
         <Button
-          className="w-full mt-2"
+          className="w-full mt-1"
           variant="default"
           onClick={handleDownload}
           disabled={isLoading || filteredUsers.length === 0}
