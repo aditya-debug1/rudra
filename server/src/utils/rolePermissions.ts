@@ -74,6 +74,7 @@ export const defaultRootPermissions = [
       "user-report",
       "client-report",
       "inventory-report",
+      "inventory-summary-report",
       "booking-report",
     ],
   },

@@ -4,6 +4,7 @@ import { useAuth } from "@/store/auth";
 import { useEffect } from "react";
 import { ClientReport } from "./client";
 import { InventoryReport } from "./inventory";
+import { InventorySummaryReport } from "./inventory-summary";
 import { UserReport } from "./user";
 
 const Reports = () => {
@@ -30,6 +31,7 @@ const Reports = () => {
       {showReport("user-report") && <UserReport />}
       {showReport("client-report") && <ClientReport />}
       {showReport("inventory-report") && <InventoryReport />}
+      {showReport("inventory-summary-report") && <InventorySummaryReport />}
     </div>
   );
 };
