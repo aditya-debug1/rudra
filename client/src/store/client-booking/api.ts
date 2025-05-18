@@ -1,4 +1,5 @@
 import newRequest from "@/utils/func/request";
+import { BookingFilters } from "./store";
 import {
   ClientBookingCreateUpdateData,
   ClientBookingPaginatedResponse,
@@ -16,7 +17,7 @@ export const clientBookingApi = {
   },
 
   // Get all bookings with pagination and filters
-  getBookings: async (params: { page?: number; limit?: number }) => {
+  getBookings: async (params: BookingFilters) => {
     const { data } = await newRequest.get<ClientBookingPaginatedResponse>(
       "/client-booking",
       { params },
