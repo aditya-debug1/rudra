@@ -1,12 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clientBookingApi } from "./api";
+import { BookingFilters } from "./store";
 import { ClientBookingCreateUpdateData } from "./types";
 
 // Get all bookings with pagination and filters
-export const useClientBookings = (params: {
-  page?: number;
-  limit?: number;
-}) => {
+export const useClientBookings = (params: BookingFilters) => {
   return useQuery({
     queryKey: ["clientBookings", params],
     queryFn: () => clientBookingApi.getBookings(params),

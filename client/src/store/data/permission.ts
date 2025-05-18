@@ -51,6 +51,15 @@ export const AdminPermissions: Permission[] = [
     actions: ["view-task", "create-task", "delete-task", "update-task"],
   },
   {
+    page: "Booking",
+    actions: [
+      "view-booking",
+      "update-booking",
+      "update-booking-status",
+      "delete-booking",
+    ],
+  },
+  {
     page: "Inventory",
     actions: [
       "view-inventory",
@@ -189,6 +198,16 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
         value: "delete-cp-employee",
         label: "Delete Client Partner Employee",
       },
+    ],
+  },
+  {
+    page: "Booking",
+    pageLabel: "Booking Sections",
+    actions: [
+      { value: "view-booking", label: "View Booking" },
+      { value: "update-booking", label: "Update Booking" },
+      { value: "update-booking-status", label: "Update Booking Status" },
+      { value: "delete-booking", label: "Delete Booking" },
     ],
   },
   {

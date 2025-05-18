@@ -61,23 +61,99 @@ export class ClientBookingController {
   }
 
   /**
-   * Get all client bookings with pagination
+   * Get all client bookings with pagination and filtering
    */
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const skip = (page - 1) * limit;
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        fromDate,
+        toDate,
+        status,
+        project,
+        plan, // paymentType
+        manager, // salesManager
+      } = req.query;
 
-      // First, fetch all bookings
-      const bookings = await ClientBooking.find()
+      const pageNumber = parseInt(page as string) || 1;
+      const limitNumber = parseInt(limit as string) || 10;
+      const skip = (pageNumber - 1) * limitNumber;
+
+      // Build filter object
+      const filter: any = {};
+
+      // Text search across multiple fields
+      if (search) {
+        const searchTerms = (search as string).trim().split(/\s+/);
+        if (searchTerms.length > 0) {
+          // Create an AND condition for all search terms
+          const andConditions = searchTerms.map((term) => {
+            const termRegex = new RegExp(term, "i");
+            // Each term should match at least one field (OR condition)
+            return {
+              $or: [
+                { applicant: termRegex },
+                { coApplicant: termRegex },
+                { phoneNo: termRegex },
+                { altNo: termRegex },
+                { email: termRegex },
+                { address: termRegex },
+                { project: termRegex },
+              ],
+            };
+          });
+
+          // Add AND condition to the filter
+          filter.$and = andConditions;
+        }
+      }
+
+      // Date range filter
+      if (fromDate || toDate) {
+        filter.date = {};
+        if (fromDate) {
+          const fromDateObj = new Date(fromDate as string);
+          fromDateObj.setHours(0, 0, 0, 0);
+          filter.date.$gte = fromDateObj;
+        }
+        if (toDate) {
+          const toDateObj = new Date(toDate as string);
+          toDateObj.setHours(23, 59, 59, 999);
+          filter.date.$lte = toDateObj;
+        }
+      }
+
+      // Status filter
+      if (status) {
+        filter.status = status;
+      }
+
+      // Project filter
+      if (project) {
+        filter.project = project;
+      }
+
+      // Payment type filter (plan)
+      if (plan) {
+        filter.paymentType = plan;
+      }
+
+      // Sales manager filter
+      if (manager) {
+        filter.salesManager = manager;
+      }
+
+      // First, fetch filtered bookings with pagination
+      const bookings = await ClientBooking.find(filter)
         .populate({
           path: "unit",
           select: "unitNumber area configuration",
           model: "Unit",
         })
         .skip(skip)
-        .limit(limit)
+        .limit(limitNumber)
         .sort({ date: -1 });
 
       // Then, conditionally populate clientPartner only if it's an ObjectId
@@ -127,13 +203,15 @@ export class ClientBookingController {
         }),
       );
 
-      const total = await ClientBooking.countDocuments();
+      // Count total documents with the same filter for accurate pagination
+      const total = await ClientBooking.countDocuments(filter);
+
       res.status(200).json({
         success: true,
         total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limitNumber: limit,
+        totalPages: Math.ceil(total / limitNumber),
+        currentPage: pageNumber,
+        limit: limitNumber,
         data: populatedBookings,
       });
     } catch (error) {
@@ -145,6 +223,7 @@ export class ClientBookingController {
       );
     }
   }
+
   /**
    * Get a single client booking by ID
    */

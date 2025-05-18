@@ -30,6 +30,12 @@ export const NavLinks: NavLinkType[] = [
     label: "Client Partners",
     to: "/client-partners/1",
   },
+  {
+    pageName: "Booking",
+    icon: "Ticket",
+    label: "Booking List",
+    to: "/booking",
+  },
   /* {
     pageName: "Task",
     icon: "ClipboardList",
