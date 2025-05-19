@@ -1,6 +1,6 @@
 import { ClientPartnerType, EmployeeType } from "@/store/client-partner";
-import { autosizeColumns } from "@/utils/func/excel";
-import * as XLSX from "xlsx";
+import { autoSizeColumns } from "@/utils/func/excel";
+import ExcelJS from "exceljs";
 
 // Function to format company data
 function formatCompanyData(cp: ClientPartnerType) {
@@ -27,7 +27,7 @@ function formatEmployeeData(employee: EmployeeType, companyName: string) {
     Position: employee.position || "-",
     Email: employee.email || "N/A",
     Phone: employee.phoneNo,
-    "Total Clients": employee.referredClients?.length.toString() || 0,
+    "Total Clients": employee.referredClients?.length.toString() || "0",
     "Alt Phone": employee.altNo || "N/A",
     "Commission %": employee.commissionPercentage.toString(),
   };
@@ -39,16 +39,45 @@ export function exportCpToExcel(data: ClientPartnerType[]): void {
     return;
   }
 
-  const workbook = XLSX.utils.book_new();
+  // Create workbook
+  const workbook = new ExcelJS.Workbook();
+
+  // Format data
+  const companyData = data.map((cp) => formatCompanyData(cp));
 
   // Create companies sheet
-  const companyData = data.map((cp) => formatCompanyData(cp));
-  const companyWorksheet = XLSX.utils.json_to_sheet(companyData);
+  const companyWorksheet = workbook.addWorksheet("Companies");
 
-  // Apply styling to headers and autosize columns
-  autosizeColumns(companyWorksheet);
+  // Add column headers for companies
+  if (companyData.length > 0) {
+    const companyHeaders = Object.keys(companyData[0]);
+    companyWorksheet.columns = companyHeaders.map((header) => ({
+      header: header,
+      key: header,
+      width: 12, // Default width, will be auto-sized later
+    }));
 
-  XLSX.utils.book_append_sheet(workbook, companyWorksheet, "Companies");
+    // Add company data rows
+    companyWorksheet.addRows(companyData);
+
+    // Style the header row
+    const headerRow = companyWorksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        color: { argb: "FFFFFFFF" }, // White text
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4472C4" }, // Blue background
+      };
+      cell.alignment = { horizontal: "center" };
+    });
+
+    // Auto size columns
+    autoSizeColumns(companyWorksheet);
+  }
 
   // Create employees sheet
   const employeeData: ReturnType<typeof formatEmployeeData>[] = [];
@@ -59,14 +88,54 @@ export function exportCpToExcel(data: ClientPartnerType[]): void {
   });
 
   if (employeeData.length > 0) {
-    const employeeWorksheet = XLSX.utils.json_to_sheet(employeeData);
+    const employeeWorksheet = workbook.addWorksheet("Employees");
 
-    // Apply styling to headers and autosize columns
-    autosizeColumns(employeeWorksheet);
+    // Add column headers for employees
+    const employeeHeaders = Object.keys(employeeData[0]);
+    employeeWorksheet.columns = employeeHeaders.map((header) => ({
+      header: header,
+      key: header,
+      width: 12, // Default width, will be auto-sized later
+    }));
 
-    XLSX.utils.book_append_sheet(workbook, employeeWorksheet, "Employees");
+    // Add employee data rows
+    employeeWorksheet.addRows(employeeData);
+
+    // Style the header row
+    const headerRow = employeeWorksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        color: { argb: "FFFFFFFF" }, // White text
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4472C4" }, // Blue background
+      };
+      cell.alignment = { horizontal: "center" };
+    });
+
+    // Auto size columns
+    autoSizeColumns(employeeWorksheet);
   }
 
   // Save the workbook
-  XLSX.writeFile(workbook, "Client_Partners_and_Employees.xlsx");
+  workbook.xlsx.writeBuffer().then((buffer) => {
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create download link
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "Client_Partners_and_Employees.xlsx";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(downloadLink);
+  });
 }

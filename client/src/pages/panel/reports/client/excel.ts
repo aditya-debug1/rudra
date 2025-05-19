@@ -6,9 +6,9 @@ import {
   getLabelFromValue,
   getSafeLabelFromValue,
 } from "@/utils/func/arrayUtils";
-import { autosizeColumns } from "@/utils/func/excel";
+import { autoSizeColumns } from "@/utils/func/excel";
 import { capitalizeWords, toProperCase } from "@/utils/func/strUtils";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 // Helper function to get a reference's full name
 const getReferenceName = (
@@ -74,27 +74,58 @@ export function exportClientToExcel(
   }
 
   const formattedData = data.map((client) => formatClientData(client, lists));
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-  // Add autosize to columns
-  autosizeColumns(worksheet);
+  // Create workbook and worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Clients");
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
+  // Get headers from the first data item
+  const headers = Object.keys(formattedData[0]);
 
-  // Apply styling to header row - now with a different color
-  const headerRange = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
-  for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-    const headerCell = XLSX.utils.encode_cell({ r: 0, c: C });
-    if (!worksheet[headerCell]) continue;
+  // Add columns with headers
+  worksheet.columns = headers.map((header) => ({
+    header: header,
+    key: header,
+    width: 12, // Default width, will be auto-sized later
+  }));
 
-    if (!worksheet[headerCell].s) worksheet[headerCell].s = {};
-    worksheet[headerCell].s = {
-      font: { bold: true, color: { rgb: "FFFFFF" } }, // White text
-      fill: { fgColor: { rgb: "4472C4" } }, // Blue background
-      alignment: { horizontal: "center" },
+  // Add rows
+  worksheet.addRows(formattedData);
+
+  // Style the header row
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell((cell) => {
+    cell.font = {
+      bold: true,
+      color: { argb: "FFFFFFFF" }, // White text
     };
-  }
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF4472C4" }, // Blue background
+    };
+    cell.alignment = { horizontal: "center" };
+  });
 
-  XLSX.writeFile(workbook, "Client_Report.xlsx");
+  // Auto size columns
+  autoSizeColumns(worksheet);
+
+  // Save workbook
+  workbook.xlsx.writeBuffer().then((buffer) => {
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create download link
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "Client_Report.xlsx";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(downloadLink);
+  });
 }

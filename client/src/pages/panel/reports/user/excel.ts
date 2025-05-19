@@ -1,6 +1,6 @@
 import { userType } from "@/store/users";
-import { autosizeColumns } from "@/utils/func/excel";
-import * as XLSX from "xlsx";
+import { autoSizeColumns } from "@/utils/func/excel";
+import ExcelJS from "exceljs";
 
 function formatUserData(user: userType) {
   return {
@@ -28,14 +28,60 @@ export function exportUsersToExcel(data: userType[]): void {
     return;
   }
 
+  // Format user data
   const formattedData = data.map((user) => formatUserData(user));
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-  // Add autosize to columns
-  autosizeColumns(worksheet);
+  // Create workbook and worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Users");
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+  // Add column headers
+  if (formattedData.length > 0) {
+    const headers = Object.keys(formattedData[0]);
+    worksheet.columns = headers.map((header) => ({
+      header: header,
+      key: header,
+      width: 12, // Default width, will be auto-sized later
+    }));
 
-  XLSX.writeFile(workbook, "Users_List.xlsx");
+    // Add data rows
+    worksheet.addRows(formattedData);
+
+    // Style the header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        color: { argb: "FFFFFFFF" }, // White text
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4472C4" }, // Blue background
+      };
+      cell.alignment = { horizontal: "center" };
+    });
+
+    // Auto size columns
+    autoSizeColumns(worksheet);
+  }
+
+  // Save the workbook
+  workbook.xlsx.writeBuffer().then((buffer) => {
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create download link
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "Users_List.xlsx";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // Clean up
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(downloadLink);
+  });
 }

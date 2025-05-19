@@ -1,8 +1,9 @@
 import { ClientBooking } from "@/store/client-booking/types";
 import { usersSummaryType } from "@/store/users";
-import { autosizeColumns } from "@/utils/func/excel";
+import { autoSizeColumns } from "@/utils/func/excel";
 import { toProperCase } from "@/utils/func/strUtils";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 // Helper function for payment type abbreviation
 function getPaymentTypeAbbreviation(paymentType: string): string {
@@ -58,10 +59,10 @@ function formatBookingData(
   };
 }
 
-export function exportBookingToExcel(
+export async function exportBookingToExcel(
   data: ClientBooking[],
   managers: usersSummaryType[],
-): void {
+): Promise<void> {
   if (!data || data.length === 0) {
     console.warn("No booking data to export");
     return;
@@ -70,13 +71,68 @@ export function exportBookingToExcel(
   const formattedData = data.map((booking) =>
     formatBookingData(booking, managers),
   );
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-  // Add autosize to columns
-  autosizeColumns(worksheet);
+  // Create a new workbook
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Bookings");
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
+  // Get headers from the first object's keys
+  const headers = Object.keys(formattedData[0]);
 
-  XLSX.writeFile(workbook, "Booking_List.xlsx");
+  // Add headers
+  worksheet.columns = headers.map((header) => ({
+    header,
+    key: header,
+    width: 15, // Default width, will be auto-sized later
+  }));
+
+  // Style the header row
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFD3D3D3" }, // Light gray background
+    };
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+  });
+
+  // Add data rows
+  formattedData.forEach((rowData) => {
+    const row = worksheet.addRow(rowData);
+
+    // Apply cell styles for data rows
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+
+      // Align numbers to right
+      if (typeof cell.value === "number") {
+        cell.alignment = { horizontal: "right" };
+      }
+    });
+  });
+
+  // Auto-size columns based on content
+  autoSizeColumns(worksheet);
+
+  // Generate Excel file
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  // Create a Blob and save the file
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, "Booking_List.xlsx");
 }
