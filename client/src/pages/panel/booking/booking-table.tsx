@@ -30,6 +30,7 @@ import { CustomAxiosError } from "@/utils/types/axios";
 import { MoreHorizontal } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BookingUpdateForm } from "./booking-form";
 import { BookingStatusForm } from "./status-form";
 
 interface BookingTableProps {
@@ -79,6 +80,7 @@ export const BookingTable = ({ data }: BookingTableProps) => {
   const navigate = useNavigate();
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [heights, setHeights] = useState<Record<string, number>>({});
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<
     ClientBooking | undefined
@@ -125,6 +127,11 @@ export const BookingTable = ({ data }: BookingTableProps) => {
         }
       },
     });
+  };
+
+  const handleUpdateModal = (booking: ClientBooking) => {
+    setSelectedBooking(booking);
+    setIsUpdateOpen(true);
   };
 
   const handleStatusModal = (booking: ClientBooking) => {
@@ -225,6 +232,7 @@ export const BookingTable = ({ data }: BookingTableProps) => {
                       <MoreAction
                         booking={booking}
                         handleDelete={handleDelete}
+                        handleUpdateModal={handleUpdateModal}
                         handleStatusModal={handleStatusModal}
                       />
                     </TableCell>
@@ -258,12 +266,21 @@ export const BookingTable = ({ data }: BookingTableProps) => {
         </TableBody>
       </Table>
       {selectedBooking && (
+        <BookingUpdateForm
+          isOpen={isUpdateOpen}
+          onOpenChange={setIsUpdateOpen}
+          booking={selectedBooking}
+        />
+      )}
+
+      {selectedBooking && (
         <BookingStatusForm
           isOpen={isStatusOpen}
           onOpenChange={setIsStatusOpen}
           booking={selectedBooking}
         />
       )}
+
       <dialog.AlertDialog />
     </div>
   );
@@ -317,10 +334,12 @@ const DetailsRow = ({ booking }: { booking: ClientBooking }) => {
 const MoreAction = ({
   booking,
   handleDelete,
+  handleUpdateModal,
   handleStatusModal,
 }: {
   booking: ClientBooking;
   handleDelete: (booking: ClientBooking) => void;
+  handleUpdateModal: (booking: ClientBooking) => void;
   handleStatusModal: (booking: ClientBooking) => void;
 }) => {
   const { combinedRole } = useAuth(true);
@@ -351,7 +370,11 @@ const MoreAction = ({
         <DropdownMenuContent>
           <DropdownMenuLabel>Actions Menu</DropdownMenuLabel>
           {Permissions.updateBooking && (
-            <DropdownMenuItem>Update Booking</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={withStopPropagation(() => handleUpdateModal(booking))}
+            >
+              Update Booking
+            </DropdownMenuItem>
           )}
           {Permissions.deleteBooking && (
             <DropdownMenuItem
