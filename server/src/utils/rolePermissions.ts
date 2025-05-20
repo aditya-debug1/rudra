@@ -97,6 +97,7 @@ export const defaultRootPermissions = [
       "delete-role",
       "change-precedence",
       "view-audit",
+      "view-auth",
     ],
   },
 ];

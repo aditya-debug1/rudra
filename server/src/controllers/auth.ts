@@ -201,14 +201,11 @@ class AuthController {
         .limit(Number(limit));
 
       res.status(200).json({
-        success: true,
-        data: {
-          logs,
-          currentPage: Number(page),
-          limitNumber: Number(limit),
-          totalLogs: total,
-          totalPages: Math.ceil(total / Number(limit)),
-        },
+        logs,
+        currentPage: Number(page),
+        limitNumber: Number(limit),
+        totalLogs: total,
+        totalPages: Math.ceil(total / Number(limit)),
       });
     } catch (error) {
       next(

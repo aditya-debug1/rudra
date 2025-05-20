@@ -16,6 +16,7 @@ const Settings = () => {
     hasPermission(combinedRole, "Settings", "view-role") ||
     hasPermission(combinedRole, "Settings", "update-role");
   const showAudits = hasPermission(combinedRole, "Settings", "view-audit");
+  const showAuth = hasPermission(combinedRole, "Settings", "view-auth");
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Settings" }]);
@@ -24,6 +25,7 @@ const Settings = () => {
   const NavLinks = [
     { PageName: "Roles & Role Settings", path: "roles", show: showRoles },
     { PageName: "Audit Logs", path: "audit", show: showAudits },
+    { PageName: "Auth Logs", path: "auth", show: showAuth },
   ];
 
   return (

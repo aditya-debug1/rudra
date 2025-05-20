@@ -12,3 +12,30 @@ export interface AuthStore {
   setUser: (user: userType | null) => void;
   setCombinedRole: (combinedRole: CombinedRoleType | null) => void;
 }
+
+export interface AuthLogType {
+  _id: string;
+  action: "login" | "logout";
+  userID: string;
+  username: string;
+  timestamp: string;
+}
+
+export interface AuthLogsResponse {
+  logs: AuthLogType[];
+  currentPage: number;
+  limitNumber: number;
+  totalLogs: number;
+  totalPages: number;
+}
+
+export interface AuthLogsParams {
+  page: number;
+  limit: number;
+  search: string;
+  userId?: string;
+  username?: string;
+  action?: string;
+  startDate?: Date | undefined;
+  endDate?: Date | undefined;
+}

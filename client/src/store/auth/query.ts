@@ -6,7 +6,7 @@ import { CustomAxiosError } from "@/utils/types/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "./store";
-import { LoginData } from "./types";
+import { AuthLogsParams, AuthLogsResponse, LoginData } from "./types";
 
 export const useAuth = (enabled = false) => {
   const navigate = useNavigate();
@@ -118,4 +118,40 @@ export const useAuth = (enabled = false) => {
     loginError: login.error as CustomAxiosError | null,
     combinedRole: useAuthStore((state) => state.combinedRole), // Expose combinedRole
   };
+};
+
+export const useAuthLogs = (params: AuthLogsParams, enabled = true) => {
+  return useQuery({
+    queryKey: ["auth-logs", params],
+    queryFn: async () => {
+      // Construct query parameters for the API call
+      const queryParams = new URLSearchParams();
+
+      // Add pagination params
+      queryParams.append("page", params.page.toString());
+      queryParams.append("limit", params.limit.toString());
+
+      // Add optional search params if they exist
+      if (params.search) queryParams.append("search", params.search);
+      if (params.userId) queryParams.append("userId", params.userId);
+      if (params.username) queryParams.append("username", params.username);
+      if (params.action) queryParams.append("action", params.action);
+
+      // Add date range if provided
+      if (params.startDate) {
+        queryParams.append("startDate", params.startDate.toISOString());
+      }
+      if (params.endDate) {
+        queryParams.append("endDate", params.endDate.toISOString());
+      }
+
+      // Make the API request
+      const response = await newRequest.get(
+        `/auth/logs?${queryParams.toString()}`,
+      );
+      return response.data as AuthLogsResponse;
+    },
+    placeholderData: (previousData) => previousData,
+    enabled,
+  });
 };
