@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { useAuditLogs } from "@/store/audit";
-import { AuditHeader } from "./audit-header";
-import { AuditLogTable } from "./audit-table";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useDebounce } from "@/hooks/use-debounce";
-import { AuditFooter } from "./audit-footer";
-import { useAuth } from "@/store/auth";
-import { hasPermission } from "@/hooks/use-role";
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import ErrorCard, { AccessDenied } from "@/components/custom ui/error-display";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useDebounce } from "@/hooks/use-debounce";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuditLogs } from "@/store/audit";
+import { useAuth } from "@/store/auth";
 import { CustomAxiosError } from "@/utils/types/axios";
+import { useEffect, useState } from "react";
+import { AuditFooter } from "./audit-footer";
+import { AuditHeader } from "./audit-header";
 import { AuditSkeleton } from "./audit-skeleton";
+import { AuditLogTable } from "./audit-table";
 
 interface QueryParams {
   page: number;
@@ -80,34 +80,14 @@ export default function AuditLogPage() {
     refetch();
   };
 
-  const Pagination = {
-    next: () => {
-      if (queryParams.page < (data?.totalPages || 1)) {
-        setQueryParams((prev) => ({
-          ...prev,
-          page: prev.page + 1,
-        }));
-        refetch();
-      }
-    },
-    prev: () => {
-      if (queryParams.page > 1) {
-        setQueryParams((prev) => ({
-          ...prev,
-          page: prev.page - 1,
-        }));
-        refetch();
-      }
-    },
-    nth: (page: number) => {
-      if (page >= 1 && page <= (data?.totalPages || 1)) {
-        setQueryParams((prev) => ({
-          ...prev,
-          page,
-        }));
-        refetch();
-      }
-    },
+  const onPageChange = (page: number) => {
+    if (page >= 1 && page <= (data?.totalPages || 1)) {
+      setQueryParams((prev) => ({
+        ...prev,
+        page,
+      }));
+      refetch();
+    }
   };
 
   const actionOptions = ["create", "update", "delete", "locked", "unlocked"];
@@ -167,9 +147,7 @@ export default function AuditLogPage() {
         totalPages={data?.totalPages || 0}
         limit={limit}
         totalLogs={data?.totalLogs || 0}
-        onNext={Pagination.next}
-        onPrevious={Pagination.prev}
-        onPageChange={Pagination.nth}
+        onPageChange={onPageChange}
       />
     </div>
   );

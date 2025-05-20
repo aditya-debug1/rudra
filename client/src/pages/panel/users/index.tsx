@@ -3,13 +3,13 @@ import ErrorCard from "@/components/custom ui/error-display";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserTable } from "@/pages/panel/users/user-table";
+import { useAuth } from "@/store/auth";
 import useUserStore, { useUsers } from "@/store/users";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { useCallback, useEffect, useState } from "react";
 import { UserFooter } from "./user-footer";
 import { UserHeader } from "./user-header";
 import { UserSkeleton } from "./user-skeleton";
-import { useAuth } from "@/store/auth";
 
 export const UserList = () => {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -77,8 +77,6 @@ export const UserList = () => {
   const navigation = {
     currentPage: data?.currentPage || 0,
     totalPages: data?.totalPages || 0,
-    onNext: () => setCurrentPage(currentPage + 1),
-    onPrevious: () => setCurrentPage(currentPage - 1),
     onPageChange: (nthPageNumber: number) => setCurrentPage(nthPageNumber),
   };
 
@@ -134,8 +132,8 @@ export const UserList = () => {
         firstIndex={paginationData?.firstIndex ?? 0}
       />
       <UserFooter
-        currPage={data?.currentPage || 0}
-        npages={data?.totalPages || 0}
+        currClients={data?.users.length || 0}
+        totalClients={data?.totalUsers || 0}
       />
     </div>
   );

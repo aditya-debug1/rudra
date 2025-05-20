@@ -1,12 +1,12 @@
 interface UserFooterProps {
-  currPage: number;
-  npages: number;
+  currClients: number;
+  totalClients: number;
 }
 
-export const UserFooter = ({ currPage, npages }: UserFooterProps) => {
+export const UserFooter = ({ currClients, totalClients }: UserFooterProps) => {
   return (
     <h3 className="text-primary/60 font-semibold text-center md:text-left w-full px-1">
-      {`Page no : ${currPage} of ${npages}`}
+      Showing {currClients} of {totalClients} clients
     </h3>
   );
 };

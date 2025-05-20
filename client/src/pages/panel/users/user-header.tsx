@@ -1,4 +1,5 @@
-import { PaginationControls } from "@/components/custom ui/pagination-controls";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,21 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserAddButton } from "./user-add-button";
-import { toProperCase } from "@/utils/func/strUtils";
-import { Tooltip } from "@/components/custom ui/tooltip-provider";
-import { FilterX } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { RoleArrayType, useRoles } from "@/store/role";
-import { useAuth } from "@/store/auth";
 import { hasPermission } from "@/hooks/use-role.ts";
+import { useAuth } from "@/store/auth";
+import { RoleArrayType, useRoles } from "@/store/role";
+import { toProperCase } from "@/utils/func/strUtils";
+import { FilterX } from "lucide-react";
+import { UserAddButton } from "./user-add-button";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  onPrevious: () => void;
-  onNext: () => void;
 }
 
 interface FilterProps {
@@ -47,22 +44,35 @@ interface UserHeaderProp {
   recordInfo: RecordInfoProps;
 }
 
-export const UserHeader = ({
-  filter,
-  pagination,
-  recordInfo,
-}: UserHeaderProp) => {
+export const UserHeader = ({ filter, pagination }: UserHeaderProp) => {
   return (
     <div className="w-full flex justify-around md:justify-between items-center gap-2 flex-wrap">
       <Filter filter={filter} />
-      <RecordInfo recordInfo={recordInfo} />
-      <PaginationControls
-        currPage={pagination.currentPage}
-        nPage={pagination.totalPages}
-        nthClick={pagination.onPageChange}
-        prevClick={pagination.onPrevious}
-        nextClick={pagination.onNext}
-      />
+      {pagination && (
+        <div className="flex gap-2 items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pagination.currentPage <= 1}
+            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+          >
+            Previous
+          </Button>
+
+          <span className="px-2 text-sm whitespace-nowrap">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pagination.currentPage >= pagination.totalPages}
+            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -123,20 +133,5 @@ const Filter = (props: { filter: FilterProps }) => {
 
       {showUserAddButton && <UserAddButton />}
     </div>
-  );
-};
-
-const RecordInfo = (props: { recordInfo: RecordInfoProps }) => {
-  const { firstIndex, lastIndex, totalUsers } = props.recordInfo;
-
-  const total = totalUsers ?? 0;
-  const first =
-    typeof firstIndex === "number" ? Math.min(firstIndex + 1, total) : 0;
-  const last = typeof lastIndex === "number" ? Math.min(lastIndex, total) : 0;
-
-  return (
-    <h2 className="font-semibold text-lg">
-      {`Record Count: ${first} - ${last} of ${total}`}
-    </h2>
   );
 };
