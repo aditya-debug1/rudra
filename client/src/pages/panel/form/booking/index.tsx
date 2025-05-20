@@ -38,7 +38,7 @@ import {
 import { unitStatus, useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { getOrdinal } from "@/utils/func/numberUtils";
-import { toProperCase } from "@/utils/func/strUtils";
+import { formatAddress, toProperCase } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
@@ -526,7 +526,7 @@ export const BookingForm = () => {
         phoneNo: newBooking.applicants.contact.phoneNo,
         altNo: newBooking.applicants.contact.residenceNo,
         email: newBooking.applicants.contact.email,
-        address: newBooking.applicants.contact.address,
+        address: formatAddress(newBooking.applicants.contact.address),
         paymentType: selectedPaymentType,
         paymentStatus: "Token Received",
         bookingAmt: newBooking.bookingDetails.bookingAmt,
