@@ -28,7 +28,8 @@ import {
 } from "@/store/client-booking/types";
 import { ignoreRole } from "@/store/data/options";
 import { useUsersSummary } from "@/store/users";
-import { formatZodMessagesOnly } from "@/utils/func/zodUtils";
+import { formatAddress } from "@/utils/func/strUtils";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { bookingUpdateSchema } from "@/utils/zod-schema/booking";
 import { useState } from "react";
@@ -92,11 +93,13 @@ export const BookingUpdateForm = ({
   };
 
   const handleSave = async () => {
-    const schemaValidation = bookingUpdateSchema.safeParse(formData);
+    const formattedData = {
+      ...formData,
+      address: formatAddress(formData.address || ""),
+    };
+    const schemaValidation = bookingUpdateSchema.safeParse(formattedData);
     if (!schemaValidation.success) {
-      const errorMessages = formatZodMessagesOnly(
-        schemaValidation.error.errors,
-      );
+      const errorMessages = formatZodErrors(schemaValidation.error.errors);
       toast({
         title: "Form Validation Error",
         description: `Please correct the following errors:\n${errorMessages}`,
@@ -109,7 +112,7 @@ export const BookingUpdateForm = ({
       setIsSubmitting(true);
       await updateBookingMutation.mutateAsync({
         id: booking._id,
-        updateData: formData,
+        updateData: formattedData,
       });
       toast({
         title: "Booking Updated",
