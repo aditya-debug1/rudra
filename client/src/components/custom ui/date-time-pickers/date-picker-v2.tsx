@@ -19,6 +19,8 @@ interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultDate?: Date;
   disabled?: boolean;
   onDateChange: (date: Date) => void;
+  fromYear?: number;
+  toYear?: number;
 }
 
 export default function DatePickerV2({
@@ -28,6 +30,8 @@ export default function DatePickerV2({
   onDateChange,
   disabled = false,
   placeholder = null,
+  fromYear = 1950,
+  toYear = new Date().getFullYear(),
   className,
 }: DatePickerProps) {
   // useStates
@@ -98,8 +102,8 @@ export default function DatePickerV2({
           disabled={disableDate}
           captionLayout="dropdown"
           onDayClick={handleDayClick}
-          fromYear={1950}
-          toYear={new Date().getFullYear()}
+          fromYear={fromYear}
+          toYear={toYear}
           defaultMonth={date}
         />
       </PopoverContent>

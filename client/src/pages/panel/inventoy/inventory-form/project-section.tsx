@@ -107,6 +107,7 @@ export const ProjectSection = ({
             onDateChange={(e) =>
               onProjectChange("completionDate", e.toISOString())
             }
+            toYear={new Date().getFullYear() + 10}
           />
         </FormFieldWrapper>
         <FormFieldWrapper
