@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { splitCamelCaseWords } from "@/utils/func/strUtils";
 import { FilterX } from "lucide-react";
 import React from "react";
 import { DateRange } from "react-day-picker";
@@ -141,7 +142,7 @@ export const AuditHeader: React.FC<AuditHeaderProps> = ({
                 <SelectLabel>Source</SelectLabel>
                 {sourceOptions.map((source) => (
                   <SelectItem key={source} value={source}>
-                    {source.toUpperCase()}
+                    {splitCamelCaseWords(source)}
                   </SelectItem>
                 ))}
               </SelectGroup>

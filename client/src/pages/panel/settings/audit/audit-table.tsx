@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AuditLog } from "@/store/audit";
-import { toProperCase } from "@/utils/func/strUtils";
+import { splitCamelCaseWords, toProperCase } from "@/utils/func/strUtils";
 
 interface AuditLogTableProps {
   logs: AuditLog[];
@@ -69,7 +69,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
                     {toProperCase(log.event.action)}
                   </Badge>
                 </TableCell>
-                <TableCell>{log.source}</TableCell>
+                <TableCell>{splitCamelCaseWords(log.source)}</TableCell>
                 <TableCell>{log.actor.username}</TableCell>
               </TableRow>
             ))

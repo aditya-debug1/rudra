@@ -1,5 +1,5 @@
 import newRequest from "@/utils/func/request";
-import { AuditLogPaginatedResponse } from "./types";
+import { AuditLogPaginatedResponse, AuditLogSources } from "./types";
 
 export const auditLogApi = {
   getLogs: async (params: {
@@ -21,6 +21,11 @@ export const auditLogApi = {
 
   getLogById: async (id: string) => {
     const { data } = await newRequest.get(`/audit/logs/${id}`);
+    return data;
+  },
+
+  getSources: async () => {
+    const { data } = await newRequest.get<AuditLogSources>(`/audit/sources`);
     return data;
   },
 

@@ -32,3 +32,8 @@ export interface AuditLogPaginatedResponse {
   totalPages: number;
   totalLogs: number;
 }
+
+export interface AuditLogSources {
+  sources: string[];
+  count: number;
+}

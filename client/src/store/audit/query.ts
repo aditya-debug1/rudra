@@ -27,6 +27,13 @@ export const useAuditLogById = (id: string | null) => {
   });
 };
 
+export const useAuditSources = () => {
+  return useQuery({
+    queryKey: ["auditSources"],
+    queryFn: () => auditLogApi.getSources(),
+  });
+};
+
 export const useAuditLogStatistics = () => {
   return useQuery({
     queryKey: ["auditLogStatistics"],

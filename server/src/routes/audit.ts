@@ -13,6 +13,9 @@ router.get("/logs/:id", verifyToken, auditLogController.getLogById);
 // Create a new audit log
 router.post("/logs", verifyToken, auditLogController.createLog);
 
+// Get audit sources
+router.get("/sources", auditLogController.getSources);
+
 // Get audit statistics
 router.get("/statistics", verifyToken, auditLogController.getStatistics);
 

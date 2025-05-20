@@ -182,6 +182,30 @@ class AuditLogController {
       );
     }
   }
+
+  async getSources(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Get all unique sources from the audit logs
+      const sources = await AuditLog.distinct("source");
+
+      // Sort the sources alphabetically for better readability
+      sources.sort();
+
+      res.status(200).json({
+        sources,
+        count: sources.length,
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error
+            ? error.message
+            : "Error fetching audit sources",
+        ),
+      );
+    }
+  }
 }
 
 export default new AuditLogController();

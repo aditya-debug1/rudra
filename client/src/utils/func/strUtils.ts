@@ -36,3 +36,7 @@ export function addNumberingToLines(input: string): string {
     .map((line, index) => `${index + 1}) ${toProperCase(line)}`)
     .join("\n");
 }
+
+export function splitCamelCaseWords(input: string): string {
+  return input.replace(/([a-z])([A-Z])/g, "$1 $2");
+}

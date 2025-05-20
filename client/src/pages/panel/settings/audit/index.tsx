@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { hasPermission } from "@/hooks/use-role";
-import { useAuditLogs } from "@/store/audit";
+import { useAuditLogs, useAuditSources } from "@/store/audit";
 import { useAuth } from "@/store/auth";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { useEffect, useState } from "react";
@@ -47,6 +47,7 @@ export default function AuditLogPage() {
   }, [setBreadcrumbs]);
 
   const { data, isLoading, error, refetch } = useAuditLogs(queryParams);
+  const { data: sources } = useAuditSources();
 
   const debouncedRefetch = useDebounce(() => {
     refetch();
@@ -92,14 +93,7 @@ export default function AuditLogPage() {
   };
 
   const actionOptions = ["create", "update", "delete", "locked", "unlocked"];
-  const sourceOptions = [
-    "Users",
-    "Roles",
-    "Client",
-    "Visit",
-    "ClientPartner",
-    "Inventory",
-  ];
+  const sourceOptions = sources?.sources || [];
 
   if (isLoading) return <AuditSkeleton />;
 
