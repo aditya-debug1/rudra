@@ -1,5 +1,6 @@
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import ErrorCard, { AccessDenied } from "@/components/custom ui/error-display";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { hasPermission } from "@/hooks/use-role";
@@ -133,22 +134,27 @@ export default function AuditLogPage() {
     );
 
   return (
-    <div className="w-full flex items-center flex-col gap-2">
-      <AuditHeader
-        filters={queryParams}
-        onFilterChange={handleFilterChange}
-        onClearFilters={handleClearFilters}
-        actionOptions={actionOptions}
-        sourceOptions={sourceOptions}
-      />
-      <AuditLogTable logs={data?.logs || []} />
-      <AuditFooter
-        currPage={+queryParams.page || 0}
-        totalPages={data?.totalPages || 0}
-        limit={limit}
-        totalLogs={data?.totalLogs || 0}
-        onPageChange={onPageChange}
-      />
-    </div>
+    <Card className="w-[90svw] lg:w-full">
+      <CardHeader>
+        <CardTitle>Audit Logs</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <AuditHeader
+          filters={queryParams}
+          onFilterChange={handleFilterChange}
+          onClearFilters={handleClearFilters}
+          actionOptions={actionOptions}
+          sourceOptions={sourceOptions}
+        />
+        <AuditLogTable logs={data?.logs || []} />
+        <AuditFooter
+          currPage={+queryParams.page || 0}
+          totalPages={data?.totalPages || 0}
+          limit={limit}
+          totalLogs={data?.totalLogs || 0}
+          onPageChange={onPageChange}
+        />
+      </CardContent>
+    </Card>
   );
 }

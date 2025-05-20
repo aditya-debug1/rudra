@@ -1,5 +1,6 @@
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import ErrorCard from "@/components/custom ui/error-display";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserTable } from "@/pages/panel/users/user-table";
@@ -121,21 +122,26 @@ export const UserList = () => {
   }
 
   return (
-    <div className="w-full flex items-center flex-col gap-2">
-      <UserHeader
-        filter={filter}
-        pagination={navigation}
-        recordInfo={paginationData || {}}
-      />
-      <UserTable
-        userList={data?.users || []}
-        firstIndex={paginationData?.firstIndex ?? 0}
-      />
-      <UserFooter
-        currClients={data?.users.length || 0}
-        totalClients={data?.totalUsers || 0}
-      />
-    </div>
+    <Card className="w-[90svw] lg:w-full">
+      <CardHeader>
+        <CardTitle>User List</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <UserHeader
+          filter={filter}
+          pagination={navigation}
+          recordInfo={paginationData || {}}
+        />
+        <UserTable
+          userList={data?.users || []}
+          firstIndex={paginationData?.firstIndex ?? 0}
+        />
+        <UserFooter
+          currClients={data?.users.length || 0}
+          totalClients={data?.totalUsers || 0}
+        />
+      </CardContent>
+    </Card>
   );
 };
 

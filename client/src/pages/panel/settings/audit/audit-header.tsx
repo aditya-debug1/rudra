@@ -1,4 +1,3 @@
-import React from "react";
 import { DatePickerWithRange } from "@/components/custom ui/date-time-pickers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FilterX } from "lucide-react";
+import React from "react";
 import { DateRange } from "react-day-picker";
 
 interface FilterParams {
@@ -73,7 +73,7 @@ export const AuditHeader: React.FC<AuditHeaderProps> = ({
   };
 
   return (
-    <div className="w-[90svw] md:w-full">
+    <div className="w-full">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-12 items-start">
         {/* Search and Clear Filters Section */}
         <div className="flex gap-2 lg:col-span-3">

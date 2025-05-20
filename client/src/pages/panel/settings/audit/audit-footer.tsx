@@ -20,10 +20,10 @@ export const AuditFooter = ({
   const first = limit * currPage - limit + 1;
 
   return (
-    <div className="w-[90svw] md:w-full flex flex-wrap-reverse justify-around sm:justify-between items-center gap-2">
-      <h3 className="text-primary/60 font-semibold text-center md:text-left px-1">
+    <div className="w-full flex flex-wrap-reverse justify-around sm:justify-between items-center gap-2">
+      <div className="text-sm text-muted-foreground">
         {`Log Count: ${first} - ${last} of ${total}`}
-      </h3>
+      </div>
       {totalPages > 1 && (
         <div className="flex gap-2 items-center">
           <Button

@@ -45,7 +45,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
   };
 
   return (
-    <Card className="w-[90svw] md:w-full">
+    <Card className="w-full">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-card">

@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const AuditSkeleton = () => {
   return (
     <div className="w-full flex items-center flex-col gap-2">
-      <div className="w-[90svw] md:w-full">
+      <div className="w-full">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-12 items-start">
           <div className="flex gap-2 lg:col-span-3">
             <Skeleton className="h-10 w-full" />
@@ -19,7 +19,7 @@ export const AuditSkeleton = () => {
           </div>
         </div>
       </div>
-      <Skeleton className="h-96 w-[90svw] md:w-full" />
+      <Skeleton className="h-96 w-full" />
       <div className="w-[90svw] md:w-full flex flex-wrap-reverse justify-around sm:justify-between items-center gap-2">
         <div />
         <div />

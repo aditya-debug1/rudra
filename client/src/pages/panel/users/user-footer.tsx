@@ -5,8 +5,8 @@ interface UserFooterProps {
 
 export const UserFooter = ({ currClients, totalClients }: UserFooterProps) => {
   return (
-    <h3 className="text-primary/60 font-semibold text-center md:text-left w-full px-1">
-      Showing {currClients} of {totalClients} clients
-    </h3>
+    <div className="text-sm text-muted-foreground text-center md:text-left w-full px-1">
+      Showing {currClients} of {totalClients} users
+    </div>
   );
 };
