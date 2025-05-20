@@ -37,7 +37,7 @@ export const WingSection = ({
     }
 
     const newWing: WingType = {
-      name: `Wing ${(wings?.length || 0) + 1}`,
+      name: String.fromCharCode(97 + (wings?.length || 0)).toUpperCase(),
       unitsPerFloor: 6,
       headerFloorIndex: 0,
       floors: [],

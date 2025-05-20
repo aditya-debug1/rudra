@@ -1,16 +1,17 @@
+import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
-import { Input } from "@/components/ui/input";
-import { FloorType, UnitType, WingType } from "@/store/inventory";
-import { CirclePlus, CopyPlus, Plus, Trash2 } from "lucide-react";
-import { FloorCard } from "./floor-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { FloorType, UnitType, WingType } from "@/store/inventory";
+import { CirclePlus, CopyPlus, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FloorCard } from "./floor-card";
 
 interface WingCardProps {
   wing: WingType;
@@ -31,6 +32,57 @@ export const WingCard = ({
   wings,
   showCommercialFloors,
 }: WingCardProps) => {
+  // State to track the input value for header floor number
+  const [headerFloorInput, setHeaderFloorInput] = useState<string>(
+    wing.headerFloorIndex !== undefined
+      ? String(wing.headerFloorIndex + 1)
+      : "",
+  );
+
+  // Timer for validation delay
+  const [headerFloorTimer, setHeaderFloorTimer] =
+    useState<NodeJS.Timeout | null>(null);
+
+  // Update input field when wing.headerFloorIndex changes externally
+  useEffect(() => {
+    if (wing.headerFloorIndex !== undefined) {
+      setHeaderFloorInput(String(wing.headerFloorIndex + 1));
+    }
+  }, [wing.headerFloorIndex]);
+
+  const handleHeaderFloorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setHeaderFloorInput(inputValue);
+
+    // Clear any existing timer
+    if (headerFloorTimer) {
+      clearTimeout(headerFloorTimer);
+    }
+
+    // If input is empty, we still update the state immediately to show empty field
+    if (inputValue === "") {
+      updateWing(wingIndex, { headerFloorIndex: 0 });
+    } else {
+      // Otherwise convert to number and update
+      const value = parseInt(inputValue);
+      if (!isNaN(value)) {
+        updateWing(wingIndex, { headerFloorIndex: value - 1 });
+      }
+    }
+
+    // Set a timer to validate after 1 second
+    const timer = setTimeout(() => {
+      const value = parseInt(inputValue);
+      if (inputValue === "" || isNaN(value) || value < 1) {
+        // Reset to default (1) if invalid after delay
+        setHeaderFloorInput("1");
+        updateWing(wingIndex, { headerFloorIndex: 0 });
+      }
+    }, 1500);
+
+    setHeaderFloorTimer(timer);
+  };
+
   const addCommercialFloor = () => {
     const floors = wing?.commercialFloors || [];
     const newFloor: FloorType = {
@@ -235,19 +287,10 @@ export const WingCard = ({
           >
             <Input
               type="number"
-              value={
-                isNaN(wing.headerFloorIndex) ||
-                wing.headerFloorIndex === undefined
-                  ? ""
-                  : wing.headerFloorIndex + 1
-              }
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                updateWing(wingIndex, {
-                  headerFloorIndex: isNaN(value) ? 0 : value - 1,
-                });
-              }}
+              value={headerFloorInput}
+              onChange={handleHeaderFloorChange}
               min={1}
+              placeholder="Enter floor number"
             />
           </FormFieldWrapper>
         </div>
