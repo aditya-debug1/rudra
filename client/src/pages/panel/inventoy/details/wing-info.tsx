@@ -44,6 +44,7 @@ import {
   useInventory,
   WingType,
 } from "@/store/inventory";
+import { capitalizeWords } from "@/utils/func/strUtils";
 import { MoreHorizontalIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -538,7 +539,7 @@ function UnitStatusModal({
                 onChange={(e) =>
                   setUnitData({
                     ...unitData,
-                    reservedByOrReason: e.target.value,
+                    reservedByOrReason: capitalizeWords(e.target.value),
                   })
                 }
               />
