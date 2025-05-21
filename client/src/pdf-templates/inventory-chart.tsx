@@ -605,10 +605,12 @@ const FloorRow: React.FC<{
         ]}
       >
         <Text>{unit.unitNumber}</Text>
-        {floor.showArea && unit.area && <Text>{unit.area} sqft</Text>}
-        {floor.showArea && unit.configuration && (
-          <Text>{unit.configuration.toUpperCase()}</Text>
+        {floor.showArea && unit.status !== "not-for-sale" && unit.area && (
+          <Text>{unit.area} sqft</Text>
         )}
+        {floor.showArea &&
+          unit.status !== "not-for-sale" &&
+          unit.configuration && <Text>{unit.configuration.toUpperCase()}</Text>}
         {unit.reservedByOrReason && (
           <Text>{capitalizeWords(unit.reservedByOrReason.toLowerCase())}</Text>
         )}
