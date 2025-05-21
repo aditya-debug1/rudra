@@ -606,7 +606,7 @@ const FloorRow: React.FC<{
       >
         <Text>{unit.unitNumber}</Text>
         {floor.showArea && unit.area && <Text>{unit.area} sqft</Text>}
-        {unit.configuration && unit.configuration !== "terrace" && (
+        {floor.showArea && unit.configuration && (
           <Text>{unit.configuration.toUpperCase()}</Text>
         )}
         {unit.reservedByOrReason && (

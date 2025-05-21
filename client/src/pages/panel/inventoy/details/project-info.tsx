@@ -111,6 +111,7 @@ export const ProjectInfo = ({
             }
             disabled={!isEditable}
             onDateChange={(e) => onProjectChange("completionDate", e)}
+            toYear={new Date().getFullYear() + 10}
           />
         </FormFieldWrapper>
         <FormFieldWrapper
