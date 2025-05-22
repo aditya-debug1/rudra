@@ -153,6 +153,7 @@ function FloorTable({ wing }: { wing: WingType }) {
               <TableHead className="text-center">Registered</TableHead>
               <TableHead className="text-center">Investor</TableHead>
               <TableHead className="text-center">Canceled</TableHead>
+              <TableHead className="text-center">Not For Sale</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -174,8 +175,7 @@ function FloorTable({ wing }: { wing: WingType }) {
                         {floor.type}
                       </TableCell>
                       <TableCell className="text-center">
-                        {floor.units.length -
-                          getUnitTotal(floor, "not-for-sale")}
+                        {floor.units.length - getUnitTotal(floor, "others")}
                       </TableCell>
                       <TableCell className="text-center">
                         {getUnitTotal(floor, "available")}
@@ -195,11 +195,14 @@ function FloorTable({ wing }: { wing: WingType }) {
                       <TableCell className="text-center">
                         {getUnitTotal(floor, "canceled")}
                       </TableCell>
+                      <TableCell className="text-center">
+                        {getUnitTotal(floor, "not-for-sale")}
+                      </TableCell>
                     </TableRow>
 
                     <TableRow className="hover:bg-card expandable-row">
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="p-0 border-b border-t-0"
                       >
                         <div
@@ -231,7 +234,7 @@ function FloorTable({ wing }: { wing: WingType }) {
                 {wing.floors.reduce(
                   (total, floor) => total + floor.units.length,
                   0,
-                ) - getOverallTotal(wing, "not-for-sale")}
+                ) - getOverallTotal(wing, "others")}
               </TableCell>
               <TableCell className="text-center font-medium">
                 {getOverallTotal(wing, "available")}
@@ -250,6 +253,9 @@ function FloorTable({ wing }: { wing: WingType }) {
               </TableCell>
               <TableCell className="text-center font-medium">
                 {getOverallTotal(wing, "canceled")}
+              </TableCell>
+              <TableCell className="text-center font-medium">
+                {getOverallTotal(wing, "not-for-sale")}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -335,10 +341,12 @@ const getStatusColor = (status: unitStatus) => {
       return "bg-destructive text-destructive-foreground hover:bg-destructive";
     case "not-for-sale":
       return "bg-orange-300 text-orange-600 hover:bg-orange-300";
+    case "others":
+      return "bg-gray-600 text-gray-100 hover:bg-gray-600";
     case "investor":
       return "bg-blue-600 text-slate-50 hover:bg-blue-600";
     case "reserved":
-      return "bg-green-500 text-slate-50 hover:bg-green-500";
+      return "bg-yellow-100 text-yellow-600 hover:bg-yellow-100";
     case "booked":
       return "bg-yellow-300/90 text-yellow-700 hover:bg-yellow-300/90";
     case "registered":
@@ -522,6 +530,7 @@ function UnitStatusModal({
                 <SelectItem value="reserved">Reserved</SelectItem>
                 <SelectItem value="investor">Investor</SelectItem>
                 <SelectItem value="not-for-sale">Not For Sale</SelectItem>
+                <SelectItem value="others">Others</SelectItem>
                 <SelectItem value="canceled">Canceled</SelectItem>
               </SelectContent>
             </Select>

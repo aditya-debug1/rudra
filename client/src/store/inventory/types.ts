@@ -5,7 +5,8 @@ export type unitStatus =
   | "registered"
   | "canceled"
   | "investor"
-  | "not-for-sale";
+  | "not-for-sale"
+  | "others";
 
 export type projectStatus = "planning" | "under-construction" | "completed";
 export type commercialUnitPlacementType = "projectLevel" | "wingLevel";

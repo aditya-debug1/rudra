@@ -25,12 +25,13 @@ const STATUS_CONFIG: Record<
   { color: string; displayName: string }
 > = {
   available: { color: "#ffffff", displayName: "Available" },
-  reserved: { color: "#a6da95", displayName: "Reserved" },
+  reserved: { color: "#fff085", displayName: "Reserved" },
   booked: { color: "#ffba00", displayName: "Booked" },
   registered: { color: "#bbf451", displayName: "Registered" },
   canceled: { color: "#fb2c36", displayName: "Canceled" },
   "not-for-sale": { color: "#f5a97f", displayName: "Not For Sale" },
   investor: { color: "#8aadf4", displayName: "Investor" },
+  others: { color: "#c4c4c4", displayName: "Others" },
 };
 
 // Extract status list from config for consistency

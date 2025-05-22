@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
 });
 
 interface StatusLegendProps {
-  statuses: Array<Exclude<unitStatus, "not-for-sale">>;
+  statuses: Array<Exclude<unitStatus, "others">>;
 }
 
 export const StatusLegend = ({ statuses }: StatusLegendProps) => (

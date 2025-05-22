@@ -1,7 +1,19 @@
 import { unitStatus } from "@/store/inventory";
+import { hexDarkenColor } from "@/utils/func/colors";
 import { toProperCase } from "@/utils/func/strUtils";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import { ALL_UNIT_STATUSES, getStatusColor } from "./utils";
+
+function getStatusHeader(status: Exclude<unitStatus, "others">) {
+  switch (status) {
+    case "not-for-sale":
+      return "N.F.S";
+    case "registered":
+      return "Reg.";
+    default:
+      return toProperCase(status);
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -82,8 +94,8 @@ const styles = StyleSheet.create({
 interface ProjectSummaryProps {
   summary: {
     totalUnits: number;
-    statusCounts: Record<Exclude<unitStatus, "not-for-sale">, number>;
-    percentages: Record<Exclude<unitStatus, "not-for-sale">, string>;
+    statusCounts: Record<Exclude<unitStatus, "others">, number>;
+    percentages: Record<Exclude<unitStatus, "others">, string>;
   };
 }
 
@@ -96,7 +108,7 @@ export const ProjectSummaryTable = ({ summary }: ProjectSummaryProps) => (
           <Text style={[styles.headerCell, { flex: 2 }]}>Total Units</Text>
           {ALL_UNIT_STATUSES.map((status, index) => (
             <Text key={index} style={[styles.headerCell, { flex: 1 }]}>
-              {toProperCase(status)}
+              {getStatusHeader(status)}
             </Text>
           ))}
         </View>
@@ -115,7 +127,9 @@ export const ProjectSummaryTable = ({ summary }: ProjectSummaryProps) => (
               <Text
                 style={{
                   color:
-                    status === "available" ? "#696969" : getStatusColor(status),
+                    status === "available"
+                      ? "#696969"
+                      : hexDarkenColor(getStatusColor(status), 10),
                 }}
               >
                 {summary.statusCounts[status]}

@@ -70,6 +70,7 @@ export const UnitTable = ({
     "canceled",
     "not-for-sale",
     "investor",
+    "others",
   ];
 
   // Generate a unique key for each unit span input

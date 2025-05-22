@@ -8,7 +8,8 @@ export type UnitStatus =
   | "registered"
   | "canceled"
   | "investor"
-  | "not-for-sale";
+  | "not-for-sale"
+  | "others";
 
 export interface UnitType extends Document {
   _id: Types.ObjectId;
@@ -93,6 +94,7 @@ const UnitSchema = new Schema<UnitType>(
         "canceled",
         "investor",
         "not-for-sale",
+        "others",
       ],
       required: true,
       index: true,

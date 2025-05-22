@@ -1,10 +1,11 @@
 import { unitStatus } from "@/store/inventory";
+import { hexDarkenColor } from "@/utils/func/colors";
 import { G, Path, Rect, Svg, Text } from "@react-pdf/renderer";
 import _ from "lodash";
 import { getStatusColor } from "./utils";
 
 interface BarChartProps {
-  data: Record<Exclude<unitStatus, "not-for-sale">, number>;
+  data: Record<Exclude<unitStatus, "others">, number>;
   width?: number;
   height?: number;
   barWidth?: number;
@@ -22,7 +23,7 @@ export const BarChart = ({
   const paddingTop = 20; // Space at the top for labels
   const scale = (height - 40 - paddingTop) / maxValue; // Adjusted scale to account for padding
   const statusLabels = Object.keys(data) as Array<
-    Exclude<unitStatus, "not-for-sale">
+    Exclude<unitStatus, "others">
   >;
 
   return (
@@ -71,7 +72,7 @@ export const BarChart = ({
                 fontSize: 8,
                 textAnchor: "middle",
                 fontWeight: "bold",
-                fill: textColor,
+                fill: hexDarkenColor(textColor, 10),
               }}
             >
               {value}

@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
 // Types for the summary data
 interface ProjectSummaryType {
   totalUnits: number;
-  statusCounts: Record<Exclude<unitStatus, "not-for-sale">, number>;
-  percentages: Record<Exclude<unitStatus, "not-for-sale">, string>;
+  statusCounts: Record<Exclude<unitStatus, "others">, number>;
+  percentages: Record<Exclude<unitStatus, "others">, string>;
 }
 
 interface WingSummaryDataItem {
@@ -138,7 +138,7 @@ interface WingSummaryDataItem {
 interface WingSummaryType {
   summaryData: WingSummaryDataItem[];
   totalRow: WingSummaryDataItem;
-  statusDistribution: Record<Exclude<unitStatus, "not-for-sale">, number>;
+  statusDistribution: Record<Exclude<unitStatus, "others">, number>;
 }
 
 // Data processing functions
@@ -159,7 +159,7 @@ const generateWingSummary = (wing: WingType): WingSummaryType => {
   const allWingUnits = [
     ...wing.floors.flatMap((floor) => floor.units),
     ...(wing.commercialFloors?.flatMap((floor) => floor.units) || []),
-  ].filter((unit) => unit.status !== "not-for-sale");
+  ].filter((unit) => unit.status !== "others");
 
   // Get unique configurations
   const configurations = _.uniq(
