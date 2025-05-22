@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
 });
 
 interface PieChartProps {
-  data: Record<Exclude<unitStatus, "not-for-sale">, number>;
+  data: Record<Exclude<unitStatus, "others">, number>;
   size?: number;
   total: number;
 }
@@ -79,7 +79,7 @@ export const PieChart = ({ data, size = 140, total }: PieChartProps) => {
   let currentAngle = 0;
   const slices: JSX.Element[] = [];
   const statusLabels = Object.keys(data) as Array<
-    Exclude<unitStatus, "not-for-sale">
+    Exclude<unitStatus, "others">
   >;
 
   statusLabels.forEach((status, index) => {

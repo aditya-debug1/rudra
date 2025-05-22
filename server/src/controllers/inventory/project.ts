@@ -318,8 +318,7 @@ class ProjectController {
           for (const floor of floors) {
             const floorUnits = allUnits.filter(
               (unit) =>
-                unit.floorId.equals(floor._id) &&
-                unit.status !== "not-for-sale",
+                unit.floorId.equals(floor._id) && unit.status !== "others",
             );
             const availableUnits = floorUnits.filter(
               (unit) => unit.status === "available",

@@ -9,6 +9,7 @@ const unitStatusSchema = z.enum([
   "canceled",
   "investor",
   "not-for-sale",
+  "others",
 ]);
 
 // Project status enum schema

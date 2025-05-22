@@ -1,6 +1,19 @@
+import { unitStatus } from "@/store/inventory";
+import { hexDarkenColor } from "@/utils/func/colors";
 import { toProperCase } from "@/utils/func/strUtils";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import { ALL_UNIT_STATUSES, getStatusColor } from "./utils";
+
+function getStatusHeader(status: Exclude<unitStatus, "others">) {
+  switch (status) {
+    case "not-for-sale":
+      return "N.F.S";
+    case "registered":
+      return "Reg.";
+    default:
+      return toProperCase(status);
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -134,7 +147,7 @@ export const WingSummaryTable = ({ summary }: WingSummaryTableProps) => (
         </Text>
         {ALL_UNIT_STATUSES.map((status, index) => (
           <Text key={index} style={[styles.headerCell, { flex: 1 }]}>
-            {toProperCase(status)}
+            {getStatusHeader(status)}
           </Text>
         ))}
         <Text style={[styles.headerCell, { flex: 1 }]}>Total</Text>
@@ -163,7 +176,7 @@ export const WingSummaryTable = ({ summary }: WingSummaryTableProps) => (
                     (row[status] as number) > 0
                       ? status === "available"
                         ? "#696969"
-                        : getStatusColor(status)
+                        : hexDarkenColor(getStatusColor(status), 10)
                       : "#94A3B8",
                   fontWeight: (row[status] as number) > 0 ? "bold" : "normal",
                 },

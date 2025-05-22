@@ -7,31 +7,29 @@ import {
 } from "@/store/inventory";
 
 // Constants
-export const STATUS_COLORS: Record<
-  Exclude<unitStatus, "not-for-sale">,
-  string
-> = {
+export const STATUS_COLORS: Record<Exclude<unitStatus, "others">, string> = {
   available: "#ffffff", // White
-  reserved: "#a6da95", // Muted Green
+  reserved: "#fff085", // Muted Green
   booked: "#ffba00", // Yellow
   registered: "#bbf451", // Light Green
   canceled: "#fb2c36", // Red
   investor: "#8aadf4", // Light Blue
+  "not-for-sale": "#f5a97f", // Peach
 };
 
-export const ALL_UNIT_STATUSES: Array<Exclude<unitStatus, "not-for-sale">> = [
+export const ALL_UNIT_STATUSES: Array<Exclude<unitStatus, "others">> = [
   "available",
   "reserved",
   "booked",
   "registered",
   "canceled",
   "investor",
+  "not-for-sale",
 ];
 
 // Helper functions
-export const getStatusColor = (
-  status: Exclude<unitStatus, "not-for-sale">,
-): string => STATUS_COLORS[status] || "#64748B";
+export const getStatusColor = (status: Exclude<unitStatus, "others">): string =>
+  STATUS_COLORS[status] || "#64748B";
 
 export const collectAllUnits = (project: ProjectType): UnitType[] => {
   const allUnits: UnitType[] = [];
@@ -55,14 +53,13 @@ export const collectAllUnits = (project: ProjectType): UnitType[] => {
   }
 
   // Filter out "not-for-sale" units
-  return allUnits.filter((unit) => unit.status !== "not-for-sale");
+  return allUnits.filter((unit) => unit.status !== "others");
 };
 
 export const calculateStatusCounts = (
   units: UnitType[],
-): Record<Exclude<unitStatus, "not-for-sale">, number> => {
-  const counts: Partial<Record<Exclude<unitStatus, "not-for-sale">, number>> =
-    {};
+): Record<Exclude<unitStatus, "others">, number> => {
+  const counts: Partial<Record<Exclude<unitStatus, "others">, number>> = {};
 
   ALL_UNIT_STATUSES.forEach((status) => {
     counts[status] = units.filter(
@@ -70,21 +67,20 @@ export const calculateStatusCounts = (
     ).length;
   });
 
-  return counts as Record<Exclude<unitStatus, "not-for-sale">, number>;
+  return counts as Record<Exclude<unitStatus, "others">, number>;
 };
 
 export const calculatePercentages = (
-  counts: Record<Exclude<unitStatus, "not-for-sale">, number>,
+  counts: Record<Exclude<unitStatus, "others">, number>,
   total: number,
-): Record<Exclude<unitStatus, "not-for-sale">, string> => {
-  const percentages: Partial<
-    Record<Exclude<unitStatus, "not-for-sale">, string>
-  > = {};
+): Record<Exclude<unitStatus, "others">, string> => {
+  const percentages: Partial<Record<Exclude<unitStatus, "others">, string>> =
+    {};
 
   ALL_UNIT_STATUSES.forEach((status) => {
     percentages[status] =
       total > 0 ? ((counts[status] / total) * 100).toFixed(1) + "%" : "0%";
   });
 
-  return percentages as Record<Exclude<unitStatus, "not-for-sale">, string>;
+  return percentages as Record<Exclude<unitStatus, "others">, string>;
 };

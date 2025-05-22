@@ -250,6 +250,7 @@ class UnitController {
         "canceled",
         "investor",
         "not-for-sale",
+        "others",
       ];
 
       if (!validStatuses.includes(status as UnitType["status"])) {
