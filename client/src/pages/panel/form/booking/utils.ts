@@ -137,7 +137,7 @@ export interface BookingType {
     checkNo: string;
     bankName: string;
     paymentDate: Date;
-    av: string;
+    av: number;
   };
 }
 

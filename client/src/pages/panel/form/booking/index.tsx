@@ -92,6 +92,7 @@ export const BookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientId, setClientId] = useState<string | null>(null);
   const [amountUnit, setAmountUnit] = useState<number>(100000);
+  const [avUnit, setAVUnit] = useState<number>(100000);
   const [bookingUnit, setBookingUnit] = useState<number>(1000);
   const [charges, setCharges] = useState<string>("");
   const [formType, setFormType] = useState<"residential" | "commercial">(
@@ -140,7 +141,7 @@ export const BookingForm = () => {
       checkNo: "",
       bankName: "",
       paymentDate: new Date(),
-      av: "0",
+      av: 0,
     },
   });
 
@@ -477,6 +478,7 @@ export const BookingForm = () => {
       bookingDetails: {
         ...bookingData.bookingDetails,
         bookingAmt: bookingData.bookingDetails.bookingAmt * bookingUnit,
+        av: bookingData.bookingDetails.av * avUnit,
       },
     };
 
@@ -1017,13 +1019,38 @@ export const BookingForm = () => {
                 Important
                 ImportantSide="right"
               >
-                <Input
-                  placeholder="Enter value"
-                  value={bookingData.bookingDetails.av}
-                  onChange={(e) => {
-                    handleInputChange(["bookingDetails", "av"], e.target.value);
-                  }}
-                />
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <Input
+                    className="w-full"
+                    type="number"
+                    value={bookingData.bookingDetails.av}
+                    onChange={(e) =>
+                      handleInputChange(
+                        ["bookingDetails", "av"],
+                        Number(e.target.value),
+                      )
+                    }
+                    placeholder="0"
+                  />
+                  <Select
+                    value={avUnit.toString()}
+                    onValueChange={(value) => setAVUnit(Number(value))}
+                  >
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Budget Units" />
+                    </SelectTrigger>
+                    <SelectContent align="center">
+                      <SelectGroup>
+                        <SelectLabel>Units</SelectLabel>
+                        {budgetOptions.map((unit, index) => (
+                          <SelectItem value={unit.value.toString()} key={index}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
               </FormFieldWrapper>
 
               <FormFieldWrapper

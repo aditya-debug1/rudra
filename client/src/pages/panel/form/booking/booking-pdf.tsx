@@ -15,7 +15,11 @@ import RobotoBold from "@/fonts/roboto/Roboto-Bold.ttf";
 import RobotoBoldItalic from "@/fonts/roboto/Roboto-BoldItalic.ttf";
 import RobotoItalic from "@/fonts/roboto/Roboto-Italic.ttf";
 import RobotoRegular from "@/fonts/roboto/Roboto-Regular.ttf";
-import { formatToCurrency, numberToWords } from "@/utils/func/numberUtils";
+import {
+  formatToCurrency,
+  numberToWords,
+  simplifyNumber,
+} from "@/utils/func/numberUtils";
 import { addNumberingToLines, formatAddress } from "@/utils/func/strUtils";
 
 interface BookingFormProps {
@@ -392,7 +396,7 @@ const BookingFormPage = ({
 
         <View style={styles.col10}>
           <Text style={styles.bold}>
-            {"A-" + (data.bookingDetails.av || 0)}
+            {"A-" + (simplifyNumber(data.bookingDetails.av) || 0)}
           </Text>
         </View>
       </View>
