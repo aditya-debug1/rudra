@@ -239,6 +239,7 @@ export const inventoryApi = {
   updateUnit: async (
     unitId: string,
     unitData: Partial<{
+      unitNumber: string;
       area: number;
       configuration: string;
       unitSpan: number;

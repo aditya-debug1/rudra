@@ -141,6 +141,7 @@ export const useInventory = () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
       // Project stats might have changed
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project"] });
       queryClient.invalidateQueries({ queryKey: ["projectsStructure"] });
     },
     onError: (error) => {

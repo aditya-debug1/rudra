@@ -1,3 +1,4 @@
+import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hasPermission } from "@/hooks/use-role";
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import {
   FloorType,
@@ -45,6 +47,7 @@ import {
   WingType,
 } from "@/store/inventory";
 import { capitalizeWords } from "@/utils/func/strUtils";
+import { CustomAxiosError } from "@/utils/types/axios";
 import { MoreHorizontalIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -361,14 +364,19 @@ const getStatusColor = (status: unitStatus) => {
 type unitDataType = {
   _id: string;
   unitNo: string;
+  area: number;
+  configuration: string;
   status: unitStatus;
   reservedByOrReason?: string;
 };
 
 function UnitTable({ units }: { units: UnitType[] }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [selectedUnitData, setSelectedUnitData] = useState<unitDataType>({
     _id: "",
+    area: 0,
+    configuration: "",
     unitNo: "",
     status: "available",
   });
@@ -378,12 +386,18 @@ function UnitTable({ units }: { units: UnitType[] }) {
     "Inventory",
     "update-unit-status",
   );
+  const updateUnit = hasPermission(combinedRole, "Inventory", "update-unit");
 
-  const hasPerms = updateUnitStatus;
+  const hasPerms = updateUnit || updateUnitStatus;
+
+  const handleSetUpdate = (data: unitDataType) => {
+    setSelectedUnitData(data);
+    setIsUpdateOpen(true);
+  };
 
   const handleSetStatus = (data: unitDataType) => {
     setSelectedUnitData(data);
-    setIsOpen(true);
+    setIsStatusOpen(true);
   };
 
   return (
@@ -433,11 +447,29 @@ function UnitTable({ units }: { units: UnitType[] }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuLabel>Unit Options</DropdownMenuLabel>
+                      {updateUnit && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleSetUpdate({
+                              _id: unit._id!,
+                              area: unit.area,
+                              configuration: unit.configuration,
+                              status: unit.status,
+                              unitNo: unit.unitNumber,
+                              reservedByOrReason: unit.reservedByOrReason,
+                            })
+                          }
+                        >
+                          Update Unit
+                        </DropdownMenuItem>
+                      )}
                       {updateUnitStatus && (
                         <DropdownMenuItem
                           onClick={() =>
                             handleSetStatus({
                               _id: unit._id!,
+                              area: unit.area,
+                              configuration: unit.configuration,
                               status: unit.status,
                               unitNo: unit.unitNumber,
                               reservedByOrReason: unit.reservedByOrReason,
@@ -455,9 +487,15 @@ function UnitTable({ units }: { units: UnitType[] }) {
           ))}
         </TableBody>
       </Table>
+      <UnitUpdateForm
+        open={isUpdateOpen}
+        onOpenChange={setIsUpdateOpen}
+        unitData={selectedUnitData}
+        setUnitData={setSelectedUnitData}
+      />
       <UnitStatusModal
-        open={isOpen}
-        onOpenChange={setIsOpen}
+        open={isStatusOpen}
+        onOpenChange={setIsStatusOpen}
         unitData={selectedUnitData}
         setUnitData={setSelectedUnitData}
       />
@@ -569,5 +607,157 @@ function UnitStatusModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function UnitUpdateForm({
+  open,
+  onOpenChange,
+  unitData,
+  setUnitData,
+}: {
+  open: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  unitData: unitDataType;
+  setUnitData: (data: unitDataType) => void;
+}) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { updateUnitMutation } = useInventory();
+  const dialog = useAlertDialog({
+    title: "Update Unit",
+    description: `Are you sure? you want to update this unit`,
+    alertType: "Warn",
+    iconName: "CircleFadingArrowUp",
+  });
+
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
+
+  const handleSubmit = async () => {
+    dialog.show({
+      config: {
+        description: `Are you sure? you want to update this unit: ${unitData.unitNo}`,
+        cancelLabel: "Cancel",
+        actionLabel: "Update Unit",
+      },
+      onAction: async () => {
+        try {
+          setIsSubmitting(true);
+          onOpenChange(false);
+          await updateUnitMutation.mutateAsync({
+            unitId: unitData._id,
+            unitNumber: unitData.unitNo,
+            area: unitData.area,
+            configuration: unitData.configuration,
+          });
+          toast({
+            title: "Unit Updated",
+            description: "Successfully updated unit",
+          });
+        } catch (error) {
+          const err = error as CustomAxiosError;
+          console.error("Failed to update unit:", error);
+          toast({
+            title: "Error Occurred",
+            description: err.response?.data.error || "Failed to update unit",
+            variant: "destructive",
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+    });
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              Update Unit - {unitData.unitNo}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-6">
+            <FormFieldWrapper
+              LabelText="Unit Number"
+              Important
+              ImportantSide="right"
+              className="gap-2"
+            >
+              <Input
+                type="text"
+                placeholder="Enter unit number"
+                value={unitData.unitNo || ""}
+                onChange={(e) =>
+                  setUnitData({ ...unitData, unitNo: e.target.value })
+                }
+              />
+            </FormFieldWrapper>
+
+            <FormFieldWrapper
+              LabelText="Area (sqft)"
+              Important
+              ImportantSide="right"
+              className="gap-2"
+            >
+              <Input
+                type="number"
+                placeholder="Enter area in sqft"
+                value={unitData.area || ""}
+                onChange={(e) =>
+                  setUnitData({
+                    ...unitData,
+                    area: parseFloat(e.target.value) || 0,
+                  })
+                }
+                min={0}
+                step={0.01}
+              />
+            </FormFieldWrapper>
+
+            <FormFieldWrapper
+              LabelText="Configuration"
+              Important
+              ImportantSide="right"
+              className="gap-2"
+            >
+              <Select
+                value={unitData.configuration}
+                onValueChange={(value) =>
+                  setUnitData({ ...unitData, configuration: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Configuration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1bhk">1BHK</SelectItem>
+                  <SelectItem value="1bhk+t">1BHK+Terrace</SelectItem>
+                  <SelectItem value="2bhk">2BHK</SelectItem>
+                  <SelectItem value="2bhk+t">2BHK+Terrace</SelectItem>
+                  <SelectItem value="3bhk">3BHK</SelectItem>
+                  <SelectItem value="3bhk+t">3BHK+Terrace</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormFieldWrapper>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update Unit"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <dialog.AlertDialog />
+    </>
   );
 }

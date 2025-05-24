@@ -162,6 +162,7 @@ class UnitController {
     try {
       const unitId = req.params.id;
       const {
+        unitNumber,
         area,
         configuration,
         unitSpan,
@@ -183,12 +184,9 @@ class UnitController {
       }
 
       // Do not allow changing floorId or unitNumber to maintain data integrity
-      if (req.body.floorId || req.body.unitNumber) {
+      if (req.body.floorId) {
         next(
-          createError(
-            400,
-            "Cannot change floorId or unitNumber. Create a new unit instead.",
-          ),
+          createError(400, "Cannot change floorId. Create a new unit instead."),
         );
         return;
       }
@@ -197,6 +195,8 @@ class UnitController {
         unitId,
         {
           $set: {
+            unitNumber:
+              unitNumber !== undefined ? unitNumber : existingUnit.unitNumber,
             area: area !== undefined ? area : existingUnit.area,
             configuration: configuration || existingUnit.configuration,
             unitSpan: unitSpan !== undefined ? unitSpan : existingUnit.unitSpan,

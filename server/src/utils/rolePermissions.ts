@@ -65,6 +65,7 @@ export const defaultRootPermissions = [
       "view-inventory-details",
       "delete-inventory",
       "update-inventory",
+      "update-unit",
       "update-unit-status",
     ],
   },
