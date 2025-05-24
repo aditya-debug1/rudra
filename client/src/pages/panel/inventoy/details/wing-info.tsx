@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Scroller } from "@/components/ui/scroller";
 import {
   Select,
   SelectContent,
@@ -138,132 +137,118 @@ function FloorTable({ wing }: { wing: WingType }) {
 
   return (
     <div className="border rounded-md overflow-hidden">
-      <Scroller
-        className="max-h-[36rem]"
-        withNavigation
-        hideScrollbar
-        scrollStep={80}
-      >
-        <table className="w-full caption-bottom text-sm">
-          <TableHeader>
-            <TableRow className="bg-card hover:bg-card sticky top-0 z-20">
-              <TableHead className="text-center">Floor No</TableHead>
-              <TableHead className="text-center">Type</TableHead>
-              <TableHead className="text-center">Total Units</TableHead>
-              <TableHead className="text-center">Available</TableHead>
-              <TableHead className="text-center">Reserved</TableHead>
-              <TableHead className="text-center">Booked</TableHead>
-              <TableHead className="text-center">Registered</TableHead>
-              <TableHead className="text-center">Investor</TableHead>
-              <TableHead className="text-center">Canceled</TableHead>
-              <TableHead className="text-center">Not For Sale</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {wing.floors &&
-              wing.floors.map((floor) => {
-                const floorId = floor.displayNumber.toString();
-                const isOpen = openItems[floorId] || false;
+      <table className="w-full caption-bottom text-sm">
+        <TableHeader>
+          <TableRow className="bg-card hover:bg-card sticky top-0 z-20">
+            <TableHead className="text-center">Floor No</TableHead>
+            <TableHead className="text-center">Type</TableHead>
+            <TableHead className="text-center">Total Units</TableHead>
+            <TableHead className="text-center">Available</TableHead>
+            <TableHead className="text-center">Reserved</TableHead>
+            <TableHead className="text-center">Booked</TableHead>
+            <TableHead className="text-center">Registered</TableHead>
+            <TableHead className="text-center">Investor</TableHead>
+            <TableHead className="text-center">Canceled</TableHead>
+            <TableHead className="text-center">Not For Sale</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {wing.floors &&
+            wing.floors.map((floor) => {
+              const floorId = floor.displayNumber.toString();
+              const isOpen = openItems[floorId] || false;
 
-                return (
-                  <React.Fragment key={floorId}>
-                    <TableRow
-                      className={`transition-colors duration-200 cursor-pointer ${isOpen ? "bg-muted/30" : ""}`}
-                      onClick={() => toggleItem(floorId)}
-                    >
-                      <TableCell className="text-center">
-                        {floor.displayNumber}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {floor.type}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {floor.units.length - getUnitTotal(floor, "others")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "available")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "reserved")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "booked")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "registered")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "investor")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "canceled")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getUnitTotal(floor, "not-for-sale")}
-                      </TableCell>
-                    </TableRow>
+              return (
+                <React.Fragment key={floorId}>
+                  <TableRow
+                    className={`transition-colors duration-200 cursor-pointer ${isOpen ? "bg-muted/30" : ""}`}
+                    onClick={() => toggleItem(floorId)}
+                  >
+                    <TableCell className="text-center">
+                      {floor.displayNumber}
+                    </TableCell>
+                    <TableCell className="text-center">{floor.type}</TableCell>
+                    <TableCell className="text-center">
+                      {floor.units.length - getUnitTotal(floor, "others")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "available")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "reserved")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "booked")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "registered")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "investor")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "canceled")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getUnitTotal(floor, "not-for-sale")}
+                    </TableCell>
+                  </TableRow>
 
-                    <TableRow className="hover:bg-card expandable-row">
-                      <TableCell
-                        colSpan={10}
-                        className="p-0 border-b border-t-0"
+                  <TableRow className="hover:bg-card expandable-row">
+                    <TableCell colSpan={10} className="p-0 border-b border-t-0">
+                      <div
+                        style={{
+                          height: isOpen ? `${heights[floorId] || 0}px` : "0px",
+                          opacity: isOpen ? 1 : 0,
+                          overflow: "hidden",
+                          transition: "height 0.3s ease, opacity 0.3s ease",
+                        }}
                       >
-                        <div
-                          style={{
-                            height: isOpen
-                              ? `${heights[floorId] || 0}px`
-                              : "0px",
-                            opacity: isOpen ? 1 : 0,
-                            overflow: "hidden",
-                            transition: "height 0.3s ease, opacity 0.3s ease",
-                          }}
-                        >
-                          <div ref={(e) => (contentRefs.current[floorId] = e)}>
-                            <UnitTable units={floor.units} />
-                          </div>
+                        <div ref={(e) => (contentRefs.current[floorId] = e)}>
+                          <UnitTable units={floor.units} />
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                );
-              })}
-          </TableBody>
-          <TableFooter>
-            <TableRow className="bg-card hover:bg-card sticky bottom-0 z-20">
-              <TableCell colSpan={2} className="text-center font-medium">
-                Total
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {wing.floors.reduce(
-                  (total, floor) => total + floor.units.length,
-                  0,
-                ) - getOverallTotal(wing, "others")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "available")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "reserved")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "booked")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "registered")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "investor")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "canceled")}
-              </TableCell>
-              <TableCell className="text-center font-medium">
-                {getOverallTotal(wing, "not-for-sale")}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        </table>
-      </Scroller>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
+              );
+            })}
+        </TableBody>
+        <TableFooter>
+          <TableRow className="bg-card hover:bg-card sticky bottom-0 z-20">
+            <TableCell colSpan={2} className="text-center font-medium">
+              Total
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {wing.floors.reduce(
+                (total, floor) => total + floor.units.length,
+                0,
+              ) - getOverallTotal(wing, "others")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "available")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "reserved")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "booked")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "registered")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "investor")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "canceled")}
+            </TableCell>
+            <TableCell className="text-center font-medium">
+              {getOverallTotal(wing, "not-for-sale")}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
+      </table>
     </div>
   );
 }
