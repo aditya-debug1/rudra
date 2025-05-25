@@ -594,29 +594,38 @@ const FloorRow: React.FC<{
     </View>
 
     {/* Unit Cells */}
-    {floor.units.map((unit, index) => (
-      <View
-        key={index}
-        style={[
-          styles.unitCell,
-          {
-            backgroundColor: STATUS_CONFIG[unit.status]?.color || "#ffffff",
-            width: getUnitWidth(unit.unitSpan),
-          },
-        ]}
-      >
-        <Text>{unit.unitNumber}</Text>
-        {floor.showArea && unit.status !== "others" && unit.area && (
-          <Text>{unit.area} sqft</Text>
-        )}
-        {floor.showArea && unit.status !== "others" && unit.configuration && (
-          <Text>{unit.configuration.toUpperCase()}</Text>
-        )}
-        {unit.reservedByOrReason && (
-          <Text>{capitalizeWords(unit.reservedByOrReason.toLowerCase())}</Text>
-        )}
-      </View>
-    ))}
+    {floor.units.map((unit, index) => {
+      const addPadding = !unit.reservedByOrReason && !floor.showArea;
+      return (
+        <View
+          key={index}
+          style={[
+            styles.unitCell,
+            {
+              backgroundColor: STATUS_CONFIG[unit.status]?.color || "#ffffff",
+              width: getUnitWidth(unit.unitSpan),
+            },
+            {
+              paddingTop: addPadding ? 8 : "auto",
+              paddingBottom: addPadding ? 8 : "auto",
+            },
+          ]}
+        >
+          <Text>{unit.unitNumber}</Text>
+          {floor.showArea && unit.status !== "others" && unit.area && (
+            <Text>{unit.area} sqft</Text>
+          )}
+          {floor.showArea && unit.status !== "others" && unit.configuration && (
+            <Text>{unit.configuration.toUpperCase()}</Text>
+          )}
+          {unit.reservedByOrReason && (
+            <Text>
+              {capitalizeWords(unit.reservedByOrReason.toLowerCase())}
+            </Text>
+          )}
+        </View>
+      );
+    })}
   </View>
 );
 
