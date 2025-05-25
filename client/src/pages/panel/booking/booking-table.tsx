@@ -27,6 +27,7 @@ import {
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import withStopPropagation from "@/utils/events/withStopPropagation";
 import { simplifyNumber } from "@/utils/func/numberUtils";
+import { capitalizeWords } from "@/utils/func/strUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { MoreHorizontal } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -200,7 +201,7 @@ export const BookingTable = ({ data }: BookingTableProps) => {
                         .replace(",", "")}
                     </TableCell>
                     <TableCell className="text-center">
-                      {booking.applicant}
+                      {capitalizeWords(booking.applicant)}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant={getStatusClr(booking.status)}>
@@ -369,7 +370,7 @@ const MoreAction = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="miniIcon" disabled={!hasPerms}>
           <MoreHorizontal />
         </Button>

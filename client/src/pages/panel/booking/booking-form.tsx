@@ -175,7 +175,7 @@ export const BookingUpdateForm = ({
               >
                 <Input
                   name="applicant"
-                  value={formData.applicant}
+                  value={formData.applicant || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   placeholder="Enter full name of primary applicant"
@@ -185,7 +185,7 @@ export const BookingUpdateForm = ({
               <FormFieldWrapper LabelText="Co-Applicant Name" className="gap-3">
                 <Input
                   name="coApplicant"
-                  value={formData.coApplicant}
+                  value={formData.coApplicant || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   placeholder="Enter co-applicant name (if applicable)"
@@ -201,7 +201,7 @@ export const BookingUpdateForm = ({
               >
                 <Input
                   name="phoneNo"
-                  value={formData.phoneNo}
+                  value={formData.phoneNo || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   placeholder="e.g., +1 (555) 123-4567"
@@ -211,7 +211,7 @@ export const BookingUpdateForm = ({
               <FormFieldWrapper LabelText="Alternate Number" className="gap-3">
                 <Input
                   name="altNo"
-                  value={formData.altNo}
+                  value={formData.altNo || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   placeholder="Additional contact number"
@@ -221,7 +221,7 @@ export const BookingUpdateForm = ({
               <FormFieldWrapper LabelText="Email Address" className="gap-3">
                 <Input
                   name="email"
-                  value={formData.email}
+                  value={formData.email || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   type="email"
@@ -237,7 +237,7 @@ export const BookingUpdateForm = ({
                 className="gap-3"
               >
                 <Select
-                  value={formData.paymentType}
+                  value={formData.paymentType || ""}
                   onValueChange={(value) =>
                     handleSelectChange("paymentType", value)
                   }
@@ -265,7 +265,7 @@ export const BookingUpdateForm = ({
               >
                 <Input
                   name="bookingAmt"
-                  value={formData.bookingAmt}
+                  value={formData.bookingAmt || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   type="number"
@@ -281,7 +281,7 @@ export const BookingUpdateForm = ({
               >
                 <Input
                   name="agreementValue"
-                  value={formData.agreementValue}
+                  value={formData.agreementValue || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   type="number"
@@ -298,7 +298,7 @@ export const BookingUpdateForm = ({
               >
                 <Input
                   name="clientPartner"
-                  value={formData.clientPartner}
+                  value={formData.clientPartner || ""}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   placeholder="Name of partner or agency"
@@ -329,7 +329,7 @@ export const BookingUpdateForm = ({
             <FormFieldWrapper LabelText="Address" className="gap-3">
               <Textarea
                 name="address"
-                value={formData.address}
+                value={formData.address || ""}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 rows={3}
@@ -346,7 +346,7 @@ export const BookingUpdateForm = ({
             >
               <Textarea
                 name="dealTerms"
-                value={formData.dealTerms}
+                value={formData.dealTerms || ""}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 rows={3}
@@ -363,7 +363,7 @@ export const BookingUpdateForm = ({
             >
               <Textarea
                 name="paymentTerms"
-                value={formData.paymentTerms}
+                value={formData.paymentTerms || ""}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 rows={3}
