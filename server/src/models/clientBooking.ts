@@ -1,5 +1,13 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
+type status =
+  | "booked"
+  | "cnc"
+  | "registeration-process"
+  | "loan-process"
+  | "registered"
+  | "canceled";
+
 // Interface extending Document for TypeScript type safety
 export interface ClientBookingType extends Document {
   _id: Types.ObjectId;
@@ -7,20 +15,27 @@ export interface ClientBookingType extends Document {
   applicant: string;
   coApplicant?: string;
   status: string;
+
+  //Unit Details
   project: string;
   wing?: string;
   floor: string;
   unit: Types.ObjectId;
+
+  //Contact
   phoneNo: string;
   altNo?: string;
   email?: string;
   address?: string;
+
+  //Payment
   paymentType: "regular-payment" | "down-payment";
   paymentStatus: string;
   bookingAmt: number;
   dealTerms: string;
   paymentTerms: string;
   salesManager: string;
+  agreementValue: number;
   clientPartner: Types.ObjectId | string;
 }
 
@@ -97,6 +112,10 @@ const ClientBookingSchema: Schema = new Schema(
       type: Number,
       required: true,
       min: [0, "Booking amount cannot be negative"],
+    },
+    agreementValue: {
+      type: Number,
+      required: true,
     },
     dealTerms: {
       type: String,

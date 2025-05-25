@@ -532,6 +532,7 @@ export const BookingForm = () => {
         paymentType: selectedPaymentType,
         paymentStatus: "Token Received",
         bookingAmt: newBooking.bookingDetails.bookingAmt,
+        agreementValue: newBooking.bookingDetails.av,
         dealTerms: newBooking.payment.includedChargesNote,
         paymentTerms: newBooking.payment.paymentTerms,
         salesManager: selectedSM,

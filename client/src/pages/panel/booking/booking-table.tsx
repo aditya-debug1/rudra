@@ -312,6 +312,10 @@ const DetailsRow = ({ booking }: { booking: ClientBooking }) => {
           <h4 className="text-sm font-bold">Email Address:</h4>
           <p className="text-sm">{booking.email || "N/A"}</p>
         </span>
+        <span className="flex items-center gap-3">
+          <h4 className="text-sm font-bold">Agreement Value:</h4>
+          <p className="text-sm">{booking.agreementValue || "N/A"}</p>
+        </span>
         <span className="flex items-center gap-3 col-span-3">
           <h4 className="text-sm font-bold">Deal Terms:</h4>
           <p className="text-sm">{booking.dealTerms}</p>

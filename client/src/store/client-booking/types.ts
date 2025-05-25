@@ -22,6 +22,7 @@ export interface ClientBooking {
   bookingAmt: number;
   dealTerms: string;
   paymentTerms: string;
+  agreementValue: number;
   salesManager: string;
   clientPartner: string;
   createdAt: Date;
@@ -61,6 +62,7 @@ export interface ClientBookingCreateUpdateData {
   paymentType: "regular-payment" | "down-payment";
   paymentStatus: string;
   bookingAmt: number;
+  agreementValue: number;
   dealTerms: string;
   paymentTerms: string;
   salesManager: string;
