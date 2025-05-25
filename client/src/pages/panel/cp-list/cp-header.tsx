@@ -58,13 +58,13 @@ export const ClientPartnerHeader = ({
           </Tooltip>
         )}
         {createClientPartner && (
-          <Tooltip content="Add Client">
+          <Tooltip content="Add Channel Partners">
             <Button
               className="flex-shrink-0"
               onClick={() => navigate("/panel/form/client-partner")}
               variant="outline"
               size="icon"
-              aria-label="Add Clients"
+              aria-label="Add Channel Partners"
             >
               <Plus />
             </Button>

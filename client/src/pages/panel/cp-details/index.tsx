@@ -1,3 +1,4 @@
+import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import ErrorCard from "@/components/custom ui/error-display";
 import { Loader } from "@/components/custom ui/loader";
@@ -9,22 +10,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import {
   ClientPartnerType,
   useClientPartners,
   useClientPartnerStore,
 } from "@/store/client-partner";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
+import { companySchema } from "@/utils/zod-schema/client-partner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClientPartnerInfo } from "./cp-info";
 import { EmployeesInfo } from "./cp-employee-info";
 import { CPFotter } from "./cp-footer";
-import { useAlertDialog } from "@/components/custom ui/alertDialog";
-import { toast } from "@/hooks/use-toast";
-import { formatZodErrors } from "@/utils/func/zodUtils";
-import { companySchema } from "@/utils/zod-schema/client-partner";
+import { ClientPartnerInfo } from "./cp-info";
 
 const DEFAULT_CP = {
   name: "",
@@ -205,9 +205,9 @@ const ClientPartnerDetails = () => {
   // useEffects
   useEffect(() => {
     setBreadcrumbs([
-      { label: "Client Partner List", to: `/panel/client-partners/${pageNo}` },
+      { label: "Channel Partner List", to: `/panel/client-partners/${pageNo}` },
       {
-        label: "Client Partner Details",
+        label: "Channel Partner Details",
       },
     ]);
   }, [setBreadcrumbs, pageNo]);
@@ -260,7 +260,7 @@ const ClientPartnerDetails = () => {
         </CardTitle>
 
         <CardDescription>
-          Client partner details and employee's information
+          Channel partner details and employee's information
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">

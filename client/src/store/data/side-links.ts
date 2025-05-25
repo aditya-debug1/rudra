@@ -27,7 +27,7 @@ export const NavLinks: NavLinkType[] = [
   {
     pageName: "ClientPartner",
     icon: "Handshake",
-    label: "Client Partners",
+    label: "Channel Partners",
     to: "/client-partners/1",
   },
   {

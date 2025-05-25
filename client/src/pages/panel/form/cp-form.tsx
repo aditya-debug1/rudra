@@ -430,7 +430,7 @@ export default function ClientPartnerForm() {
             }
           }}
         >
-          Add Client Partner
+          Add Channel Partner
         </Button>
       </div>
     </div>

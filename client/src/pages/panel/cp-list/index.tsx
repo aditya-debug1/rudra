@@ -1,19 +1,19 @@
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import ErrorCard from "@/components/custom ui/error-display";
+import { Loader } from "@/components/custom ui/loader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useEffect, useState } from "react";
-import { ClientPartnerHeader } from "./cp-header";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/store/auth";
 import {
   useClientPartners,
   useClientPartnerStore,
 } from "@/store/client-partner";
-import { CenterWrapper } from "@/components/custom ui/center-page";
-import { Loader } from "@/components/custom ui/loader";
 import { CustomAxiosError } from "@/utils/types/axios";
-import { useAuth } from "@/store/auth";
-import ErrorCard from "@/components/custom ui/error-display";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ClientPartnerFooter } from "./cp-footer";
+import { ClientPartnerHeader } from "./cp-header";
 import { ClientPartnerTable } from "./cp-table";
 
 const ClientPartnerList = () => {
@@ -108,7 +108,7 @@ const ClientPartnerList = () => {
   return (
     <Card className="w-[90svw] lg:w-full">
       <CardHeader>
-        <CardTitle>Client Partner List</CardTitle>
+        <CardTitle>Channel Partner List</CardTitle>
       </CardHeader>
       <CardContent>
         {/* Client Partner Header */}

@@ -35,9 +35,9 @@ export function ClientPartnerReport() {
           <FileSpreadsheet className="text-gray-500" />
           <span className="text-sm text-gray-500 uppercase">XLSX</span>
         </div>
-        <CardTitle className="mt-4">Client Partner Report</CardTitle>
+        <CardTitle className="mt-4">CP Report</CardTitle>
         <CardDescription>
-          Detailed client partner list in a spreadsheet
+          Detailed channel partner list in a spreadsheet
         </CardDescription>
       </CardHeader>
 

@@ -1,5 +1,3 @@
-import { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import {
   Building2,
   ReceiptText,
@@ -7,17 +5,19 @@ import {
   TicketX,
   User,
 } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useAuth } from "@/store/auth/query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { hasPermission } from "@/hooks/use-role";
+import { useAuth } from "@/store/auth/query";
+import { BookingForm } from "./booking";
+import { CancellationForm } from "./cancellation";
 import ClientForm from "./client-form";
 import ClientPartnerForm from "./cp-form";
-import { BookingForm } from "./booking";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { CancellationForm } from "./cancellation";
 
 type FormType = {
   id: string;
@@ -56,7 +56,7 @@ const Form = () => {
       },
       {
         id: "client-partner",
-        label: "Client Partner",
+        label: "Channel Partner",
         permission: "client-partner-form",
         icon: <Building2 className="h-4 w-4 [@media(min-width:524px)]:mr-2" />,
         component: <ClientPartnerForm />,
