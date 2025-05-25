@@ -111,13 +111,13 @@ export const BookingHeader = ({
           )}
 
           {createBooking && (
-            <Tooltip content="Add Client">
+            <Tooltip content="Add Bookings">
               <Button
                 className="flex-shrink-0"
                 onClick={() => navigate("/panel/form/booking")}
                 variant="outline"
                 size="icon"
-                aria-label="Add Clients"
+                aria-label="Add Bookings"
               >
                 <Plus />
               </Button>
