@@ -30,12 +30,12 @@ const Reports = () => {
 
   return (
     <div className="w-full grid place-items-center grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {showReport("client-report") && <ClientReport />}
-      {showReport("booking-report") && <BookingReport />}
-      {showReport("cp-report") && <ClientPartnerReport />}
       {showReport("inventory-report") && <InventoryReport />}
       {showReport("inventory-summary-report") && <InventorySummaryReport />}
+      {showReport("booking-report") && <BookingReport />}
       {showReport("user-report") && <UserReport />}
+      {showReport("client-report") && <ClientReport />}
+      {showReport("cp-report") && <ClientPartnerReport />}
     </div>
   );
 };
