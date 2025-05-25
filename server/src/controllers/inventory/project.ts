@@ -390,7 +390,7 @@ class ProjectController {
               populate: {
                 path: "units",
                 select:
-                  "_id unitNumber area configuration unitSpan status reservedByOrReason",
+                  "_id unitNumber area configuration unitSpan status reservedByOrReason referenceId",
               },
             },
             {
@@ -399,7 +399,7 @@ class ProjectController {
               populate: {
                 path: "units",
                 select:
-                  "_id unitNumber area configuration unitSpan status reservedByOrReason",
+                  "_id unitNumber area configuration unitSpan status reservedByOrReason referenceId",
               },
             },
           ],
@@ -410,7 +410,7 @@ class ProjectController {
           populate: {
             path: "units",
             select:
-              "_id unitNumber area configuration unitSpan status reservedByOrReason",
+              "_id unitNumber area configuration unitSpan status reservedByOrReason referenceId",
           },
         });
 
