@@ -32,7 +32,7 @@ import { formatAddress } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { bookingUpdateSchema } from "@/utils/zod-schema/booking";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface BookingUpdateFormProps {
   booking: ClientBooking;
@@ -47,20 +47,28 @@ export const BookingUpdateForm = ({
 }: BookingUpdateFormProps) => {
   const [formData, setFormData] = useState<
     Partial<ClientBookingCreateUpdateData>
-  >({
-    applicant: booking.applicant,
-    coApplicant: booking.coApplicant || "",
-    phoneNo: booking.phoneNo,
-    altNo: booking.altNo || "",
-    email: booking.email || "",
-    address: booking.address || "",
-    bookingAmt: booking.bookingAmt,
-    dealTerms: booking.dealTerms,
-    paymentTerms: booking.paymentTerms,
-    salesManager: booking.salesManager,
-    clientPartner: booking.clientPartner,
-    paymentType: booking.paymentType,
-  });
+  >({});
+
+  // Update form data whenever booking changes or dialog opens
+  useEffect(() => {
+    if (isOpen && booking) {
+      setFormData({
+        applicant: booking.applicant,
+        coApplicant: booking.coApplicant || "",
+        phoneNo: booking.phoneNo,
+        altNo: booking.altNo || "",
+        email: booking.email || "",
+        address: booking.address || "",
+        bookingAmt: booking.bookingAmt,
+        agreementValue: booking.agreementValue || 0,
+        dealTerms: booking.dealTerms,
+        paymentTerms: booking.paymentTerms,
+        salesManager: booking.salesManager,
+        clientPartner: booking.clientPartner,
+        paymentType: booking.paymentType,
+      });
+    }
+  }, [booking, isOpen]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateBookingMutation = useUpdateClientBooking();
@@ -221,22 +229,6 @@ export const BookingUpdateForm = ({
                 />
               </FormFieldWrapper>
 
-              <FormFieldWrapper
-                Important
-                ImportantSide="right"
-                LabelText="Booking Amount"
-                className="gap-3"
-              >
-                <Input
-                  name="bookingAmt"
-                  value={formData.bookingAmt}
-                  onChange={handleInputChange}
-                  disabled={isSubmitting}
-                  type="number"
-                  placeholder="Enter amount in USD"
-                />
-              </FormFieldWrapper>
-
               {/* Payment Type */}
               <FormFieldWrapper
                 Important
@@ -265,6 +257,54 @@ export const BookingUpdateForm = ({
                 </Select>
               </FormFieldWrapper>
 
+              <FormFieldWrapper
+                Important
+                ImportantSide="right"
+                LabelText="Booking Amount"
+                className="gap-3"
+              >
+                <Input
+                  name="bookingAmt"
+                  value={formData.bookingAmt}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  type="number"
+                  placeholder="Enter amount"
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper
+                Important
+                ImportantSide="right"
+                LabelText="Agreement Value"
+                className="gap-3"
+              >
+                <Input
+                  name="agreementValue"
+                  value={formData.agreementValue}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  type="number"
+                  placeholder="Enter agreement value"
+                />
+              </FormFieldWrapper>
+
+              {/* Client Partner */}
+              <FormFieldWrapper
+                Important
+                ImportantSide="right"
+                LabelText="Client Partner"
+                className="gap-3"
+              >
+                <Input
+                  name="clientPartner"
+                  value={formData.clientPartner}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="Name of partner or agency"
+                />
+              </FormFieldWrapper>
+
               {/* Sales Manager */}
               <FormFieldWrapper
                 Important
@@ -284,22 +324,6 @@ export const BookingUpdateForm = ({
                 />
               </FormFieldWrapper>
             </div>
-
-            {/* Client Partner */}
-            <FormFieldWrapper
-              Important
-              ImportantSide="right"
-              LabelText="Client Partner"
-              className="gap-3"
-            >
-              <Input
-                name="clientPartner"
-                value={formData.clientPartner}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                placeholder="Name of partner or agency"
-              />
-            </FormFieldWrapper>
 
             {/* Address */}
             <FormFieldWrapper LabelText="Address" className="gap-3">

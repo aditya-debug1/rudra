@@ -26,6 +26,7 @@ import {
 } from "@/store/client-booking/types";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import withStopPropagation from "@/utils/events/withStopPropagation";
+import { simplifyNumber } from "@/utils/func/numberUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { MoreHorizontal } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -105,6 +106,7 @@ export const BookingTable = ({ data }: BookingTableProps) => {
   const handleDelete = async (booking: ClientBooking) => {
     dialog.show({
       config: {
+        alertType: "Danger",
         description: `Are you sure you want to delete this booking for ${booking.applicant}?`,
       },
       onAction: async () => {
@@ -314,7 +316,9 @@ const DetailsRow = ({ booking }: { booking: ClientBooking }) => {
         </span>
         <span className="flex items-center gap-3">
           <h4 className="text-sm font-bold">Agreement Value:</h4>
-          <p className="text-sm">{booking.agreementValue || "N/A"}</p>
+          <p className="text-sm">
+            {simplifyNumber(booking.agreementValue) || "N/A"}
+          </p>
         </span>
         <span className="flex items-center gap-3 col-span-3">
           <h4 className="text-sm font-bold">Deal Terms:</h4>
