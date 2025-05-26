@@ -605,10 +605,7 @@ const FloorRow: React.FC<{
               backgroundColor: STATUS_CONFIG[unit.status]?.color || "#ffffff",
               width: getUnitWidth(unit.unitSpan),
             },
-            {
-              paddingTop: addPadding ? 8 : "auto",
-              paddingBottom: addPadding ? 8 : "auto",
-            },
+            addPadding ? { paddingTop: 8, paddingBottom: 8 } : {},
           ]}
         >
           <Text>{unit.unitNumber}</Text>
