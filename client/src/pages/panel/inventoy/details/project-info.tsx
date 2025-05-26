@@ -85,7 +85,7 @@ export const ProjectInfo = ({
         />
       </FormFieldWrapper>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-2">
         <FormFieldWrapper
           className="gap-3"
           LabelText="Project Start Date"
@@ -151,7 +151,6 @@ export const ProjectInfo = ({
                 project?.commercialUnitPlacement === "projectLevel" &&
                 "hover:bg-primary"
               }`}
-              size="sm"
               variant={
                 project?.commercialUnitPlacement === "projectLevel"
                   ? "default"
@@ -169,7 +168,6 @@ export const ProjectInfo = ({
                 project?.commercialUnitPlacement === "wingLevel" &&
                 "hover:bg-primary"
               }`}
-              size="sm"
               variant={
                 project?.commercialUnitPlacement === "wingLevel"
                   ? "default"
@@ -183,6 +181,18 @@ export const ProjectInfo = ({
               Wing
             </Button>
           </div>
+        </FormFieldWrapper>
+        <FormFieldWrapper
+          className="gap-3"
+          LabelText="Project Stage"
+          Important={isEditable}
+          ImportantSide="right"
+        >
+          <Input
+            onChange={(e) => onProjectChange("projectStage", e.target.value)}
+            value={project?.projectStage || 0}
+            disabled={!isEditable}
+          />
         </FormFieldWrapper>
       </div>
     </div>

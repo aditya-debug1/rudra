@@ -40,6 +40,7 @@ type ProjectPayload = {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: WingPayload[];
   commercialFloors?: FloorPayload[];
+  projectStage: number;
 };
 
 class ProjectController {
@@ -62,6 +63,7 @@ class ProjectController {
         startDate: new Date(projectData.startDate),
         status: projectData.status,
         commercialUnitPlacement: projectData.commercialUnitPlacement,
+        projectStage: projectData.projectStage || 0,
         wings: [], // Will populate these later
         commercialFloors: [], // Will populate these later
       });
@@ -522,6 +524,8 @@ class ProjectController {
       if (projectData.completionDate)
         updateData.completionDate = new Date(projectData.completionDate);
       if (projectData.status) updateData.status = projectData.status;
+      if (projectData.projectStage)
+        updateData.projectStage = projectData.projectStage;
 
       const updatedProject = await Project.findByIdAndUpdate(
         projectId,

@@ -23,6 +23,7 @@ export interface ProjectType {
   commercialUnitPlacement: commercialUnitPlacementType;
   wings: WingType[];
   commercialFloors?: FloorType[];
+  projectStage: number;
 }
 
 export interface WingType {

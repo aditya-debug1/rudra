@@ -54,6 +54,7 @@ export interface ProjectType extends Document {
   status: "planning" | "under-construction" | "completed";
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: Types.ObjectId[];
+  projectStage: number;
   commercialFloors?: Types.ObjectId[];
 }
 
@@ -213,6 +214,10 @@ const ProjectSchema = new Schema<ProjectType>(
       type: String,
       enum: ["projectLevel", "wingLevel"],
       required: true,
+    },
+    projectStage: {
+      type: Number,
+      default: 0,
     },
     wings: [
       {
