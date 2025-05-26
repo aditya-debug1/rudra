@@ -29,6 +29,7 @@ import {
   useCreateClientBooking,
   useUpdateClientBooking,
 } from "@/store/client-booking/query";
+import { ClientBookingCreateUpdateData } from "@/store/client-booking/types";
 import { useClientPartners } from "@/store/client-partner";
 import {
   budgetOptions,
@@ -516,7 +517,7 @@ export const BookingForm = () => {
       }
 
       setIsSubmitting(true);
-      const formattedData = {
+      const formattedData: ClientBookingCreateUpdateData = {
         date: newBooking.bookingDetails.date,
         applicant: newBooking.applicants.primary,
         coApplicant: newBooking.applicants.coApplicant,

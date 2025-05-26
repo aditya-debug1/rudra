@@ -14,7 +14,7 @@ export interface ClientBookingType extends Document {
   date: Date;
   applicant: string;
   coApplicant?: string;
-  status: string;
+  status: status;
 
   //Unit Details
   project: string;
@@ -59,7 +59,16 @@ const ClientBookingSchema: Schema = new Schema(
     status: {
       type: String,
       required: true,
-      trim: true,
+      enum: [
+        "registeration-process",
+        "loan-process",
+        "registered",
+        "canceled",
+        "booked",
+        "cnc",
+      ],
+      default: "booked",
+      index: true,
     },
     project: {
       type: String,

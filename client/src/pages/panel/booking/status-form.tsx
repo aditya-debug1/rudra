@@ -18,7 +18,12 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useUpdateClientBooking } from "@/store/client-booking/query";
-import { ClientBooking } from "@/store/client-booking/types";
+import {
+  bookingClientStatus,
+  ClientBooking,
+} from "@/store/client-booking/types";
+import { useInventory } from "@/store/inventory";
+import { capitalizeWords } from "@/utils/func/strUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { useState } from "react";
 
@@ -33,9 +38,21 @@ export const BookingStatusForm = ({
   isOpen,
   onOpenChange,
 }: BookingStatusFormProps) => {
-  const [bookingStatus, setBookingStatus] = useState(booking.status);
+  const [bookingStatus, setBookingStatus] = useState<bookingClientStatus>(
+    booking.status,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateBookingMutation = useUpdateClientBooking();
+  const { updateUnitStatusMutation } = useInventory();
+
+  const statuses: bookingClientStatus[] = [
+    "booked",
+    "cnc",
+    "canceled",
+    "registered",
+    "loan-process",
+    "registeration-process",
+  ];
 
   const handleSave = async () => {
     try {
@@ -44,6 +61,14 @@ export const BookingStatusForm = ({
         id: booking._id,
         updateData: { status: bookingStatus },
       });
+
+      if (bookingStatus == "registered") {
+        await updateUnitStatusMutation.mutateAsync({
+          unitId: booking.unit._id,
+          status: "registered",
+        });
+      }
+
       toast({
         title: "Status Updated",
         description: "The booking status has been successfully updated.",
@@ -85,7 +110,7 @@ export const BookingStatusForm = ({
           >
             <Select
               value={bookingStatus}
-              onValueChange={setBookingStatus}
+              onValueChange={(e) => setBookingStatus(e as bookingClientStatus)}
               disabled={isSubmitting}
             >
               <SelectTrigger className="w-full">
@@ -93,14 +118,11 @@ export const BookingStatusForm = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="booked">Booked</SelectItem>
-                  <SelectItem value="registeration-process">
-                    Registration Process
-                  </SelectItem>
-                  <SelectItem value="registered">Registered</SelectItem>
-                  <SelectItem value="loan-process">Loan Process</SelectItem>
-                  <SelectItem value="cnc">CNC</SelectItem>
-                  <SelectItem value="canceled">Canceled</SelectItem>
+                  {statuses.map((status) => (
+                    <SelectItem value={status}>
+                      {capitalizeWords(status.replace("-", " "))}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>

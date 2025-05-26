@@ -1,14 +1,23 @@
 // Type for a single client booking
+export type bookingClientStatus =
+  | "booked"
+  | "cnc"
+  | "registeration-process"
+  | "loan-process"
+  | "registered"
+  | "canceled";
+
 export interface ClientBooking {
   _id: string;
   date: Date;
   applicant: string;
   coApplicant?: string;
-  status: string;
+  status: bookingClientStatus;
   project: string;
   wing?: string;
   floor: string;
   unit: {
+    _id: string;
     unitNumber: string;
     area: string;
     configuration: string;
@@ -50,7 +59,7 @@ export interface ClientBookingCreateUpdateData {
   date?: Date;
   applicant: string;
   coApplicant?: string;
-  status: string;
+  status: bookingClientStatus;
   project: string;
   wing?: string;
   floor: string;
