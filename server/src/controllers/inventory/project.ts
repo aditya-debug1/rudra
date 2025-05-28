@@ -1,7 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import { Floor, Project, Unit, Wing } from "../../models/inventory"; // Adjust path as needed
-import { IBankAccount } from "../../models/payment-ledger";
+import {
+  BankDetails,
+  Floor,
+  Project,
+  Unit,
+  Wing,
+} from "../../models/inventory";
 import auditService from "../../utils/audit-service";
 import createError from "../../utils/createError";
 
@@ -41,7 +46,7 @@ type ProjectPayload = {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: WingPayload[];
   commercialFloors?: FloorPayload[];
-  bank?: IBankAccount;
+  bank?: BankDetails;
   projectStage: number;
 };
 
@@ -515,31 +520,32 @@ class ProjectController {
         return next(createError(404, "Project not found"));
       }
 
-      // Update project's direct properties
-      const updateData: Partial<ProjectPayload> = {};
-      if (projectData.name) updateData.name = projectData.name;
-      if (projectData.by) updateData.by = projectData.by;
-      if (projectData.location) updateData.location = projectData.location;
-      if (projectData.description)
-        updateData.description = projectData.description;
-      if (projectData.startDate)
-        updateData.startDate = new Date(projectData.startDate);
-      if (projectData.completionDate)
-        updateData.completionDate = new Date(projectData.completionDate);
-      if (projectData.status) updateData.status = projectData.status;
-      if (projectData.projectStage)
-        updateData.projectStage = projectData.projectStage;
-      if (projectData.bank) updateData.bank = projectData.bank;
-
-      const updatedProject = await Project.findByIdAndUpdate(
-        projectId,
-        updateData,
-        { new: true },
-      );
-
-      if (!updatedProject) {
-        createError(500, "Failed to update project unkonwn error occured");
+      // Find the project document to update
+      const project = await Project.findById(projectId);
+      if (!project) {
+        return next(createError(404, "Project not found"));
       }
+
+      // Update project's direct properties using document methods (to trigger pre-save)
+      if (projectData.name) project.name = projectData.name;
+      if (projectData.by) project.by = projectData.by;
+      if (projectData.location) project.location = projectData.location;
+      if (projectData.description)
+        project.description = projectData.description;
+      if (projectData.startDate)
+        project.startDate = new Date(projectData.startDate);
+      if (projectData.completionDate)
+        project.completionDate = new Date(projectData.completionDate);
+      if (projectData.status) project.status = projectData.status;
+      if (projectData.projectStage)
+        project.projectStage = projectData.projectStage;
+      if (projectData.bank) {
+        project.bank = projectData.bank; // This will trigger pre-save hook
+        project.markModified("bank"); // Ensure Mongoose knows this field changed
+      }
+
+      // Save the document - this will trigger the pre-save hook
+      const updatedProject = await project.save();
 
       // Create audit log
       await auditService.logUpdate(
@@ -553,7 +559,7 @@ class ProjectController {
       res.status(200).json({
         success: true,
         data: {
-          projectId: updatedProject!._id,
+          projectId: updatedProject._id,
           message: "Project updated successfully",
         },
       });

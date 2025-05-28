@@ -1,4 +1,10 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import {
+  EncryptionUtil,
+  isEncrypted,
+  safeDecryptBankDetails,
+  transformBankDetails,
+} from "../utils/bank-encryption";
 
 // Types
 export enum BankAccountType {
@@ -44,14 +50,14 @@ export interface FloorType extends Document {
   type: "residential" | "commercial";
   displayNumber: number;
   showArea: boolean;
-  units: Types.ObjectId[]; // References to Unit documents
+  units: Types.ObjectId[];
 }
 
 export interface WingType extends Document {
   _id: Types.ObjectId;
   projectId: Types.ObjectId;
   name: string;
-  commercialFloors?: Types.ObjectId[]; // References to Floor documents
+  commercialFloors?: Types.ObjectId[];
   floors: Types.ObjectId[];
   unitsPerFloor: number;
   headerFloorIndex: number;
@@ -286,6 +292,62 @@ const ProjectSchema = new Schema<ProjectType>(
   },
   { timestamps: true },
 );
+
+// Pre-save hook for encryption
+ProjectSchema.pre<ProjectType>("save", function (next) {
+  if (this.isModified("bank") && this.bank) {
+    try {
+      // Only encrypt if not already encrypted
+      const bankDetails = this.bank;
+      if (!isEncrypted(bankDetails.holderName)) {
+        this.bank = EncryptionUtil.encryptBankDetails(bankDetails);
+      }
+    } catch (error) {
+      console.error("Encryption error:", error);
+      return next(new Error("Failed to encrypt bank details"));
+    }
+  }
+  next();
+});
+
+// Post hooks for decryption - use transform approach
+ProjectSchema.post("find", function (docs: ProjectType[]) {
+  if (docs && Array.isArray(docs)) {
+    docs.forEach(transformBankDetails);
+  }
+});
+
+ProjectSchema.post("findOne", function (doc: ProjectType | null) {
+  if (doc) {
+    transformBankDetails(doc);
+  }
+});
+
+ProjectSchema.post("findOneAndUpdate", function (doc: ProjectType | null) {
+  if (doc) {
+    transformBankDetails(doc);
+  }
+});
+
+// Add toJSON transform to ensure decryption when converting to JSON
+ProjectSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    if (ret.bank) {
+      ret.bank = safeDecryptBankDetails(ret.bank);
+    }
+    return ret;
+  },
+});
+
+// Add toObject transform to ensure decryption when converting to object
+ProjectSchema.set("toObject", {
+  transform: function (doc, ret) {
+    if (ret.bank) {
+      ret.bank = safeDecryptBankDetails(ret.bank);
+    }
+    return ret;
+  },
+});
 
 // Create models
 export const Unit = mongoose.model<UnitType>("Unit", UnitSchema);
