@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { Floor, Project, Unit, Wing } from "../../models/inventory"; // Adjust path as needed
+import { IBankAccount } from "../../models/payment-ledger";
 import auditService from "../../utils/audit-service";
 import createError from "../../utils/createError";
 
@@ -40,6 +41,7 @@ type ProjectPayload = {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: WingPayload[];
   commercialFloors?: FloorPayload[];
+  bank?: IBankAccount;
   projectStage: number;
 };
 
@@ -64,6 +66,7 @@ class ProjectController {
         status: projectData.status,
         commercialUnitPlacement: projectData.commercialUnitPlacement,
         projectStage: projectData.projectStage || 0,
+        bank: projectData.bank,
         wings: [], // Will populate these later
         commercialFloors: [], // Will populate these later
       });
@@ -526,6 +529,7 @@ class ProjectController {
       if (projectData.status) updateData.status = projectData.status;
       if (projectData.projectStage)
         updateData.projectStage = projectData.projectStage;
+      if (projectData.bank) updateData.bank = projectData.bank;
 
       const updatedProject = await Project.findByIdAndUpdate(
         projectId,

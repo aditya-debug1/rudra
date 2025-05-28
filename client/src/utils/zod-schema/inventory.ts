@@ -129,7 +129,51 @@ const projectSchema = z
     }
   });
 
+const bankDetailsSchema = z.object({
+  holderName: z
+    .string()
+    .trim()
+    .min(3, "Account holder name must be at least 3 characters")
+    .max(100, "Account holder name must be under 100 characters")
+    .regex(/^[a-zA-Z\s.'-]+$/, "Name contains invalid characters"),
+
+  accountNumber: z
+    .string()
+    .trim()
+    .min(8, "Account number must be at least 8 digits")
+    .max(18, "Account number must be under 18 digits")
+    .regex(/^\d+$/, "Account number must contain only digits"),
+
+  name: z
+    .string()
+    .trim()
+    .min(2, "Bank name must be at least 2 characters")
+    .max(100, "Bank name must be under 100 characters")
+    .regex(/^[a-zA-Z\s.'-]+$/, "Bank name contains invalid characters"),
+
+  branch: z
+    .string()
+    .trim()
+    .min(2, "Branch name must be at least 2 characters")
+    .max(100, "Branch name must be under 100 characters")
+    .regex(/^[a-zA-Z0-9\s.'-]+$/, "Branch name contains invalid characters"),
+
+  ifscCode: z
+    .string()
+    .trim()
+    .length(11, "IFSC code must be exactly 11 characters")
+    .regex(
+      /^[A-Z]{4}0[A-Z0-9]{6}$/,
+      "IFSC code must be in the format: 4 letters, 0, 6 alphanumeric characters",
+    ),
+
+  accountType: z.enum(["saving", "current"], {
+    required_error: "Account type is required",
+  }),
+});
+
 export {
+  bankDetailsSchema,
   commercialUnitPlacementSchema,
   floorSchema,
   floorTypeSchema,

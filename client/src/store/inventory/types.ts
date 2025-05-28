@@ -24,6 +24,14 @@ export interface ProjectType {
   wings: WingType[];
   commercialFloors?: FloorType[];
   projectStage: number;
+  bank: {
+    holderName: string;
+    accountNumber: string;
+    name: string;
+    branch: string;
+    ifscCode: string;
+    accountType: "saving" | "current";
+  };
 }
 
 export interface WingType {

@@ -173,6 +173,15 @@ export const inventoryApi = {
       description: string;
       startDate: Date | string;
       completionDate?: Date | string;
+      projectStage: number;
+      bank: {
+        holderName: string;
+        accountNumber: string;
+        name: string;
+        branch: string;
+        ifscCode: string;
+        accountType: "saving" | "current";
+      };
       status: "planning" | "under-construction" | "completed";
     }>,
   ) => {

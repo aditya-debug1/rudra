@@ -218,7 +218,9 @@ export default function InventoryDetails() {
       <CardFooter className="justify-end gap-2">
         <ProjectDetailsFooter
           isEditable={isEditable}
+          hasBank={!!editableProject?.bank}
           handleEditToggle={handleEditToggle}
+          projectId={editableProject?._id}
           handleDeleteProject={handleDeleteProject}
         />
       </CardFooter>

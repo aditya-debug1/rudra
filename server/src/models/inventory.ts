@@ -1,6 +1,11 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 // Types
+export enum BankAccountType {
+  SAVINGS = "savings",
+  CURRENT = "current",
+}
+
 export type UnitStatus =
   | "reserved"
   | "available"
@@ -10,6 +15,15 @@ export type UnitStatus =
   | "investor"
   | "not-for-sale"
   | "others";
+
+export interface BankDetails {
+  holderName: string;
+  accountNumber: string;
+  name: string;
+  branch: string;
+  ifscCode: string;
+  accountType: BankAccountType;
+}
 
 export interface UnitType extends Document {
   _id: Types.ObjectId;
@@ -55,6 +69,7 @@ export interface ProjectType extends Document {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: Types.ObjectId[];
   projectStage: number;
+  bank?: BankDetails;
   commercialFloors?: Types.ObjectId[];
 }
 
@@ -180,6 +195,40 @@ const WingSchema = new Schema<WingType>(
   { timestamps: true },
 );
 
+const BankDetailsSchema = new Schema<BankDetails>({
+  holderName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  accountNumber: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  branch: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  ifscCode: {
+    type: String,
+    required: true,
+    trim: true,
+    match: [/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, "Please provide a valid IFSC code"],
+  },
+  accountType: {
+    type: String,
+    enum: Object.values(BankAccountType),
+    required: true,
+  },
+});
+
 const ProjectSchema = new Schema<ProjectType>(
   {
     name: {
@@ -231,6 +280,9 @@ const ProjectSchema = new Schema<ProjectType>(
         ref: "Floor",
       },
     ],
+    bank: {
+      type: BankDetailsSchema,
+    },
   },
   { timestamps: true },
 );
