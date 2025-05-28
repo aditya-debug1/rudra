@@ -152,7 +152,7 @@ export const BankDetailsForm = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md px-2">
-        <DialogHeader className="space-y-2">
+        <DialogHeader className="space-y-2 px-4">
           <DialogTitle className="text-xl font-semibold">
             {bankDetails ? "Update Bank Details" : "Add Bank Details"}
           </DialogTitle>
