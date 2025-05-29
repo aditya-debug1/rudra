@@ -32,7 +32,6 @@ const BookingList = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useClientBookings(filters);
   const { logout: handleLogout } = useAuth(true);
-  console.log(filters);
 
   // Event Handlers
   const debouncedSetSearch = useDebounce((value: string) => {
