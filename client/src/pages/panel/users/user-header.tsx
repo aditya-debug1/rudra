@@ -92,46 +92,48 @@ const Filter = (props: { filter: FilterProps }) => {
   const showUserAddButton = hasPermission(combinedRole, "Users", "create-user");
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-wrap justify-around sm:justify-start">
       <Input
         placeholder="Search users"
-        className="max-w-xs"
+        className="sm:max-w-52"
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
       />
-      <Select onValueChange={onRoleChange} value={selectedRole}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Roles" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Roles</SelectLabel>
-            {roles.data &&
-              roles.data.map((role: RoleArrayType) => {
-                return (
-                  <SelectItem value={role.name} key={role._id}>
-                    {toProperCase(role.name)}
-                  </SelectItem>
-                );
-              })}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
 
-      {isFiltered && (
-        <Tooltip content="Clear Filter" side="bottom">
-          <Button
-            onClick={onClearFilter}
-            variant="outline"
-            size="icon"
-            className="px-2"
-          >
-            <FilterX size={20} />
-          </Button>
-        </Tooltip>
-      )}
+      <span className="flex gap-2">
+        <Select onValueChange={onRoleChange} value={selectedRole}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Roles" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Roles</SelectLabel>
+              {roles.data &&
+                roles.data.map((role: RoleArrayType) => {
+                  return (
+                    <SelectItem value={role.name} key={role._id}>
+                      {toProperCase(role.name)}
+                    </SelectItem>
+                  );
+                })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
 
-      {showUserAddButton && <UserAddButton />}
+        {isFiltered && (
+          <Tooltip content="Clear Filter" side="bottom">
+            <Button
+              onClick={onClearFilter}
+              variant="outline"
+              size="icon"
+              className="px-2"
+            >
+              <FilterX size={20} />
+            </Button>
+          </Tooltip>
+        )}
+        {showUserAddButton && <UserAddButton />}
+      </span>
     </div>
   );
 };
