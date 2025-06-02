@@ -106,17 +106,17 @@ const BookingLedgerList = () => {
       });
     }
 
-    if (!project.data.bank) {
-      return toast({
-        title: "Error Occurred",
-        description: `Missing project bank data for generating demand letter`,
-        variant: "destructive",
-      });
-    }
-
     try {
       const cb = clientBooking.data;
       const p = project.data;
+
+      if (!p.bank) {
+        return toast({
+          title: "Error Occurred",
+          description: `Missing project bank data for generating demand letter`,
+          variant: "destructive",
+        });
+      }
 
       // Calculate amount received
       const amountReceived =

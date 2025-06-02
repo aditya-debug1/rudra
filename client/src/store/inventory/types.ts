@@ -24,7 +24,7 @@ export interface ProjectType {
   wings: WingType[];
   commercialFloors?: FloorType[];
   projectStage: number;
-  bank: {
+  bank?: {
     holderName: string;
     accountNumber: string;
     name: string;

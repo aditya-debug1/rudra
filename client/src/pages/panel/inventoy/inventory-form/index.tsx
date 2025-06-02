@@ -36,6 +36,7 @@ const DEFAULT_PROJECT: ProjectType = {
   status: "planning",
   commercialUnitPlacement: "projectLevel",
   wings: [],
+  projectStage: 0,
 };
 
 const InventoryForm = () => {
