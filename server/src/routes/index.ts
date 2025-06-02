@@ -1,6 +1,7 @@
 import analyticsRoute from "./analytics";
 import auditRoute from "./audit";
 import authRoute from "./auth";
+import bookingLedgerRoute from "./booking-ledger";
 import clientRoute from "./client";
 import clientPartnerRoute from "./client-partner";
 import clientBookingRoute from "./clientBooking";
@@ -13,6 +14,7 @@ export {
   analyticsRoute,
   auditRoute,
   authRoute,
+  bookingLedgerRoute,
   clientBookingRoute,
   clientPartnerRoute,
   clientRoute,

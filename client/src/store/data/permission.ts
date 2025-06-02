@@ -60,6 +60,16 @@ export const AdminPermissions: Permission[] = [
     ],
   },
   {
+    page: "BookingLedger",
+    actions: [
+      "view-booking-ledger",
+      "add-booking-payment",
+      "restore-booking-payment",
+      "delete-booking-payment",
+      "view-deleted-booking-payments",
+    ],
+  },
+  {
     page: "Inventory",
     actions: [
       "view-inventory",
@@ -210,6 +220,20 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
       { value: "update-booking", label: "Update Booking" },
       { value: "update-booking-status", label: "Update Booking Status" },
       { value: "delete-booking", label: "Delete Booking" },
+    ],
+  },
+  {
+    page: "BookingLedger",
+    pageLabel: "Booking Ledger Sections",
+    actions: [
+      { value: "view-booking-ledger", label: "View Booking Ledger" },
+      { value: "add-booking-payment", label: "Add Booking Payment" },
+      { value: "restore-booking-payment", label: "Restore Booking Payment" },
+      { value: "delete-booking-payment", label: "Delete Booking Payment" },
+      {
+        value: "view-deleted-booking-payments",
+        label: "View Deleted Booking Payments",
+      },
     ],
   },
   {

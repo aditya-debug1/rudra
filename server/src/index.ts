@@ -7,6 +7,7 @@ import {
   analyticsRoute,
   auditRoute,
   authRoute,
+  bookingLedgerRoute,
   clientBookingRoute,
   clientPartnerRoute,
   clientRoute,
@@ -69,6 +70,7 @@ app.use("/api/role", roleRoute);
 app.use("/api/audit", auditRoute);
 app.use("/api/client", clientRoute);
 app.use("/api/client-booking", clientBookingRoute);
+app.use("/api/booking-ledger", bookingLedgerRoute);
 app.use("/api/visit", visitRoute);
 app.use("/api/client-partner", clientPartnerRoute);
 app.use("/api/analytics", analyticsRoute);

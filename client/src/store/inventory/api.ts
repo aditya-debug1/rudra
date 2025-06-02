@@ -154,6 +154,16 @@ export const inventoryApi = {
     return response.data;
   },
 
+  // Get a single project by ID
+  getProjectByName: async (projectName: string) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append("projectName", projectName);
+    const response = await newRequest.get<GetProjectByIdResponse>(
+      `/inventory/project/name?${queryParams}`,
+    );
+    return response.data;
+  },
+
   // Create a new project
   createProject: async (projectData: ProjectPayload) => {
     const response = await newRequest.post<ProjectResponse>(

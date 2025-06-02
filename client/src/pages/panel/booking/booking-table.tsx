@@ -204,13 +204,16 @@ export const BookingTable = ({ data }: BookingTableProps) => {
                       {capitalizeWords(booking.applicant)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={getStatusClr(booking.status)}>
+                      <Badge
+                        variant={getStatusClr(booking.status)}
+                        className="whitespace-nowrap"
+                      >
                         {booking.status == "registeration-process"
                           ? "REG. PROCESS"
                           : booking.status.replace("-", " ").toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center whitespace-nowrap">
                       {booking.project}
                     </TableCell>
                     <TableCell className="text-center">
@@ -351,6 +354,7 @@ const MoreAction = ({
   handleUpdateModal: (booking: ClientBooking) => void;
   handleStatusModal: (booking: ClientBooking) => void;
 }) => {
+  const navigate = useNavigate();
   const { combinedRole } = useAuth(true);
 
   const Permissions = {
@@ -361,6 +365,9 @@ const MoreAction = ({
       "Booking",
       "update-booking-status",
     ),
+    ledgerPerms:
+      hasPermission(combinedRole, "BookingLedger", "view-booking-ledger") &&
+      booking.status == "registered",
   };
 
   const hasPerms =
@@ -378,6 +385,22 @@ const MoreAction = ({
       {hasPerms && (
         <DropdownMenuContent>
           <DropdownMenuLabel>Actions Menu</DropdownMenuLabel>
+          {Permissions.ledgerPerms && (
+            <DropdownMenuItem
+              onClick={withStopPropagation(() =>
+                navigate(`ledger/${booking._id}`),
+              )}
+            >
+              Open Ledger
+            </DropdownMenuItem>
+          )}
+          {Permissions.changeStatus && (
+            <DropdownMenuItem
+              onClick={withStopPropagation(() => handleStatusModal(booking))}
+            >
+              Change Status
+            </DropdownMenuItem>
+          )}
           {Permissions.updateBooking && (
             <DropdownMenuItem
               onClick={withStopPropagation(() => handleUpdateModal(booking))}
@@ -390,13 +413,6 @@ const MoreAction = ({
               onClick={withStopPropagation(() => handleDelete(booking))}
             >
               Delete Booking
-            </DropdownMenuItem>
-          )}
-          {Permissions.changeStatus && (
-            <DropdownMenuItem
-              onClick={withStopPropagation(() => handleStatusModal(booking))}
-            >
-              Change Status
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

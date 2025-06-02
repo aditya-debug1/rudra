@@ -35,6 +35,15 @@ export const useInventory = () => {
       staleTime: 2 * 60 * 1000, // 2 minutes
     });
 
+  // Get a single project by Name
+  const useProjectByName = (projectName: string) =>
+    useQuery({
+      queryKey: ["project", projectName],
+      queryFn: () => inventoryApi.getProjectByName(projectName),
+      enabled: !!projectName,
+      staleTime: 2 * 60 * 1000, // 2 minutes
+    });
+
   // Project Mutations
   // ----------------
 
@@ -194,6 +203,7 @@ export const useInventory = () => {
     useProjectsList,
     useProjectsStructure,
     useProjectDetails,
+    useProjectByName,
 
     // Project mutations
     createProjectMutation,

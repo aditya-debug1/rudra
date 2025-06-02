@@ -1,17 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import {
-  EncryptionUtil,
-  isEncrypted,
-  safeDecryptBankDetails,
-  transformBankDetails,
-} from "../utils/bank-encryption";
 
 // Types
-export enum BankAccountType {
-  SAVINGS = "savings",
-  CURRENT = "current",
-}
-
 export type UnitStatus =
   | "reserved"
   | "available"
@@ -21,15 +10,6 @@ export type UnitStatus =
   | "investor"
   | "not-for-sale"
   | "others";
-
-export interface BankDetails {
-  holderName: string;
-  accountNumber: string;
-  name: string;
-  branch: string;
-  ifscCode: string;
-  accountType: BankAccountType;
-}
 
 export interface UnitType extends Document {
   _id: Types.ObjectId;
@@ -75,7 +55,7 @@ export interface ProjectType extends Document {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: Types.ObjectId[];
   projectStage: number;
-  bank?: BankDetails;
+  bank?: Types.ObjectId;
   commercialFloors?: Types.ObjectId[];
 }
 
@@ -201,40 +181,6 @@ const WingSchema = new Schema<WingType>(
   { timestamps: true },
 );
 
-const BankDetailsSchema = new Schema<BankDetails>({
-  holderName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  accountNumber: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  branch: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  ifscCode: {
-    type: String,
-    required: true,
-    trim: true,
-    match: [/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, "Please provide a valid IFSC code"],
-  },
-  accountType: {
-    type: String,
-    enum: Object.values(BankAccountType),
-    required: true,
-  },
-});
-
 const ProjectSchema = new Schema<ProjectType>(
   {
     name: {
@@ -287,67 +233,12 @@ const ProjectSchema = new Schema<ProjectType>(
       },
     ],
     bank: {
-      type: BankDetailsSchema,
+      type: Schema.Types.ObjectId,
+      ref: "Bank",
     },
   },
   { timestamps: true },
 );
-
-// Pre-save hook for encryption
-ProjectSchema.pre<ProjectType>("save", function (next) {
-  if (this.isModified("bank") && this.bank) {
-    try {
-      // Only encrypt if not already encrypted
-      const bankDetails = this.bank;
-      if (!isEncrypted(bankDetails.holderName)) {
-        this.bank = EncryptionUtil.encryptBankDetails(bankDetails);
-      }
-    } catch (error) {
-      console.error("Encryption error:", error);
-      return next(new Error("Failed to encrypt bank details"));
-    }
-  }
-  next();
-});
-
-// Post hooks for decryption - use transform approach
-ProjectSchema.post("find", function (docs: ProjectType[]) {
-  if (docs && Array.isArray(docs)) {
-    docs.forEach(transformBankDetails);
-  }
-});
-
-ProjectSchema.post("findOne", function (doc: ProjectType | null) {
-  if (doc) {
-    transformBankDetails(doc);
-  }
-});
-
-ProjectSchema.post("findOneAndUpdate", function (doc: ProjectType | null) {
-  if (doc) {
-    transformBankDetails(doc);
-  }
-});
-
-// Add toJSON transform to ensure decryption when converting to JSON
-ProjectSchema.set("toJSON", {
-  transform: function (doc, ret) {
-    if (ret.bank) {
-      ret.bank = safeDecryptBankDetails(ret.bank);
-    }
-    return ret;
-  },
-});
-
-// Add toObject transform to ensure decryption when converting to object
-ProjectSchema.set("toObject", {
-  transform: function (doc, ret) {
-    if (ret.bank) {
-      ret.bank = safeDecryptBankDetails(ret.bank);
-    }
-    return ret;
-  },
-});
 
 // Create models
 export const Unit = mongoose.model<UnitType>("Unit", UnitSchema);

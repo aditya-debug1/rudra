@@ -37,6 +37,7 @@ export interface ClientBookingType extends Document {
   salesManager: string;
   agreementValue: number;
   clientPartner: Types.ObjectId | string;
+  payments: Types.ObjectId[];
 }
 
 // Create the schema
@@ -153,6 +154,7 @@ const ClientBookingSchema: Schema = new Schema(
         message: "clientPartner must be either a string or a valid ObjectId",
       },
     },
+    payments: [{ type: Schema.Types.ObjectId, ref: "BookingLedger" }],
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps

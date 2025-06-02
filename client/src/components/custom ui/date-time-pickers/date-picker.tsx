@@ -18,6 +18,7 @@ interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
   defaultDate?: Date;
   onDateChange: (date: Date) => void;
+  disabled?: boolean;
 }
 
 export function DatePicker({
@@ -27,6 +28,7 @@ export function DatePicker({
   onDateChange,
   className,
   label,
+  disabled = false,
 }: DatePickerProps) {
   // useStates
   const [isOpen, setIsOpen] = useState(false);
@@ -71,6 +73,7 @@ export function DatePicker({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          disabled={disabled}
           variant={"outline"}
           className={cn(
             "w-[280px] justify-start text-left font-normal",

@@ -58,6 +58,16 @@ export const defaultRootPermissions = [
     ],
   },
   {
+    page: "BookingLedger",
+    actions: [
+      "view-booking-ledger",
+      "add-booking-payment",
+      "restore-booking-payment",
+      "delete-booking-payment",
+      "view-deleted-booking-payments",
+    ],
+  },
+  {
     page: "Inventory",
     actions: [
       "view-inventory",

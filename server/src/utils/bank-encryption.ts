@@ -1,36 +1,46 @@
 // src/utils/bank-encryption.ts
 import * as CryptoJS from "crypto-js";
-import { BankDetails } from "../models/inventory";
+import { BankDetailsType } from "../models/bank-details";
 
-// Helper function to check if data is encrypted
+// Improved helper function to check if data is encrypted
 export function isEncrypted(value: string): boolean {
   if (!value || typeof value !== "string") return false;
 
-  try {
-    // Try to decrypt - if it fails or returns empty, it's likely not encrypted
-    const decrypted = CryptoJS.AES.decrypt(
-      value,
-      process.env.ENCRYPTION_KEY || "default-32-char-key-for-development-only",
-    ).toString(CryptoJS.enc.Utf8);
-
-    // If decryption returns empty string, it's probably not encrypted
-    // or if the original value looks like plain text (no special encryption characters)
-    return !!(
-      (decrypted.length > 0 && value.includes("U2FsdGVkX1")) ||
-      value.match(/^[A-Za-z0-9+/]+=*$/)
-    );
-  } catch (error) {
-    return false;
+  // CryptoJS AES encrypted strings start with "U2FsdGVkX1" when using default settings
+  // or have a base64-like pattern
+  if (value.startsWith("U2FsdGVkX1")) {
+    return true;
   }
+
+  // Additional check for base64 pattern (but not too strict to avoid false positives)
+  const base64Pattern = /^[A-Za-z0-9+/]+=*$/;
+  if (base64Pattern.test(value) && value.length > 20) {
+    // Encrypted strings are usually longer
+    try {
+      // Try to decrypt - if it succeeds and returns meaningful data, it's encrypted
+      const decrypted = CryptoJS.AES.decrypt(
+        value,
+        process.env.ENCRYPTION_KEY ||
+          "default-32-char-key-for-development-only",
+      ).toString(CryptoJS.enc.Utf8);
+
+      return decrypted.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  return false;
 }
 
 // Helper function to safely decrypt bank details
-export function safeDecryptBankDetails(bankDetails: BankDetails): BankDetails {
+export function safeDecryptBankDetails(
+  bankDetails: BankDetailsType,
+): BankDetailsType {
   if (!bankDetails) return bankDetails;
 
   try {
-    // Check each field individually to see if it's encrypted
-    const result: BankDetails = { ...bankDetails };
+    const result: BankDetailsType = { ...bankDetails };
 
     if (isEncrypted(bankDetails.holderName)) {
       result.holderName = EncryptionUtil.decryptString(bankDetails.holderName);
@@ -57,15 +67,34 @@ export function safeDecryptBankDetails(bankDetails: BankDetails): BankDetails {
     return result;
   } catch (error) {
     console.warn("Bank details decryption failed:", error);
-    return bankDetails; // Return original data if decryption fails
+    return bankDetails;
   }
 }
 
-// Transform function to decrypt on retrieval
-export function transformBankDetails(doc: any) {
-  if (doc && doc.bank) {
-    doc.bank = safeDecryptBankDetails(doc.bank);
+// Transform function for Bank documents (separate collection)
+export function transformBankDetailsDocument(doc: any) {
+  if (doc) {
+    if (isEncrypted(doc.holderName)) {
+      doc.holderName = EncryptionUtil.decryptString(doc.holderName);
+    }
+    if (isEncrypted(doc.accountNumber)) {
+      doc.accountNumber = EncryptionUtil.decryptString(doc.accountNumber);
+    }
+    if (isEncrypted(doc.name)) {
+      doc.name = EncryptionUtil.decryptString(doc.name);
+    }
+    if (isEncrypted(doc.branch)) {
+      doc.branch = EncryptionUtil.decryptString(doc.branch);
+    }
+    if (isEncrypted(doc.ifscCode)) {
+      doc.ifscCode = EncryptionUtil.decryptString(doc.ifscCode);
+    }
   }
+  return doc;
+}
+
+// Transform function for projects (kept for compatibility)
+export function transformBankDetails(doc: any) {
   return doc;
 }
 
@@ -98,11 +127,9 @@ export class EncryptionUtil {
         this.ENCRYPTION_KEY,
       ).toString(CryptoJS.enc.Utf8);
 
-      // If decryption returns empty string, return original value
       return decrypted || encryptedValue;
     } catch (error) {
       console.error("String decryption failed:", error);
-      // Return original value if decryption fails
       return encryptedValue;
     }
   }
@@ -110,7 +137,7 @@ export class EncryptionUtil {
   /**
    * Encrypt bank details object
    */
-  static encryptBankDetails(data: BankDetails): BankDetails {
+  static encryptBankDetails(data: BankDetailsType): BankDetailsType {
     if (!data) return data;
 
     try {
@@ -121,7 +148,6 @@ export class EncryptionUtil {
         name: this.encryptString(data.name),
         branch: this.encryptString(data.branch),
         ifscCode: this.encryptString(data.ifscCode),
-        // accountType doesn't need encryption
         accountType: data.accountType,
       };
     } catch (error) {
@@ -133,7 +159,7 @@ export class EncryptionUtil {
   /**
    * Decrypt bank details object
    */
-  static decryptBankDetails(encryptedData: BankDetails): BankDetails {
+  static decryptBankDetails(encryptedData: BankDetailsType): BankDetailsType {
     if (!encryptedData) return encryptedData;
 
     try {
@@ -144,40 +170,40 @@ export class EncryptionUtil {
         name: this.decryptString(encryptedData.name),
         branch: this.decryptString(encryptedData.branch),
         ifscCode: this.decryptString(encryptedData.ifscCode),
-        // accountType doesn't need decryption
         accountType: encryptedData.accountType,
       };
     } catch (error) {
       console.error("Bank details decryption failed:", error);
-      // Return original data if decryption fails completely
       return encryptedData;
     }
   }
 
   /**
-   * Check if a string appears to be encrypted
+   * Improved check if a string appears to be encrypted
    */
   static isEncrypted(value: string): boolean {
     if (!value || typeof value !== "string") return false;
 
-    try {
-      // CryptoJS encrypted strings typically contain specific patterns
-      // Check for base64-like pattern and try decryption
-      const hasEncryptionPattern =
-        value.includes("U2FsdGVkX1") || /^[A-Za-z0-9+/]+=*$/.test(value);
-
-      if (!hasEncryptionPattern) return false;
-
-      // Try to decrypt and see if we get meaningful result
-      const decrypted = CryptoJS.AES.decrypt(
-        value,
-        this.ENCRYPTION_KEY,
-      ).toString(CryptoJS.enc.Utf8);
-
-      // If decryption succeeds and returns non-empty string, it's likely encrypted
-      return decrypted.length > 0;
-    } catch (error) {
-      return false;
+    // CryptoJS encrypted strings typically start with "U2FsdGVkX1"
+    if (value.startsWith("U2FsdGVkX1")) {
+      return true;
     }
+
+    // Additional pattern check with length consideration
+    const base64Pattern = /^[A-Za-z0-9+/]+=*$/;
+    if (base64Pattern.test(value) && value.length > 20) {
+      try {
+        const decrypted = CryptoJS.AES.decrypt(
+          value,
+          this.ENCRYPTION_KEY,
+        ).toString(CryptoJS.enc.Utf8);
+
+        return decrypted.length > 0;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    return false;
   }
 }

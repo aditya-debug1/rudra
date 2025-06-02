@@ -1,12 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import {
-  BankDetails,
-  Floor,
-  Project,
-  Unit,
-  Wing,
-} from "../../models/inventory";
+import { Bank, BankDetailsPayload } from "../../models/bank-details";
+import { Floor, Project, Unit, Wing } from "../../models/inventory";
 import auditService from "../../utils/audit-service";
 import createError from "../../utils/createError";
 
@@ -46,7 +41,7 @@ type ProjectPayload = {
   commercialUnitPlacement: "projectLevel" | "wingLevel";
   wings: WingPayload[];
   commercialFloors?: FloorPayload[];
-  bank?: BankDetails;
+  bank?: BankDetailsPayload;
   projectStage: number;
 };
 
@@ -478,7 +473,75 @@ class ProjectController {
           populate: {
             path: "units",
           },
-        });
+        })
+        .populate({ path: "bank" });
+
+      if (!project) {
+        return next(createError(404, "Project not found"));
+      }
+
+      res.status(200).json({
+        success: true,
+        data: project,
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Failed to fetch project",
+        ),
+      );
+    }
+  }
+
+  /**
+   * Gets a project by name with all its related data (wings, floors, units)
+   */
+  async getProjectByName(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { projectName } = req.query;
+
+      // Basic validation for project name
+      if (
+        !projectName ||
+        typeof projectName !== "string" ||
+        projectName.trim().length === 0
+      ) {
+        return next(createError(400, "Invalid or missing project name"));
+      }
+
+      // Find project by name (case-insensitive search)
+      const project = await Project.findOne({
+        name: { $regex: new RegExp(`^${projectName.trim()}$`, "i") },
+      })
+        .populate({
+          path: "wings",
+          populate: [
+            {
+              path: "floors",
+              populate: {
+                path: "units",
+              },
+            },
+            {
+              path: "commercialFloors",
+              populate: {
+                path: "units",
+              },
+            },
+          ],
+        })
+        .populate({
+          path: "commercialFloors",
+          populate: {
+            path: "units",
+          },
+        })
+        .populate({ path: "bank" });
 
       if (!project) {
         return next(createError(404, "Project not found"));
@@ -539,12 +602,30 @@ class ProjectController {
       if (projectData.status) project.status = projectData.status;
       if (projectData.projectStage)
         project.projectStage = projectData.projectStage;
+
+      // Handle bank details update/creation
       if (projectData.bank) {
-        project.bank = projectData.bank; // This will trigger pre-save hook
-        project.markModified("bank"); // Ensure Mongoose knows this field changed
+        // Check if project already has a bank
+        if (project.bank) {
+          // Update existing bank
+          await Bank.findByIdAndUpdate(project.bank, {
+            ...projectData.bank,
+            projectId: project._id, // Ensure projectId is set correctly
+          });
+        } else {
+          // Create new bank
+          const bank = new Bank({
+            projectId,
+            ...projectData.bank,
+          });
+          await bank.save();
+
+          // Update project with bank reference
+          project.bank = bank._id;
+        }
       }
 
-      // Save the document - this will trigger the pre-save hook
+      // Save the project document - this will trigger the pre-save hook
       const updatedProject = await project.save();
 
       // Create audit log

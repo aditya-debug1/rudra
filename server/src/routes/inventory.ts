@@ -10,6 +10,7 @@ router.use(verifyToken);
 router.post("/project", projectController.createProject);
 router.get("/project", projectController.getAllProjects);
 router.get("/project-structure", projectController.getProjectsStructure);
+router.get("/project/name", projectController.getProjectByName);
 router.get("/project/:projectId", projectController.getProjectById);
 router.put("/project/:projectId", projectController.updateProject);
 router.delete("/project/:projectId", projectController.deleteProject);
