@@ -9,13 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { hasPermission } from "@/hooks/use-role";
 import { toast } from "@/hooks/use-toast";
 import {
   DemandLetterDataType,
   DemandLetterPdf,
 } from "@/pdf-templates/demand-letter";
 import { useAuth } from "@/store/auth";
-import { BankReference, ClientBookingReference } from "@/store/booking-ledger";
+import { useBankAccounts } from "@/store/bank";
+import { ClientBookingReference } from "@/store/booking-ledger";
 import { useBookingLedger } from "@/store/booking-ledger/query";
 import { useBookingLedgerStore } from "@/store/booking-ledger/store";
 import { useClientBookingById } from "@/store/client-booking/query";
@@ -39,10 +41,21 @@ const BookingLedgerList = () => {
   const LedgerPageNo = Number(pageno) ? Number(pageno) : 1;
   const { id: clientId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const {
+    data: bankRef,
+    isLoading: isBankLoading,
+    error: bankError,
+  } = useBankAccounts();
   const { filters, setFilters, resetFilters, setSelectedClientId } =
     useBookingLedgerStore();
   const { usePaymentsByClient } = useBookingLedger();
-  const { logout: handleLogout } = useAuth(true);
+  const { logout: handleLogout, combinedRole } = useAuth(true);
+
+  const canViewDeletedPayments = hasPermission(
+    combinedRole,
+    "BookingLedger",
+    "view-deleted-booking-payments",
+  );
 
   // Get payments data
   const { data, isLoading, error } = usePaymentsByClient(
@@ -52,13 +65,13 @@ const BookingLedgerList = () => {
   const {
     data: clientBooking,
     isLoading: isClientBookingLoading,
-    error: isClientBookingError,
+    error: clientBookingError,
   } = useClientBookingById(clientId || "");
   const { useProjectByName } = useInventory();
   const {
     data: project,
     isLoading: isProjectLoading,
-    error: isProjectError,
+    error: projectError,
   } = useProjectByName(clientBooking?.data.project || "");
 
   const clientRef: ClientBookingReference = {
@@ -69,16 +82,6 @@ const BookingLedgerList = () => {
     project: clientBooking?.data.project || "",
     unit: clientBooking?.data.unit.unitNumber || "",
   };
-
-  const bankRef: BankReference[] = [
-    {
-      _id: "6837199ea93795ed8e5c6454",
-      holderName: "Sai Kripa",
-      name: "ICICI Bank",
-      branch: "Bangalore Koramangala",
-      accountNumber: "ICIC0004321",
-    },
-  ];
 
   // Event Handlers
   const handlePageChange = (newPage: number) => {
@@ -206,6 +209,10 @@ const BookingLedgerList = () => {
   }, [clientId, setSelectedClientId]);
 
   useEffect(() => {
+    setFilters({ includeDeleted: canViewDeletedPayments });
+  }, [canViewDeletedPayments, setFilters]);
+
+  useEffect(() => {
     handlePageChange(LedgerPageNo);
     if (LedgerPageNo) {
       setFilters({ page: LedgerPageNo });
@@ -221,7 +228,12 @@ const BookingLedgerList = () => {
   }, [setBreadcrumbs, PageNo]);
 
   // Handle other cases
-  if (isLoading || isClientBookingLoading || isProjectLoading) {
+  if (
+    isLoading ||
+    isClientBookingLoading ||
+    isProjectLoading ||
+    isBankLoading
+  ) {
     return (
       <CenterWrapper>
         <Loader />
@@ -229,10 +241,11 @@ const BookingLedgerList = () => {
     );
   }
 
-  if (error || isClientBookingError) {
+  if (error || clientBookingError || projectError || bankError) {
     const axiosError = (error ||
-      isClientBookingError ||
-      isProjectError) as CustomAxiosError;
+      clientBookingError ||
+      projectError ||
+      bankError) as CustomAxiosError;
     const { response, message } = axiosError || {};
 
     let errMsg =
@@ -295,25 +308,25 @@ const BookingLedgerList = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Payments</p>
-              <p className="text-lg font-semibold  font-mono">
+              <p className="text-md sm:text-lg font-semibold  font-mono">
                 ₹{data.summary.totalAmount.toLocaleString("en-IN")}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Received</p>
-              <p className="text-lg font-semibold text-green-600  font-mono">
+              <p className="text-md sm:text-lg font-semibold text-green-600  font-mono">
                 ₹{data.summary.totalPayments.toLocaleString("en-IN")}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Refunds</p>
-              <p className="text-lg font-semibold text-red-600  font-mono">
+              <p className="text-md sm:text-lg font-semibold text-red-600  font-mono">
                 ₹{data.summary.totalRefunds.toLocaleString("en-IN")}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Penalties</p>
-              <p className="text-lg font-semibold text-orange-600  font-mono">
+              <p className="text-md sm:text-lg font-semibold text-orange-600  font-mono">
                 ₹{data.summary.totalPenalties.toLocaleString("en-IN")}
               </p>
             </div>
@@ -337,7 +350,7 @@ const BookingLedgerList = () => {
       </CardContent>
       <CreatePaymentForm
         clientBooking={clientRef}
-        bankAccounts={bankRef}
+        bankAccounts={bankRef?.data || []}
         isOpen={showPaymentForm}
         onOpenChange={setShowPaymentForm}
       />

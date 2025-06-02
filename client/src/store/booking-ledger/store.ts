@@ -18,7 +18,7 @@ export const useBookingLedgerStore = create<BookingLedgerStore>((set) => ({
   filters: {
     page: 1,
     limit: 5,
-    includeDeleted: true,
+    includeDeleted: false,
   },
 
   // Filter actions

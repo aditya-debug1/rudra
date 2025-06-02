@@ -119,7 +119,12 @@ export const BookingLedgerTable = ({ data }: BookingLedgerTableProps) => {
     "BookingLedger",
     "restore-booking-payment",
   );
-  const hasPerms = canDeletePayments || canRestorePayments;
+  const canViewDeletedPayments = hasPermission(
+    combinedRole,
+    "BookingLedger",
+    "view-deleted-booking-payments",
+  );
+  const hasActionPerms = canDeletePayments || canRestorePayments;
 
   // Alert dialogs
   const deleteDialog = useAlertDialog({
@@ -272,14 +277,23 @@ export const BookingLedgerTable = ({ data }: BookingLedgerTableProps) => {
             <TableHead className="text-center whitespace-nowrap">
               Bank Account
             </TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            {hasPerms && <TableHead className="text-center">Action</TableHead>}
+            {canViewDeletedPayments && (
+              <TableHead className="text-center">Status</TableHead>
+            )}
+            {hasActionPerms && (
+              <TableHead className="text-center">Action</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {!data?.data?.length ? (
             <TableRow>
-              <TableCell colSpan={hasPerms ? 9 : 8} className="text-center">
+              <TableCell
+                colSpan={
+                  (hasActionPerms ? 8 : 7) + (canViewDeletedPayments ? 1 : 0)
+                }
+                className="text-center"
+              >
                 No Payment Data
               </TableCell>
             </TableRow>
@@ -340,14 +354,18 @@ export const BookingLedgerTable = ({ data }: BookingLedgerTableProps) => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">
-                      {isDeleted ? (
-                        <Badge variant="destructive">Deleted</Badge>
-                      ) : (
-                        <Badge variant="success">Active</Badge>
-                      )}
-                    </TableCell>
-                    {hasPerms && (
+
+                    {canViewDeletedPayments && (
+                      <TableCell className="text-center">
+                        {isDeleted ? (
+                          <Badge variant="destructive">Deleted</Badge>
+                        ) : (
+                          <Badge variant="success">Active</Badge>
+                        )}
+                      </TableCell>
+                    )}
+
+                    {hasActionPerms && (
                       <TableCell className="text-center">
                         <MoreAction
                           payment={payment}
@@ -363,7 +381,10 @@ export const BookingLedgerTable = ({ data }: BookingLedgerTableProps) => {
                   {/* Improved expandable details row */}
                   <TableRow className="expandable-row">
                     <TableCell
-                      colSpan={hasPerms ? 9 : 8}
+                      colSpan={
+                        (hasActionPerms ? 8 : 7) +
+                        (canViewDeletedPayments ? 1 : 0)
+                      }
                       className="p-0 border-b border-t-0"
                     >
                       <div

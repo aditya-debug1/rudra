@@ -26,9 +26,9 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
+import { BankDetailsType } from "@/store/bank";
 import { useBookingLedger } from "@/store/booking-ledger/query";
 import {
-  BankReference,
   ClientBookingReference,
   CreateBookingLedgerPayload,
   PaymentMethod,
@@ -100,7 +100,7 @@ const formatCurrency = (amount: number): string => {
 // Component Props
 interface CreatePaymentFormProps {
   clientBooking: ClientBookingReference;
-  bankAccounts: BankReference[];
+  bankAccounts: BankDetailsType[];
   isOpen: boolean;
   onOpenChange: (state: boolean) => void;
 }
@@ -1064,7 +1064,7 @@ export const CreatePaymentForm = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
+                  <CreditCard className="hidden sm:block h-4 w-4" />
                   Create Payment
                 </div>
               )}
