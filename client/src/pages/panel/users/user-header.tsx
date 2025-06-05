@@ -46,8 +46,41 @@ interface UserHeaderProp {
 
 export const UserHeader = ({ filter, pagination }: UserHeaderProp) => {
   return (
-    <div className="w-full flex justify-around md:justify-between items-center gap-2 flex-wrap">
-      <Filter filter={filter} />
+    <div className="w-full flex flex-wrap gap-3 items-center justify-around md:justify-between mb-3">
+      <div className="flex gap-3 sm:gap-2 justify-around flex-wrap sm:flex-nowrap sm:justify-start">
+        {/* Search input */}
+        <Input
+          type="text"
+          value={filter.searchTerm}
+          onChange={(e) => filter.onSearchChange(e.target.value)}
+          placeholder="Search users..."
+          className="sm:max-w-64"
+        />
+
+        {/* Role filter */}
+        <RoleSelect filter={filter} />
+
+        <span className="flex gap-2">
+          {/* Clear filters button */}
+          {filter.isFiltered && (
+            <Tooltip content="Clear filter">
+              <Button
+                className="flex-shrink-0"
+                onClick={filter.onClearFilter}
+                variant="outline"
+                size="icon"
+                aria-label="Clear filters"
+              >
+                <FilterX size={20} />
+              </Button>
+            </Tooltip>
+          )}
+
+          <UserAddButtonWrapper />
+        </span>
+      </div>
+
+      {/* Pagination controls */}
       {pagination && (
         <div className="flex gap-2 items-center">
           <Button
@@ -77,63 +110,40 @@ export const UserHeader = ({ filter, pagination }: UserHeaderProp) => {
   );
 };
 
-const Filter = (props: { filter: FilterProps }) => {
+const RoleSelect = ({ filter }: { filter: FilterProps }) => {
   const { rolesArray: roles } = useRoles();
-  const {
-    searchTerm,
-    onSearchChange,
-    selectedRole,
-    onRoleChange,
-    isFiltered,
-    onClearFilter,
-  } = props.filter;
 
+  return (
+    <Select onValueChange={filter.onRoleChange} value={filter.selectedRole}>
+      <SelectTrigger className="w-44 sm:w-[120px]">
+        <SelectValue placeholder="Roles" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Roles</SelectLabel>
+          {roles.data &&
+            roles.data.map((role: RoleArrayType) => {
+              return (
+                <SelectItem value={role.name} key={role._id}>
+                  {toProperCase(role.name)}
+                </SelectItem>
+              );
+            })}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};
+
+const UserAddButtonWrapper = () => {
   const { combinedRole } = useAuth(false);
   const showUserAddButton = hasPermission(combinedRole, "Users", "create-user");
 
+  if (!showUserAddButton) return null;
+
   return (
-    <div className="flex gap-2 flex-wrap justify-around sm:justify-start">
-      <Input
-        placeholder="Search users"
-        className="sm:max-w-52"
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
-
-      <span className="flex gap-2">
-        <Select onValueChange={onRoleChange} value={selectedRole}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Roles" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Roles</SelectLabel>
-              {roles.data &&
-                roles.data.map((role: RoleArrayType) => {
-                  return (
-                    <SelectItem value={role.name} key={role._id}>
-                      {toProperCase(role.name)}
-                    </SelectItem>
-                  );
-                })}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
-        {isFiltered && (
-          <Tooltip content="Clear Filter" side="bottom">
-            <Button
-              onClick={onClearFilter}
-              variant="outline"
-              size="icon"
-              className="px-2"
-            >
-              <FilterX size={20} />
-            </Button>
-          </Tooltip>
-        )}
-        {showUserAddButton && <UserAddButton />}
-      </span>
+    <div className="flex-shrink-0">
+      <UserAddButton />
     </div>
   );
 };
