@@ -16,6 +16,7 @@ export interface ProjectType {
   name: string;
   by: string;
   location: string;
+  email?: string;
   description: string;
   startDate: string;
   completionDate?: string;

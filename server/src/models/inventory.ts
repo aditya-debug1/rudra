@@ -48,6 +48,7 @@ export interface ProjectType extends Document {
   name: string;
   by: string;
   location: string;
+  email?: string;
   description?: string;
   startDate: Date;
   completionDate?: Date;
@@ -195,6 +196,9 @@ const ProjectSchema = new Schema<ProjectType>(
     location: {
       type: String,
       required: true,
+    },
+    email: {
+      type: String,
     },
     description: {
       type: String,

@@ -160,7 +160,7 @@ const BookingLedgerList = () => {
           letterHeadData={{
             name: project.data.by,
             address: project.data.location,
-            email: "",
+            email: project.data.email || "",
           }}
           isSigned={isSigned}
           includeLetterHead={includeLetterHead}

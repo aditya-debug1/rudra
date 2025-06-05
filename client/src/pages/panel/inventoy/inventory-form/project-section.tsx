@@ -61,18 +61,28 @@ export const ProjectSection = ({
           />
         </FormFieldWrapper>
       </div>
-      <FormFieldWrapper
-        className="gap-3"
-        LabelText="Location"
-        Important
-        ImportantSide="right"
-      >
-        <Input
-          value={project.location}
-          onChange={(e) => onProjectChange("location", e.target.value)}
-          placeholder="123 Main Street, Anytown, State, 12345"
-        />
-      </FormFieldWrapper>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <FormFieldWrapper
+          className="gap-3"
+          LabelText="Location"
+          Important
+          ImportantSide="right"
+        >
+          <Input
+            value={project.location}
+            onChange={(e) => onProjectChange("location", e.target.value)}
+            placeholder="123 Main Street, Anytown, State, 12345"
+          />
+        </FormFieldWrapper>
+
+        <FormFieldWrapper className="gap-3 lg:w-[28rem]" LabelText="Email">
+          <Input
+            value={project?.email || ""}
+            placeholder="Enter project email"
+            onChange={(e) => onProjectChange("email", e.target.value)}
+          />
+        </FormFieldWrapper>
+      </div>
       <FormFieldWrapper className="gap-3" LabelText="Description">
         <Textarea
           value={project.description}
