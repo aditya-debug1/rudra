@@ -45,7 +45,7 @@ export const Panel = () => {
     <BreadcrumbProvider>
       <div
         id="main-container"
-        className={`bg-primary-foreground w-svw min-h-svh ${styles.AppLayout}`}
+        className={`bg-primary-foreground w-full min-h-svh ${styles.AppLayout}`}
       >
         <Sidebar
           className={styles.AppSidebar}
