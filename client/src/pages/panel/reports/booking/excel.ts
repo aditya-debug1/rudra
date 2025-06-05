@@ -51,6 +51,7 @@ function formatBookingData(
     AltNo: booking.altNo,
     Plan: getPaymentTypeAbbreviation(booking.paymentType),
     "Booking Amount": booking.bookingAmt,
+    "Agreement Value": booking.agreementValue || 0,
     Status: toProperCase(booking.status),
     "Deal Terms": booking.dealTerms,
     "Payment Terms": booking.paymentTerms,
