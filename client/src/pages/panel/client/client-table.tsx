@@ -13,12 +13,9 @@ import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { ClientType, GetClientsResponse } from "@/store/client";
 import { RefernceListType, useClientPartners } from "@/store/client-partner";
-import { projectOptions, requirementOptions } from "@/store/data/options";
+import { requirementOptions } from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
-import {
-  getLabelFromValue,
-  getSafeLabelFromValue,
-} from "@/utils/func/arrayUtils";
+import { getLabelFromValue } from "@/utils/func/arrayUtils";
 import { simplifyNumber } from "@/utils/func/numberUtils.ts";
 import { toProperCase } from "@/utils/func/strUtils";
 import { ChevronRight } from "lucide-react";
@@ -249,10 +246,7 @@ export const ClientTable = ({
                             <span className="col-span-2 flex items-center gap-3">
                               <h4 className="text-sm font-bold">Project:</h4>
                               <p className="text-sm">
-                                {getSafeLabelFromValue(
-                                  projectOptions,
-                                  client.project,
-                                ) || "N/A"}
+                                {client.project || "N/A"}
                               </p>
                             </span>
                             <span className="col-span-2 flex items-center justify-start gap-3">

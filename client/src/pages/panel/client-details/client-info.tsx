@@ -1,3 +1,4 @@
+import { Combobox } from "@/components/custom ui/combobox";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,13 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { budgetOptions } from "@/store/data/options";
-import { simplifyNumber } from "@/utils/func/numberUtils";
-import { useEffect, useMemo, useState } from "react";
-import { Combobox } from "@/components/custom ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientType } from "@/store/client";
-import { projectOptions, requirementOptions } from "@/store/data/options";
+import { budgetOptions, requirementOptions } from "@/store/data/options";
+import { useInventory } from "@/store/inventory";
+import { simplifyNumber } from "@/utils/func/numberUtils";
+import { useEffect, useMemo, useState } from "react";
 
 interface ClientInfoProp {
   isEditable: boolean;
@@ -33,6 +33,11 @@ export const ClientInfo = ({
   handleInputChange,
   showContactInfo = false,
 }: ClientInfoProp) => {
+  const { useProjectsStructure } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
+  const projectOptions =
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
+
   // Handler for budget changes that passes to the parent's handleInputChange
   const handleBudgetChange = (value: number) => {
     handleInputChange("budget", value);

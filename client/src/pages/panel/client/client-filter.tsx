@@ -26,11 +26,11 @@ import { useClientStore } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
 import {
   ignoreRole,
-  projectOptions,
   refDefaultOptions,
   requirementOptions,
   statusOptions,
 } from "@/store/data/options";
+import { useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { toProperCase } from "@/utils/func/strUtils";
 import { ListFilter } from "lucide-react";
@@ -70,6 +70,8 @@ export const ClientFilter = ({
   const { filters, setFilters, resetFilters } = useClientStore();
   const { useReferenceWithDelete } = useClientPartners();
   const { data: users } = useUsersSummary();
+  const { useProjectsStructure } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
   const { data: refData } = useReferenceWithDelete();
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
 
@@ -90,6 +92,9 @@ export const ClientFilter = ({
     ...refDefaultOptions,
     ...refDynamicOptions,
   ];
+
+  const projectOptions =
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
 
   const managerOptions =
     users

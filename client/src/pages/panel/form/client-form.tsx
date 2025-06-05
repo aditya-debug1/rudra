@@ -26,11 +26,11 @@ import { useClientPartners } from "@/store/client-partner";
 import {
   budgetOptions,
   ignoreRole,
-  projectOptions,
   refDefaultOptions,
   requirementOptions,
   statusOptions,
 } from "@/store/data/options";
+import { useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { capitalizeWords, formatAddress } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
@@ -72,12 +72,17 @@ const ClientForm = () => {
   const [remarkInput, setRemarkInput] = useState("");
   const { createClientMutation } = useClients();
   const { useReference } = useClientPartners();
+  const { useProjectsStructure } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
   const { toast } = useToast();
   const firstNameRef = useRef<HTMLInputElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
   const { data: users } = useUsersSummary();
   const { data: refData } = useReference();
+
+  const projectOptions =
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
 
   const managerOptions =
     users

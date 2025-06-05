@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/card";
 import { useClients, useClientStore } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
-import { projectOptions, requirementOptions } from "@/store/data/options";
+import { requirementOptions } from "@/store/data/options";
+import { useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { Download, FileSpreadsheet } from "lucide-react";
 import { useEffect } from "react";
@@ -31,6 +32,11 @@ export function ClientReport() {
   const { data: managers } = useUsersSummary();
   const { useReferenceWithDelete } = useClientPartners();
   const { data: refData } = useReferenceWithDelete();
+
+  const { useProjectsStructure } = useInventory();
+  const { data: projectsData } = useProjectsStructure();
+  const projectOptions =
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
 
   const countAppliedFilters = (filterObj: typeof filters) => {
     // List of keys to exclude
