@@ -34,6 +34,7 @@ type ProjectPayload = {
   name: string;
   by: string;
   location: string;
+  email?: string;
   description?: string;
   startDate: Date | string;
   completionDate?: Date | string;
@@ -70,6 +71,10 @@ class ProjectController {
         wings: [], // Will populate these later
         commercialFloors: [], // Will populate these later
       });
+
+      if (projectData.email) {
+        project.email = projectData.email;
+      }
 
       if (projectData.description) {
         project.description = projectData.description;
@@ -383,7 +388,7 @@ class ProjectController {
       // fetch all projects
       const projects = await Project.find(
         {},
-        "_id name by location commercialUnitPlacement",
+        "_id name by location email commercialUnitPlacement",
       )
         .populate({
           path: "wings",
@@ -593,6 +598,7 @@ class ProjectController {
       if (projectData.name) project.name = projectData.name;
       if (projectData.by) project.by = projectData.by;
       if (projectData.location) project.location = projectData.location;
+      if (projectData.email) project.email = projectData.email;
       if (projectData.description)
         project.description = projectData.description;
       if (projectData.startDate)

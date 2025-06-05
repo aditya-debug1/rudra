@@ -18,10 +18,10 @@ const ClientPartnerDetails = lazy(() => import("@/pages/panel/cp-details"));
 const Task = lazy(() => import("@/pages/panel/task"));
 const BookingList = lazy(() => import("@/pages/panel/booking"));
 const BookingLedger = lazy(() => import("@/pages/panel/booking-ledger"));
-const Inventory = lazy(() => import("@/pages/panel/inventoy"));
-const InventoryDetails = lazy(() => import("@/pages/panel/inventoy/details"));
+const Inventory = lazy(() => import("@/pages/panel/inventory"));
+const InventoryDetails = lazy(() => import("@/pages/panel/inventory/details"));
 const InventoryForm = lazy(
-  () => import("@/pages/panel/inventoy/inventory-form"),
+  () => import("@/pages/panel/inventory/inventory-form"),
 );
 const Form = lazy(() => import("@/pages/panel/form"));
 const Reports = lazy(() => import("@/pages/panel/reports"));

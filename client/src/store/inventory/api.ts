@@ -97,6 +97,7 @@ export interface ProjectPayload {
   name: string;
   by: string;
   location: string;
+  email?: string;
   description: string;
   startDate: Date | string;
   completionDate?: Date | string;
@@ -180,6 +181,7 @@ export const inventoryApi = {
       name: string;
       by: string;
       location: string;
+      email: string;
       description: string;
       startDate: Date | string;
       completionDate?: Date | string;

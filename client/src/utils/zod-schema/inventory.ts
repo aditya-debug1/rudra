@@ -89,6 +89,12 @@ const projectSchema = z
     name: z.string().min(1, "Project name is required"),
     by: z.string().min(1, "Project by is required"),
     location: z.string().min(1, "Project location is required"),
+    email: z
+      .string()
+      .trim()
+      .email()
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
     description: z.string(),
     startDate: z.string(),
     completionDate: z.string().optional(),

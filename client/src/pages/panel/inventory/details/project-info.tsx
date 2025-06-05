@@ -63,19 +63,29 @@ export const ProjectInfo = ({
           />
         </FormFieldWrapper>
       </div>
-      <FormFieldWrapper
-        className="gap-3"
-        LabelText="Location"
-        Important={isEditable}
-        ImportantSide="right"
-      >
-        <Input
-          value={project?.location || ""}
-          placeholder={isEditable ? "Enter project location" : "N/A"}
-          disabled={!isEditable}
-          onChange={(e) => onProjectChange("location", e.target.value)}
-        />
-      </FormFieldWrapper>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <FormFieldWrapper
+          className="gap-3 flex-grow"
+          LabelText="Location"
+          Important={isEditable}
+          ImportantSide="right"
+        >
+          <Input
+            value={project?.location || ""}
+            placeholder={isEditable ? "Enter project location" : "N/A"}
+            disabled={!isEditable}
+            onChange={(e) => onProjectChange("location", e.target.value)}
+          />
+        </FormFieldWrapper>
+        <FormFieldWrapper className="gap-3 lg:w-[28rem]" LabelText="Email">
+          <Input
+            value={project?.email || ""}
+            placeholder={isEditable ? "Enter project email" : "N/A"}
+            disabled={!isEditable}
+            onChange={(e) => onProjectChange("email", e.target.value)}
+          />
+        </FormFieldWrapper>
+      </div>
       <FormFieldWrapper className="gap-3" LabelText="Description">
         <Textarea
           value={project?.description || ""}

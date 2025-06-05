@@ -31,6 +31,7 @@ const DEFAULT_PROJECT: ProjectType = {
   name: "",
   by: "",
   location: "",
+  email: "",
   description: "",
   startDate: new Date().toISOString(),
   status: "planning",
