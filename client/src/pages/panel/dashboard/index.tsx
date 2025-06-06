@@ -1,9 +1,11 @@
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth, useAuthStore } from "@/store/auth";
 import { useEffect } from "react";
+import BookingRegistrationChart from "./b2r";
 import BookingChart from "./booking";
 import StatusChart from "./status-pie";
-import { useAuth, useAuthStore } from "@/store/auth";
-import { hasPermission } from "@/hooks/use-role";
+import TargetChart from "./target";
 
 const Dashboard = () => {
   // Hooks
@@ -28,9 +30,11 @@ const Dashboard = () => {
     ]);
   }, [setBreadcrumbs]);
   return (
-    <div className="w-full grid gap-3 grid-cols-1 lg:grid-cols-3">
+    <div className="w-full grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       <BookingChart manager={manager} />
       <StatusChart manager={manager} />
+      <TargetChart manager={manager} />
+      <BookingRegistrationChart manager={manager} />
     </div>
   );
 };

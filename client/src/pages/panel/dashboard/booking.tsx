@@ -1,12 +1,4 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Loader } from "@/components/custom ui/loader";
 import {
   Card,
   CardContent,
@@ -18,6 +10,8 @@ import {
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -30,9 +24,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useState, useEffect, useMemo } from "react";
 import { useYearlyBookingStats } from "@/store/analytics";
-import { Loader } from "@/components/custom ui/loader";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // Custom label formatter to prevent overflow
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,11 +57,11 @@ const CustomizedLabel = (props: any) => {
 const chartConfig = {
   client: {
     label: "Client",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(220 70% 50%)",
   },
   booking: {
     label: "Booking",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(160 60% 45%)",
   },
 } satisfies ChartConfig;
 
@@ -180,7 +182,7 @@ export default function BookingChart({ manager }: BookingChartProps) {
   };
 
   return (
-    <Card className="lg:col-span-2">
+    <Card className="md:col-span-2">
       <CardHeader className="flex-row justify-between">
         <div>
           <CardTitle>Booking Chart</CardTitle>
@@ -230,6 +232,7 @@ export default function BookingChart({ manager }: BookingChartProps) {
                 cursor={false}
                 content={<ChartTooltipContent indicator="line" />}
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <Bar
                 dataKey="client"
                 fill="var(--color-client)"

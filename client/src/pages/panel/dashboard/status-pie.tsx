@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -226,6 +228,7 @@ export default function StatusChart({ manager }: StatusChartProps) {
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <Pie
                 data={chartData}
                 dataKey="clients"
