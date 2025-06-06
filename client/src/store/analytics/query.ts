@@ -24,6 +24,17 @@ export const useYearlyBookingStats = (params?: {
   });
 };
 
+// Hook for yearly registration statistics
+export const useYearlyRegistrationStats = (params?: {
+  year?: number;
+  manager?: string;
+}) => {
+  return useQuery({
+    queryKey: ["yearlyRegistrationStats", params],
+    queryFn: () => analyticsApi.getYearlyRegistrationStats(params),
+  });
+};
+
 // The same hooks with parameters pre-typed for additional context
 export const useFilteredClientStatusCounts = (
   startDate?: string,
@@ -42,6 +53,16 @@ export const useYearlyBookingStatsForYear = (
   manager?: string,
 ) => {
   return useYearlyBookingStats({
+    year,
+    manager,
+  });
+};
+
+export const useYearlyRegistrationStatsForYear = (
+  year: number = new Date().getFullYear(),
+  manager?: string,
+) => {
+  return useYearlyRegistrationStats({
     year,
     manager,
   });

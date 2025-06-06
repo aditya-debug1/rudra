@@ -25,6 +25,24 @@ type YearlyBookingStats = {
   };
 };
 
+type RegistrationMonthlyStats = {
+  month: string;
+  booking: number;
+  registration: number;
+  canceled: number;
+};
+
+type YearlyRegistrationStats = {
+  year: number;
+  monthlyStats: RegistrationMonthlyStats[];
+  summary: {
+    totalBookingsForYear: number;
+    totalRegistrationsForYear: number;
+    totalCanceledForYear: number;
+    registrationRate: number;
+  };
+};
+
 export const analyticsApi = {
   getClientStatusCounts: async (params?: {
     startDate?: string;
@@ -46,6 +64,19 @@ export const analyticsApi = {
   }) => {
     const { data } = await newRequest.get<YearlyBookingStats>(
       "/analytics/booking-status",
+      {
+        params,
+      },
+    );
+    return data;
+  },
+
+  getYearlyRegistrationStats: async (params?: {
+    year?: number;
+    manager?: string;
+  }) => {
+    const { data } = await newRequest.get<YearlyRegistrationStats>(
+      "/analytics/registration-status",
       {
         params,
       },

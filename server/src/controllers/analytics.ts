@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Client } from "../models/client";
+import ClientBooking from "../models/clientBooking";
 import { VisitType } from "../models/visit";
 import createError from "../utils/createError";
 
@@ -127,7 +128,7 @@ class analyticsController {
         };
       }
 
-      // Get all clients with their visits within the specified year
+      // Get all clients with their visits within the specified year (excluding booked visits)
       const clients = await Client.find().populate<{ visits: VisitType[] }>({
         path: "visits",
         match: {
@@ -156,11 +157,29 @@ class analyticsController {
 
         // Count this client once in the month of their latest visit
         monthlyStats[month].client++;
+      }
 
-        // Check if the latest status is "booked"
-        if (latestVisit.status === "booked") {
-          monthlyStats[month].booking++;
-        }
+      // Now get bookings from ClientBooking table
+      let bookingFilter: any = {
+        date: { $gte: startDate, $lte: endDate },
+        status: { $ne: "canceled" }, // exclude bookings with "canceled" status
+      };
+
+      // Add manager filter for bookings
+      if (manager) {
+        bookingFilter.salesManager = manager;
+      }
+
+      // Get all bookings within the specified year
+      const bookings = await ClientBooking.find(bookingFilter).sort({
+        date: -1,
+      });
+
+      // Count bookings by month
+      for (const booking of bookings) {
+        const bookingDate = new Date(booking.date);
+        const month = bookingDate.getMonth(); // 0-based (January is 0)
+        monthlyStats[month].booking++;
       }
 
       // Format the response with month names
@@ -186,7 +205,7 @@ class analyticsController {
           client: stats.client,
           booking: stats.booking,
         }))
-        .filter((month) => month.client > 0);
+        .filter((month) => month.client > 0); //remove filter-line to include months with 0 clients
 
       // Calculate summary totals
       const totalClients = formattedResponse.reduce(
@@ -219,6 +238,171 @@ class analyticsController {
           error instanceof Error
             ? error.message
             : "Failed to fetch yearly booking statistics",
+        ),
+      );
+    }
+  }
+
+  async getYearlyRegistrationStats(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      // Extract the year from query parameters, default to current year
+      const year =
+        parseInt(req.query.year as string) || new Date().getFullYear();
+
+      // Create date range for the specified year
+      const startDate = new Date(year, 0, 1); // January 1st of the specified year
+      const endDate = new Date(year, 11, 31, 23, 59, 59, 999); // December 31st of the specified year
+
+      // Optionally filter by manager if provided
+      const { manager } = req.query;
+      let managerFilter = {};
+      if (manager) {
+        managerFilter = {
+          salesManager: manager,
+        };
+      }
+
+      // Initialize monthly statistics array
+      const monthlyStats = Array(12)
+        .fill(0)
+        .map(() => ({
+          booking: 0, // Count of bookings (booked, cnc, registeration-process, loan-process)
+          registration: 0, // Count of registrations (registered)
+          canceled: 0, // Count of canceled bookings
+        }));
+
+      // Define booking statuses (excluding canceled and registered)
+      const bookingStatuses = [
+        "booked",
+        "cnc",
+        "registeration-process",
+        "loan-process",
+      ];
+
+      // Get all bookings within the specified year (excluding canceled & registration)
+      const bookingFilter = {
+        date: { $gte: startDate, $lte: endDate },
+        status: { $in: bookingStatuses },
+        ...managerFilter,
+      };
+
+      const bookings = await ClientBooking.find(bookingFilter).sort({
+        date: -1,
+      });
+
+      // Count bookings by month
+      for (const booking of bookings) {
+        const bookingDate = new Date(booking.date);
+        const month = bookingDate.getMonth(); // 0-based (January is 0)
+        monthlyStats[month].booking++;
+      }
+
+      // Get all registrations within the specified year
+      const registrationFilter = {
+        date: { $gte: startDate, $lte: endDate },
+        status: "registered",
+        ...managerFilter,
+      };
+
+      const registrations = await ClientBooking.find(registrationFilter).sort({
+        date: -1,
+      });
+
+      // Count registrations by month
+      for (const registration of registrations) {
+        const registrationDate = new Date(registration.date);
+        const month = registrationDate.getMonth(); // 0-based (January is 0)
+        monthlyStats[month].registration++;
+      }
+
+      // Get all canceled bookings within the specified year
+      const canceledFilter = {
+        date: { $gte: startDate, $lte: endDate },
+        status: "canceled",
+        ...managerFilter,
+      };
+
+      const canceledBookings = await ClientBooking.find(canceledFilter).sort({
+        date: -1,
+      });
+
+      // Count canceled bookings by month
+      for (const canceledBooking of canceledBookings) {
+        const canceledDate = new Date(canceledBooking.date);
+        const month = canceledDate.getMonth(); // 0-based (January is 0)
+        monthlyStats[month].canceled++;
+      }
+
+      // Format the response with month names
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      // Include all months (don't filter out months with 0 activity for consistent chart display)
+      const formattedResponse = monthlyStats.map((stats, index) => ({
+        month: monthNames[index],
+        booking: stats.booking,
+        registration: stats.registration,
+        canceled: stats.canceled,
+      }));
+
+      // Calculate summary totals (all months)
+      const totalBookings = monthlyStats.reduce(
+        (sum, stats) => sum + stats.booking,
+        0,
+      );
+
+      const totalRegistrations = monthlyStats.reduce(
+        (sum, stats) => sum + stats.registration,
+        0,
+      );
+
+      const totalCanceled = monthlyStats.reduce(
+        (sum, stats) => sum + stats.canceled,
+        0,
+      );
+
+      // Calculate total potential registrations (including canceled bookings)
+      const totalPotentialRegistrations = totalBookings + totalCanceled;
+
+      res.status(200).json({
+        year,
+        monthlyStats: formattedResponse,
+        summary: {
+          totalBookingsForYear: totalBookings,
+          totalRegistrationsForYear: totalRegistrations,
+          totalCanceledForYear: totalCanceled,
+          totalPotentialRegistrations: totalPotentialRegistrations,
+          registrationRate:
+            Math.round(
+              (totalRegistrations /
+                (totalRegistrations + totalPotentialRegistrations)) *
+                10000,
+            ) / 100, // Original rate for comparison
+        },
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch yearly registration statistics",
         ),
       );
     }

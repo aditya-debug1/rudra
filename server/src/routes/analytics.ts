@@ -18,4 +18,11 @@ router.get(
   analyticsController.getYearlyBookingStats,
 );
 
+// Get booking status
+router.get(
+  "/registration-status",
+  verifyToken,
+  analyticsController.getYearlyRegistrationStats,
+);
+
 export default router;
