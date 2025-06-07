@@ -97,6 +97,7 @@ const BookingLedgerList = () => {
   const handleGenerateLetter = async (
     isSigned: boolean = false,
     includeLetterHead: boolean = false,
+    intrestAmt?: number,
   ) => {
     if (!project || !clientBooking || !data) {
       return toast({
@@ -164,6 +165,7 @@ const BookingLedgerList = () => {
           }}
           isSigned={isSigned}
           includeLetterHead={includeLetterHead}
+          interestAmount={intrestAmt}
         />,
       ).toBlob();
 

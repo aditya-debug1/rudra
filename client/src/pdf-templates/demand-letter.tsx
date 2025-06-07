@@ -1,4 +1,5 @@
-import Sign from "@/assets/ManagerSign.png";
+import AccountantSign from "@/assets/AccountantSign.png";
+import ManagerSign from "@/assets/ManagerSign.png";
 import CambriaBoldItalic from "@/fonts/cambria/Cambria Bold Italic.ttf";
 import CambriaBold from "@/fonts/cambria/Cambria Bold.ttf";
 import CambriaItalic from "@/fonts/cambria/Cambria Italic.ttf";
@@ -50,6 +51,7 @@ export interface DemandLetterDataType {
 interface DemandLetterProps {
   data: DemandLetterDataType;
   letterHeadData: { name: string; address: string; email: string };
+  interestAmount?: number;
   isSigned?: boolean;
   includeLetterHead?: boolean;
 }
@@ -248,10 +250,7 @@ const styles = StyleSheet.create({
     margin: "15 0 0 0",
   },
   sign: {
-    position: "absolute",
-    bottom: 190,
-    right: 75,
-    width: 50,
+    width: 90,
     height: 50,
   },
   signatureSpace: {
@@ -267,6 +266,7 @@ const formatCurrency = (amount: number) => {
 export const DemandLetterPdf = ({
   data,
   letterHeadData,
+  interestAmount = 0,
   isSigned = false,
   includeLetterHead = false,
 }: DemandLetterProps) => {
@@ -304,7 +304,9 @@ export const DemandLetterPdf = ({
       <Page size="A4" style={styles.page}>
         {includeLetterHead && <LetterHead data={letterHeadData} />}
         <View style={styles.letterhead}>
-          <Text style={styles.letterheadTitle}>DEMAND LETTER</Text>
+          <Text style={styles.letterheadTitle}>
+            {interestAmount ? "INTEREST LETTER" : "DEMAND LETTER"}
+          </Text>
         </View>
 
         <View style={styles.date}>
@@ -384,19 +386,58 @@ export const DemandLetterPdf = ({
             </View>
           </View>
           <View style={styles.tableRow}>
-            <View style={styles.tableColHighlight}>
-              <Text style={styles.tableCellBold}>Amount Payable</Text>
+            <View
+              style={
+                interestAmount ? styles.tableCol : styles.tableColHighlight
+              }
+            >
+              <Text
+                style={interestAmount ? styles.tableCell : styles.tableCellBold}
+              >
+                Amount Payable
+              </Text>
             </View>
-            <View style={styles.tableColHighlight}>
+            <View
+              style={
+                interestAmount ? styles.tableCol : styles.tableColHighlight
+              }
+            >
               <Text style={styles.tableCellRight}>
                 Rs. {formatCurrency(amountPayable)}/-
               </Text>
             </View>
           </View>
+          {interestAmount && (
+            <>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellBold}>Interest</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellRight}>
+                    Rs. {formatCurrency(interestAmount)}/-
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableColHighlight}>
+                  <Text style={styles.tableCellBold}>
+                    Amount Payable with Interest
+                  </Text>
+                </View>
+                <View style={styles.tableColHighlight}>
+                  <Text style={styles.tableCellRight}>
+                    Rs. {formatCurrency(amountPayable + interestAmount)}
+                    /-
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
         <Text style={styles.amountWords}>
-          (Rupees: {numberToWords(amountPayable)})
+          (Rupees: {numberToWords(amountPayable + interestAmount)})
         </Text>
 
         <Text style={styles.paragraph}>
@@ -464,13 +505,22 @@ export const DemandLetterPdf = ({
         </View>
 
         {isSigned && (
-          <>
-            <Image src={Sign} style={styles.sign} />
+          <View
+            style={{
+              position: "absolute",
+              bottom: interestAmount ? 140 : 175,
+              right: 90,
+            }}
+          >
+            <Image
+              src={interestAmount ? AccountantSign : ManagerSign}
+              style={[styles.sign, { width: interestAmount ? 90 : 50 }]}
+            />
             <View style={styles.signatureSpace}>
               <Text>_________________________</Text>
               <Text>Authorized Signatory</Text>
             </View>
-          </>
+          </View>
         )}
       </Page>
     </Document>

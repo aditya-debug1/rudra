@@ -815,6 +815,16 @@ export const CreatePaymentForm = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <AmountInput
+                    label="Demand"
+                    value={demandField.displayValue}
+                    unit={demandField.unit}
+                    onValueChange={updateDemandDisplay}
+                    onUnitChange={updateDemandUnit}
+                    disabled={isSubmitting}
+                    placeholder="Enter demand"
+                  />
+
+                  <AmountInput
                     label="Amount"
                     value={amountField.displayValue}
                     unit={amountField.unit}
@@ -824,16 +834,6 @@ export const CreatePaymentForm = ({
                     required
                     disabled={isSubmitting}
                     placeholder="Enter amount"
-                  />
-
-                  <AmountInput
-                    label="Demand"
-                    value={demandField.displayValue}
-                    unit={demandField.unit}
-                    onValueChange={updateDemandDisplay}
-                    onUnitChange={updateDemandUnit}
-                    disabled={isSubmitting}
-                    placeholder="Enter demand"
                   />
                 </div>
 
