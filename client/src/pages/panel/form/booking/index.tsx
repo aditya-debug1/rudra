@@ -967,7 +967,7 @@ export const BookingForm = () => {
 
               <FormFieldWrapper
                 className="gap-3"
-                LabelText="Check/Draft No"
+                LabelText="Cheque/Draft No"
                 Important
                 ImportantSide="right"
               >
