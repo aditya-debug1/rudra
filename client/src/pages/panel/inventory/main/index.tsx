@@ -161,7 +161,9 @@ export default function ProjectsTable() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-card">
-                <TableHead className="text-center">Project Name</TableHead>
+                <TableHead className="text-center whitespace-nowrap">
+                  Project Name
+                </TableHead>
                 <TableHead className="text-center">Developer</TableHead>
                 <TableHead className="text-center whitespace-nowrap">
                   Start Date

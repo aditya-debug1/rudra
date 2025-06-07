@@ -136,20 +136,26 @@ function FloorTable({ wing }: { wing: WingType }) {
   }, [wing.floors]);
 
   return (
-    <div className="border rounded-md overflow-hidden">
+    <div className="border rounded-md overflow-auto">
       <table className="w-full caption-bottom text-sm">
         <TableHeader>
           <TableRow className="bg-card hover:bg-card sticky top-0 z-20">
-            <TableHead className="text-center">Floor No</TableHead>
+            <TableHead className="text-center whitespace-nowrap">
+              Floor No
+            </TableHead>
             <TableHead className="text-center">Type</TableHead>
-            <TableHead className="text-center">Total Units</TableHead>
+            <TableHead className="text-center whitespace-nowrap">
+              Total Units
+            </TableHead>
             <TableHead className="text-center">Available</TableHead>
             <TableHead className="text-center">Reserved</TableHead>
             <TableHead className="text-center">Booked</TableHead>
             <TableHead className="text-center">Registered</TableHead>
             <TableHead className="text-center">Investor</TableHead>
             <TableHead className="text-center">Canceled</TableHead>
-            <TableHead className="text-center">Not For Sale</TableHead>
+            <TableHead className="text-center whitespace-nowrap">
+              Not For Sale
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
