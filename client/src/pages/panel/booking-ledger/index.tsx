@@ -41,9 +41,9 @@ const BookingLedgerList = () => {
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const { setBreadcrumbs } = useBreadcrumb();
-  const { pageno } = useParams();
+  const { pageno, ledgerPageNo } = useParams();
   const PageNo = Number(pageno) ? Number(pageno) : 1;
-  const LedgerPageNo = Number(pageno) ? Number(pageno) : 1;
+  const LedgerPageNo = Number(ledgerPageNo) ? Number(ledgerPageNo) : 1;
   const { id: clientId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {
