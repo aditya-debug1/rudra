@@ -84,6 +84,7 @@ export interface ClientBookingReference {
   unit: string;
   phoneNo: string;
   email: string;
+  wing: string;
 }
 
 export interface BankReference {

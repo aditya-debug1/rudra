@@ -1,4 +1,4 @@
-import { DatePicker } from "@/components/custom ui/date-time-pickers";
+import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -229,7 +229,7 @@ const AmountInput: React.FC<AmountInputProps> = ({
             placeholder={placeholder}
             disabled={disabled}
             min="0"
-            step="0.01"
+            step="0"
             className={error ? "border-red-500" : ""}
           />
           <Select
@@ -365,7 +365,7 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
             LabelText={label}
             className="gap-2"
           >
-            <DatePicker
+            <DatePickerV2
               disabled={isSubmitting}
               defaultDate={
                 paymentDetails[field]
@@ -373,7 +373,7 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
                   : undefined
               }
               onDateChange={(date) => onDetailsChange(field, date)}
-              className="w-full"
+              className="sm:w-full"
             />
             {validationErrors[errorKey] && (
               <p className="text-sm text-red-500 flex items-center gap-1">
@@ -704,7 +704,8 @@ export const CreatePaymentForm = ({
                 <span>•</span>
                 <Building className="h-4 w-4" />
                 <span>
-                  {clientBooking.project} ({clientBooking.unit})
+                  {clientBooking.project} ({clientBooking.wing}-
+                  {clientBooking.unit})
                 </span>
               </DialogDescription>
             </div>
@@ -737,13 +738,13 @@ export const CreatePaymentForm = ({
                       LabelText="Payment Date"
                       className="gap-2"
                     >
-                      <DatePicker
+                      <DatePickerV2
                         disabled={isSubmitting}
                         defaultDate={
                           formData.date ? new Date(formData.date) : new Date()
                         }
                         onDateChange={(date) => handleInputChange("date", date)}
-                        className="w-full"
+                        className="sm:w-full"
                       />
                     </FormFieldWrapper>
                   </div>

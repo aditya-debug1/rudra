@@ -86,6 +86,7 @@ const BookingLedgerList = () => {
     email: clientBooking?.data.email || "",
     project: clientBooking?.data.project || "",
     unit: clientBooking?.data.unit.unitNumber || "",
+    wing: clientBooking?.data.wing || "",
   };
 
   // Event Handlers
