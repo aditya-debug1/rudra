@@ -11,9 +11,10 @@ export const requirementOptions = [
 ];
 
 export const budgetOptions = [
-  { label: "Thousands", value: 1000 },
+  { label: "₹", value: 1 },
+  { label: "K", value: 1000 },
   { label: "Lacs", value: 100000 },
-  { label: "Crores", value: 10000000 },
+  { label: "Cr", value: 10000000 },
 ];
 
 export const refDefaultOptions: ComboboxOption[] = [
