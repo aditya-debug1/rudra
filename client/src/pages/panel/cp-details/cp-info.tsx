@@ -47,14 +47,19 @@ export const ClientPartnerInfo = ({
               />
             </FormFieldWrapper>
           </div>
-          <FormFieldWrapper LabelText="Email">
-            <Input
-              value={data.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              placeholder={isEditable ? "Enter email" : "N/A"}
-              disabled={!isEditable}
-            />
-          </FormFieldWrapper>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0">
+            <FormFieldWrapper LabelText="CP ID">
+              <Input value={data.cpId} disabled />
+            </FormFieldWrapper>
+            <FormFieldWrapper LabelText="Email">
+              <Input
+                value={data.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                placeholder={isEditable ? "Enter email" : "N/A"}
+                disabled={!isEditable}
+              />
+            </FormFieldWrapper>
+          </div>
           <FormFieldWrapper
             LabelText="Phone Number"
             Important={isEditable}
