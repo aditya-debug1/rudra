@@ -142,12 +142,12 @@ const useFormValidation = () => {
 const useAmountFields = () => {
   const [amountField, setAmountField] = useState<AmountFieldState>({
     displayValue: "",
-    unit: "thousand",
+    unit: "lakh",
   });
 
   const [demandField, setDemandField] = useState<AmountFieldState>({
     displayValue: "",
-    unit: "thousand",
+    unit: "lakh",
   });
 
   const updateAmountDisplay = (value: string) => {
@@ -172,8 +172,8 @@ const useAmountFields = () => {
     calculateActualAmount(demandField.displayValue, demandField.unit);
 
   const resetAmountFields = () => {
-    setAmountField({ displayValue: "", unit: "thousand" });
-    setDemandField({ displayValue: "", unit: "thousand" });
+    setAmountField({ displayValue: "", unit: "lakh" });
+    setDemandField({ displayValue: "", unit: "lakh" });
   };
 
   return {
@@ -347,15 +347,28 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
 }) => {
   const commonFieldClass = "space-y-1";
 
+  const handleChequeDateChange = (date: Date | null) => {
+    // Update the cheque date
+    if (date) {
+      onDetailsChange("chequeDate", date);
+
+      // Auto-populate due date with the same date if due date is not already set
+      if (date && !paymentDetails.dueDate) {
+        onDetailsChange("dueDate", date);
+      }
+    }
+  };
+
   const renderField = (
     field: string,
     label: string,
     required: boolean = false,
     type: "text" | "date" = "text",
     placeholder?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    customOnChange?: (value: any) => void,
   ) => {
     const errorKey = `paymentDetails.${field}`;
-
     if (type === "date") {
       return (
         <div className={commonFieldClass}>
@@ -372,7 +385,9 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
                   ? new Date(paymentDetails[field])
                   : undefined
               }
-              onDateChange={(date) => onDetailsChange(field, date)}
+              onDateChange={
+                customOnChange || ((date) => onDetailsChange(field, date))
+              }
               className="sm:w-full"
             />
             {validationErrors[errorKey] && (
@@ -385,7 +400,6 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
         </div>
       );
     }
-
     return (
       <div className={commonFieldClass}>
         <FormFieldWrapper
@@ -417,12 +431,18 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {renderField("chequeNumber", "Cheque Number", true)}
-          {renderField("bankName", "Bank Name")}
-          {renderField("chequeDate", "Cheque Date", true, "date")}
-          {renderField("dueDate", "Due Date", false, "date")}
+          {renderField("bankName", "Bank Name", true)}
+          {renderField(
+            "chequeDate",
+            "Cheque Date",
+            true,
+            "date",
+            undefined,
+            handleChequeDateChange,
+          )}
+          {renderField("dueDate", "Due Date", true, "date")}
         </div>
       );
-
     case PaymentMethod.UPI:
     case PaymentMethod.ONLINE_PAYMENT:
       return (
@@ -431,7 +451,6 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
           {renderField("transactionDate", "Transaction Date", false, "date")}
         </div>
       );
-
     case PaymentMethod.NEFT:
     case PaymentMethod.RTGS:
     case PaymentMethod.IMPS:
@@ -445,10 +464,8 @@ const PaymentMethodFields: React.FC<PaymentMethodFieldsProps> = ({
           </div>
         </div>
       );
-
     case PaymentMethod.DEMAND_DRAFT:
       return renderField("bankName", "Bank Name");
-
     default:
       return null;
   }

@@ -1,4 +1,5 @@
 import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
+import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,7 @@ export const BookingUpdateForm = ({
   useEffect(() => {
     if (isOpen && booking) {
       setFormData({
+        date: booking.date,
         applicant: booking.applicant,
         coApplicant: booking.coApplicant || "",
         phoneNo: booking.phoneNo,
@@ -97,6 +99,13 @@ export const BookingUpdateForm = ({
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleDateChange = (date: Date) => {
+    setFormData((prev) => ({
+      ...prev,
+      date: date,
     }));
   };
 
@@ -166,6 +175,24 @@ export const BookingUpdateForm = ({
         <ScrollArea className="max-h-[calc(100svh-250px)] px-4">
           <div className="py-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Date Field */}
+              <FormFieldWrapper
+                Important
+                ImportantSide="right"
+                LabelText="Booking Date"
+                className="gap-3"
+              >
+                <DatePickerV2
+                  defaultDate={
+                    formData.date ? new Date(formData.date) : undefined
+                  }
+                  onDateChange={handleDateChange}
+                  disabled={isSubmitting}
+                  className="sm:w-full"
+                  closeOnDayClick={true}
+                />
+              </FormFieldWrapper>
+
               {/* Applicant Information */}
               <FormFieldWrapper
                 Important
