@@ -269,7 +269,7 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
                       value={interestAmt}
                       onChange={(e) => setInterestAmt(e.target.value)}
                       min="0"
-                      step="0.01"
+                      step="0"
                     />
                   </div>
                 )}
@@ -286,7 +286,7 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
                       value={months}
                       onChange={(e) => setMonths(e.target.value)}
                       min="1"
-                      step="1"
+                      step="0"
                     />
                     <p className="text-xs text-muted-foreground">
                       Interest will be calculated at 24% annual rate
