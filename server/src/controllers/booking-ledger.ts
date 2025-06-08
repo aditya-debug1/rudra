@@ -25,7 +25,7 @@ export class BookingLedgerController {
         return next(createError(400, "Valid amount is required"));
       }
 
-      if (!paymentData.demand || paymentData.demand <= 0) {
+      if (typeof paymentData.demand != "number" || paymentData.demand < 0) {
         return next(createError(400, "Valid demand is required"));
       }
 

@@ -31,7 +31,7 @@ const AmountSchema = z
   .max(999999999, "Amount too large");
 const DemandSchema = z
   .number()
-  .positive("Demand must be positive")
+  .min(0, "Demand cannot be negative")
   .max(999999999, "Demand too large");
 
 const PercentageSchema = z
