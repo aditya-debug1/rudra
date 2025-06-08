@@ -119,7 +119,7 @@ export const BookingStatusForm = ({
               <SelectContent>
                 <SelectGroup>
                   {statuses.map((status) => (
-                    <SelectItem value={status}>
+                    <SelectItem key={status} value={status}>
                       {capitalizeWords(status.replace("-", " "))}
                     </SelectItem>
                   ))}

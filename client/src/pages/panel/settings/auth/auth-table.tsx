@@ -62,7 +62,7 @@ export const AuthTable = ({ data }: AuthTableProps) => {
         <TableBody>
           {data && data.length > 0 ? (
             data.map((log) => (
-              <TableRow>
+              <TableRow key={log._id}>
                 <TableCell className="whitespace-nowrap">
                   {new Date(log.timestamp).toLocaleString("en-GB", {
                     hour: "numeric",
