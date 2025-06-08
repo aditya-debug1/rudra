@@ -39,7 +39,9 @@ const BookingSchema = z.discriminatedUnion("type", [
       primary: z.string().min(1, "Primary applicant required"),
       coApplicant: z.string().optional(),
       contact: z.object({
-        phoneNo: z.string().min(1, "Phone number required"),
+        phoneNo: z
+          .string()
+          .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }),
         email: z.string().optional(),
         address: z.string().min(1, "Address required"),
         residenceNo: z.string().optional(),

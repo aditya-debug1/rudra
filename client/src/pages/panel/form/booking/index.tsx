@@ -39,7 +39,11 @@ import {
 import { unitStatus, useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
 import { getOrdinal } from "@/utils/func/numberUtils";
-import { formatAddress, toProperCase } from "@/utils/func/strUtils";
+import {
+  capitalizeWords,
+  formatAddress,
+  toProperCase,
+} from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
@@ -519,8 +523,8 @@ export const BookingForm = () => {
       setIsSubmitting(true);
       const formattedData: ClientBookingCreateUpdateData = {
         date: newBooking.bookingDetails.date,
-        applicant: newBooking.applicants.primary,
-        coApplicant: newBooking.applicants.coApplicant,
+        applicant: capitalizeWords(newBooking.applicants.primary),
+        coApplicant: capitalizeWords(newBooking.applicants.coApplicant || ""),
         status: "booked",
         project: newBooking.project.name,
         wing: newBooking.unit.wing,
