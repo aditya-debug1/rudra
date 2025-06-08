@@ -31,6 +31,11 @@ import { CreatePaymentForm } from "./ledger-form";
 import { BookingLedgerHeader } from "./ledger-header";
 import { BookingLedgerTable } from "./ledger-table";
 
+function calculateMonthlyInterestAmount(amountPayable: number, months: number) {
+  // amountPayable = (agreementValue * projectStage) / 100 - amountReceived
+  return ((amountPayable * 24) / 100 / 12) * months;
+}
+
 const BookingLedgerList = () => {
   // Hooks
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
@@ -97,7 +102,9 @@ const BookingLedgerList = () => {
   const handleGenerateLetter = async (
     isSigned: boolean = false,
     includeLetterHead: boolean = false,
-    intrestAmt?: number,
+    interestData?:
+      | { type: "amount"; value: number }
+      | { type: "months"; value: number },
   ) => {
     if (!project || !clientBooking || !data) {
       return toast({
@@ -122,6 +129,30 @@ const BookingLedgerList = () => {
       // Calculate amount received
       const amountReceived =
         data.summary.totalPayments - data.summary.totalRefunds;
+
+      // Calculate interest amount if needed
+      let finalInterestAmount = 0;
+      if (interestData) {
+        if (interestData.type === "amount") {
+          // Use the manually entered amount
+          finalInterestAmount = interestData.value;
+        } else if (interestData.type === "months") {
+          // Calculate interest based on months
+          const agreementValue = cb.agreementValue;
+          const projectStage = p.projectStage;
+          const amountPayable =
+            (agreementValue * projectStage) / 100 - amountReceived;
+
+          if (amountPayable > 0) {
+            finalInterestAmount = calculateMonthlyInterestAmount(
+              amountPayable,
+              interestData.value,
+            );
+          } else {
+            finalInterestAmount = 0;
+          }
+        }
+      }
 
       const demandLetterData: DemandLetterDataType = {
         applicationInfo: {
@@ -165,7 +196,7 @@ const BookingLedgerList = () => {
           }}
           isSigned={isSigned}
           includeLetterHead={includeLetterHead}
-          interestAmount={intrestAmt}
+          interestAmount={finalInterestAmount}
         />,
       ).toBlob();
 
@@ -184,7 +215,7 @@ const BookingLedgerList = () => {
       } else {
         toast({
           title: "Success",
-          description: "Demand letter generated successfully",
+          description: `${interestData ? "Interest" : "Demand"} letter generated successfully`,
           variant: "default",
         });
       }
@@ -202,7 +233,6 @@ const BookingLedgerList = () => {
       });
     }
   };
-
   // Effects
   useEffect(() => {
     if (clientId) {

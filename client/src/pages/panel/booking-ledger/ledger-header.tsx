@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -33,7 +34,9 @@ interface BookingLedgerHeaderProps {
   handleGenerateLetter: (
     isSigned?: boolean,
     includeLetterHead?: boolean,
-    intrestAmt?: number,
+    interestData?:
+      | { type: "amount"; value: number }
+      | { type: "months"; value: number },
   ) => void;
   isFiltered: boolean;
   clearFilter: () => void;
@@ -116,7 +119,9 @@ interface PrintModalProps {
   handleGenerateLetter: (
     isSigned?: boolean,
     includeLetterHead?: boolean,
-    intrestAmt?: number,
+    interestData?:
+      | { type: "amount"; value: number }
+      | { type: "months"; value: number },
   ) => void;
 }
 
@@ -124,25 +129,69 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
   const [includeLetterHead, setIncludeLetterHead] = useState(true);
   const [isSigned, setIsSigned] = useState(true);
   const [letterType, setLetterType] = useState("demand");
+  const [interestCalculationType, setInterestCalculationType] =
+    useState("manual"); // "manual" or "calculated"
   const [interestAmt, setInterestAmt] = useState("");
+  const [months, setMonths] = useState("");
   const [open, setOpen] = useState(false);
 
   const handlePrint = () => {
-    if (letterType == "interest" && !parseFloat(interestAmt)) {
-      return toast({
-        title: "Letter Creation Error",
-        description: "Please enter a valid interest amount",
-        variant: "warning",
-      });
+    if (letterType === "interest") {
+      let interestData:
+        | { type: "amount"; value: number }
+        | { type: "months"; value: number };
+
+      if (interestCalculationType === "manual") {
+        const amount = parseFloat(interestAmt);
+        if (!amount || amount <= 0) {
+          return toast({
+            title: "Letter Creation Error",
+            description: "Please enter a valid interest amount",
+            variant: "warning",
+          });
+        }
+        interestData = { type: "amount", value: amount };
+      } else if (interestCalculationType === "calculated") {
+        const monthsNum = parseInt(months);
+        if (!monthsNum || monthsNum <= 0) {
+          return toast({
+            title: "Letter Creation Error",
+            description: "Please enter a valid number of months",
+            variant: "warning",
+          });
+        }
+        interestData = { type: "months", value: monthsNum };
+      } else {
+        return;
+      }
+
+      handleGenerateLetter(isSigned, includeLetterHead, interestData);
+    } else {
+      handleGenerateLetter(isSigned, includeLetterHead);
     }
-    const intrestAmt =
-      letterType === "interest" ? parseFloat(interestAmt) || 0 : 0;
-    handleGenerateLetter(isSigned, includeLetterHead, intrestAmt);
+
     setOpen(false);
   };
 
+  const resetForm = () => {
+    setLetterType("demand");
+    setInterestCalculationType("manual");
+    setInterestAmt("");
+    setMonths("");
+    setIncludeLetterHead(true);
+    setIsSigned(true);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) {
+          resetForm();
+        }
+      }}
+    >
       <Tooltip content="Print Options">
         <DialogTrigger asChild>
           <Button
@@ -180,19 +229,70 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
             </div>
 
             {letterType === "interest" && (
-              <div className="space-y-2 mx-1">
-                <Label htmlFor="interestAmt" className="text-sm font-medium">
-                  Interest Amount
-                </Label>
-                <Input
-                  id="interestAmt"
-                  type="number"
-                  placeholder="Enter interest amount"
-                  value={interestAmt}
-                  onChange={(e) => setInterestAmt(e.target.value)}
-                  min="0"
-                  step="0.01"
-                />
+              <div className="space-y-4 mx-1">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">
+                    Interest Calculation Method
+                  </Label>
+                  <RadioGroup
+                    value={interestCalculationType}
+                    onValueChange={setInterestCalculationType}
+                    className="grid grid-cols-1 gap-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="manual" id="manual" />
+                      <Label htmlFor="manual" className="text-sm">
+                        Manual Amount Entry
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="calculated" id="calculated" />
+                      <Label htmlFor="calculated" className="text-sm">
+                        Calculate by Months
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {interestCalculationType === "manual" && (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="interestAmt"
+                      className="text-sm font-medium"
+                    >
+                      Interest Amount
+                    </Label>
+                    <Input
+                      id="interestAmt"
+                      type="number"
+                      placeholder="Enter interest amount"
+                      value={interestAmt}
+                      onChange={(e) => setInterestAmt(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                )}
+
+                {interestCalculationType === "calculated" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="months" className="text-sm font-medium">
+                      Number of Months
+                    </Label>
+                    <Input
+                      id="months"
+                      type="number"
+                      placeholder="Enter number of months"
+                      value={months}
+                      onChange={(e) => setMonths(e.target.value)}
+                      min="1"
+                      step="1"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Interest will be calculated at 24% annual rate
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
