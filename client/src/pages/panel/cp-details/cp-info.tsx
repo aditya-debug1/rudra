@@ -28,7 +28,7 @@ export const ClientPartnerInfo = ({
               ImportantSide="right"
             >
               <Input
-                value={data.name}
+                value={data.name || ""}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter company name"
                 disabled={!isEditable}
@@ -40,7 +40,7 @@ export const ClientPartnerInfo = ({
               ImportantSide="right"
             >
               <Input
-                value={data.ownerName}
+                value={data.ownerName || ""}
                 onChange={(e) => handleInputChange("ownerName", e.target.value)}
                 placeholder="Enter owner name"
                 disabled={!isEditable}
@@ -49,11 +49,11 @@ export const ClientPartnerInfo = ({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0">
             <FormFieldWrapper LabelText="CP ID">
-              <Input value={data.cpId} disabled />
+              <Input value={data.cpId || ""} disabled />
             </FormFieldWrapper>
             <FormFieldWrapper LabelText="Email">
               <Input
-                value={data.email}
+                value={data.email || ""}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder={isEditable ? "Enter email" : "N/A"}
                 disabled={!isEditable}
@@ -66,7 +66,7 @@ export const ClientPartnerInfo = ({
             ImportantSide="right"
           >
             <Input
-              value={data.phoneNo}
+              value={data.phoneNo || ""}
               onChange={(e) => handleInputChange("phoneNo", e.target.value)}
               placeholder="Enter phone number"
               disabled={!isEditable}
@@ -81,7 +81,7 @@ export const ClientPartnerInfo = ({
                 <Globe className="h-4 w-4 text-foreground" />
               </div>
               <Input
-                value={data.companyWebsite}
+                value={data.companyWebsite || ""}
                 onChange={(e) =>
                   handleInputChange("companyWebsite", e.target.value)
                 }
@@ -94,7 +94,7 @@ export const ClientPartnerInfo = ({
           <FormFieldWrapper LabelText="Address" className="gap-3 flex-grow">
             <Textarea
               className="h-full lg:resize-none"
-              value={data.address}
+              value={data.address || ""}
               onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder={isEditable ? "Enter company address" : "N/A"}
               disabled={!isEditable}
@@ -106,7 +106,7 @@ export const ClientPartnerInfo = ({
           <FormFieldWrapper LabelText="Notes" className="gap-3 flex-grow">
             <Textarea
               className="h-full lg:resize-none"
-              value={data.notes}
+              value={data.notes || ""}
               onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder={
                 isEditable ? "Additional info about company..." : "N/A"

@@ -213,7 +213,6 @@ const ClientPartnerDetails = () => {
   }, [setBreadcrumbs, pageNo]);
 
   useEffect(() => {
-    console.log("Data output", data);
     if (data) {
       setClientPartner(data);
       setEditableClientPartner(data);
