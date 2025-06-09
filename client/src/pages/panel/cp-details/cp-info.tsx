@@ -161,7 +161,7 @@ export const ClientPartnerInfo = ({
             </Badge>
             <span>on</span>
             <time className="font-medium text-foreground">
-              {formatDate(data.createdAt)}
+              {data.createdAt && formatDate(data.createdAt)}
             </time>
           </div>
 
