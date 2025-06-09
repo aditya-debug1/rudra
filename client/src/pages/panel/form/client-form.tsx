@@ -390,7 +390,6 @@ const ClientForm = () => {
                 >
                   <div className="flex flex-col sm:flex-row gap-4 grow">
                     <Input
-                      type="number"
                       value={client.budget}
                       onChange={(e) =>
                         handleInputChange("budget", Number(e.target.value))
