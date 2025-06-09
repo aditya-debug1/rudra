@@ -64,7 +64,7 @@ const ClientPartnerList = () => {
   useEffect(() => {
     setBreadcrumbs([
       {
-        label: "Client Partner List",
+        label: "Channel Partner List",
       },
     ]);
   }, [setBreadcrumbs]);

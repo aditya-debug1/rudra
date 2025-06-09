@@ -30,4 +30,8 @@ export interface ClientPartnerType {
   notes?: string;
   companyWebsite?: string;
   employees: EmployeeType[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy: string;
 }

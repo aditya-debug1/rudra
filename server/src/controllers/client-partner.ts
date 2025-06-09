@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { ClientPartner, CPEmployee } from "../models/client-partner";
 import mongoose from "mongoose";
-import createError from "../utils/createError";
+import { ClientPartner, CPEmployee } from "../models/client-partner";
 import auditService from "../utils/audit-service";
-import { populate } from "dotenv";
+import createError from "../utils/createError";
 
 class ClientPartnerController {
   // Get all client partners (exclude soft deleted ones)
@@ -188,6 +187,7 @@ class ClientPartnerController {
         address,
         notes,
         companyWebsite,
+        createdBy: req.user.username,
       });
 
       await clientPartner.save();
@@ -212,6 +212,14 @@ class ClientPartnerController {
           await employee.save();
           createdEmployees.push(employee);
           employeeIds.push(employee._id);
+
+          // Audit log for each employee creation
+          await auditService.logCreate(
+            employee.toObject(),
+            req,
+            "CPEmployee",
+            `Created employee: ${employee.firstName} ${employee.lastName} for client partner: ${clientPartner.name}`,
+          );
         }
 
         // Add employee references to client partner
@@ -221,9 +229,9 @@ class ClientPartnerController {
         }
       }
 
-      // Create audit log
+      // Create audit log for client partner creation
       await auditService.logCreate(
-        clientPartner,
+        clientPartner.toObject(),
         req,
         "ClientPartner",
         `Created client partner: ${clientPartner.name} with ${employeeIds.length} employees`,
@@ -253,9 +261,20 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      // Get original data for audit logging
+      const originalClientPartner = await ClientPartner.findOne({
+        _id: req.params.id,
+        isDeleted: { $ne: true },
+      });
+
+      if (!originalClientPartner) {
+        next(createError(404, "Client partner not found"));
+        return;
+      }
+
       const clientPartner = await ClientPartner.findOneAndUpdate(
         { _id: req.params.id, isDeleted: { $ne: true } },
-        req.body,
+        { ...req.body, updatedBy: req.user.username },
         { new: true, runValidators: true },
       ).populate({
         path: "employees",
@@ -269,10 +288,14 @@ class ClientPartnerController {
         },
       });
 
-      if (!clientPartner) {
-        next(createError(404, "Client partner not found"));
-        return;
-      }
+      // Create audit log for client partner update
+      await auditService.logUpdate(
+        originalClientPartner.toObject(),
+        clientPartner!.toObject(),
+        req,
+        "ClientPartner",
+        `Updated client partner: ${clientPartner!.name}`,
+      );
 
       res.status(200).json({
         message: "Client Partner updated successfully",
@@ -306,20 +329,34 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      // Get original data for audit logging
+      const originalClientPartner = await ClientPartner.findOne({
+        _id: req.params.id,
+        isDeleted: { $ne: true },
+      });
+
+      if (!originalClientPartner) {
+        next(createError(404, "Client partner not found"));
+        return;
+      }
+
       const clientPartner = await ClientPartner.findOneAndUpdate(
         { _id: req.params.id, isDeleted: { $ne: true } },
         { isDeleted: true },
         { new: true },
       );
 
-      if (!clientPartner) {
-        next(createError(404, "Client partner not found"));
-        return;
-      }
+      // Create audit log for client partner soft delete
+      await auditService.logDelete(
+        originalClientPartner.toObject(),
+        req,
+        "ClientPartner",
+        `Soft deleted client partner: ${originalClientPartner.name}`,
+      );
 
       res.status(200).json({
         message: "Client Partner deleted successfully",
-        cpId: clientPartner._id,
+        cpId: clientPartner!._id,
       });
     } catch (error) {
       if (error instanceof mongoose.Error.CastError) {
@@ -360,6 +397,11 @@ class ClientPartnerController {
           return;
         }
 
+        // Get associated employees for audit logging
+        const associatedEmployees = await CPEmployee.find({
+          clientPartnerId: clientPartner._id,
+        }).session(session);
+
         // Delete all associated employees
         await CPEmployee.deleteMany({
           clientPartnerId: clientPartner._id,
@@ -371,6 +413,17 @@ class ClientPartnerController {
         // Commit the transaction
         await session.commitTransaction();
         session.endSession();
+
+        // Create audit log for hard delete (after successful transaction)
+        await auditService.logDelete(
+          {
+            clientPartner: clientPartner.toObject(),
+            deletedEmployees: associatedEmployees.map((emp) => emp.toObject()),
+          },
+          req,
+          "ClientPartner",
+          `Hard deleted client partner: ${clientPartner.name} and ${associatedEmployees.length} associated employees`,
+        );
 
         res.status(200).json({
           message:
@@ -430,6 +483,14 @@ class ClientPartnerController {
       clientPartner.employees.push(newEmployee._id);
       await clientPartner.save();
 
+      // Create audit log for employee addition
+      await auditService.logCreate(
+        newEmployee.toObject(),
+        req,
+        "CPEmployee",
+        `Added employee: ${newEmployee.firstName} ${newEmployee.lastName} to client partner: ${clientPartner.name}`,
+      );
+
       // Fetch the updated client partner with populated employees
       const updatedClientPartner = await ClientPartner.findById(
         clientPartnerId,
@@ -486,13 +547,13 @@ class ClientPartnerController {
       }
 
       // Check if the employee exists and belongs to this client partner
-      const employee = await CPEmployee.findOne({
+      const originalEmployee = await CPEmployee.findOne({
         _id: employeeId,
         clientPartnerId: id,
         isDeleted: { $ne: true },
       });
 
-      if (!employee) {
+      if (!originalEmployee) {
         next(createError(404, "Employee not found"));
         return;
       }
@@ -502,6 +563,15 @@ class ClientPartnerController {
         employeeId,
         req.body,
         { new: true, runValidators: true },
+      );
+
+      // Create audit log for employee update
+      await auditService.logUpdate(
+        originalEmployee.toObject(),
+        updatedEmployee!.toObject(),
+        req,
+        "CPEmployee",
+        `Updated employee: ${updatedEmployee!.firstName} ${updatedEmployee!.lastName} in client partner: ${clientPartner.name}`,
       );
 
       // Get the updated client partner with populated employees
@@ -574,9 +644,20 @@ class ClientPartnerController {
         return;
       }
 
+      // Store original data for audit logging
+      const originalEmployeeData = employee.toObject();
+
       // Soft delete the employee
       employee.isDeleted = true;
       await employee.save();
+
+      // Create audit log for employee soft delete
+      await auditService.logDelete(
+        originalEmployeeData,
+        req,
+        "CPEmployee",
+        `Soft deleted employee: ${employee.firstName} ${employee.lastName} from client partner: ${clientPartner.name}`,
+      );
 
       // Get the updated client partner with populated employees
       const updatedClientPartner = await ClientPartner.findById(id).populate({
@@ -633,6 +714,9 @@ class ClientPartnerController {
         return;
       }
 
+      // Store original data for audit logging
+      const originalEmployeeData = employee.toObject();
+
       // Remove employee reference from client partner
       clientPartner.employees = clientPartner.employees.filter(
         (empId) => empId.toString() !== employeeId,
@@ -641,6 +725,14 @@ class ClientPartnerController {
 
       // Hard delete the employee
       await CPEmployee.findByIdAndDelete(employeeId);
+
+      // Create audit log for employee hard delete
+      await auditService.logDelete(
+        originalEmployeeData,
+        req,
+        "CPEmployee",
+        `Hard deleted employee: ${employee.firstName} ${employee.lastName} from client partner: ${clientPartner.name}`,
+      );
 
       // Get the updated client partner with populated employees
       const updatedClientPartner = await ClientPartner.findById(id).populate({
@@ -676,6 +768,17 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      // Get original data for audit logging
+      const originalClientPartner = await ClientPartner.findOne({
+        _id: req.params.id,
+        isDeleted: true,
+      });
+
+      if (!originalClientPartner) {
+        next(createError(404, "Deleted client partner not found"));
+        return;
+      }
+
       const clientPartner = await ClientPartner.findOneAndUpdate(
         { _id: req.params.id, isDeleted: true },
         { isDeleted: false },
@@ -692,10 +795,14 @@ class ClientPartnerController {
         },
       });
 
-      if (!clientPartner) {
-        next(createError(404, "Deleted client partner not found"));
-        return;
-      }
+      // Create audit log for client partner restore
+      await auditService.logUpdate(
+        { ...originalClientPartner.toObject(), isDeleted: true },
+        clientPartner!.toObject(),
+        req,
+        "ClientPartner",
+        `Restored client partner: ${clientPartner!.name}`,
+      );
 
       res.status(200).json({
         message: "Client Partner restored successfully",
@@ -745,9 +852,21 @@ class ClientPartnerController {
         return;
       }
 
+      // Store original data for audit logging
+      const originalEmployeeData = { ...employee.toObject(), isDeleted: true };
+
       // Restore the employee
       employee.isDeleted = false;
       await employee.save();
+
+      // Create audit log for employee restore
+      await auditService.logUpdate(
+        originalEmployeeData,
+        employee.toObject(),
+        req,
+        "CPEmployee",
+        `Restored employee: ${employee.firstName} ${employee.lastName} in client partner: ${clientPartner.name}`,
+      );
 
       // Get the updated client partner with populated employees
       const updatedClientPartner = await ClientPartner.findById(id).populate({

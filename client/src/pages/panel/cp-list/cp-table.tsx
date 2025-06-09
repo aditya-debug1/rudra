@@ -1,4 +1,4 @@
-import { GetClientPartnersResponse } from "@/store/client-partner";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,10 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
 import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
+import { GetClientPartnersResponse } from "@/store/client-partner";
+import { ChevronRight } from "lucide-react";
 
 interface ClientPartnerTableProps {
   data?: GetClientPartnersResponse;
@@ -27,6 +27,12 @@ export const ClientPartnerTable = ({
     "ClientPartner",
     "view-cp-details",
   );
+  const showContacts = hasPermission(
+    combinedRole,
+    "ClientPartner",
+    "view-cp-contacts",
+  );
+
   const firstIndex = data
     ? data.currentPage * data.limitNumber - data.limitNumber
     : 0;
@@ -39,8 +45,14 @@ export const ClientPartnerTable = ({
             <TableHead className="text-center">#</TableHead>
             <TableHead className="text-center">Company</TableHead>
             <TableHead className="text-center">Owner</TableHead>
-            <TableHead className="text-center">Email</TableHead>
-            <TableHead className="text-center">Phone No</TableHead>
+            {showContacts && (
+              <>
+                <TableHead className="text-center">Email</TableHead>
+                <TableHead className="text-center whitespace-nowrap">
+                  Phone No
+                </TableHead>
+              </>
+            )}
             <TableHead className="text-center whitespace-nowrap">
               Total Employee
             </TableHead>
@@ -55,7 +67,10 @@ export const ClientPartnerTable = ({
         <TableBody>
           {!data || !data.clientPartners.length ? (
             <TableRow className="hover:bg-card">
-              <TableCell colSpan={showDetails ? 7 : 6} className="text-center">
+              <TableCell
+                colSpan={5 + (showDetails ? 1 : 0) + (showContacts ? 2 : 0)}
+                className="text-center"
+              >
                 No Client Partners Data
               </TableCell>
             </TableRow>
@@ -67,10 +82,15 @@ export const ClientPartnerTable = ({
                 </TableCell>
                 <TableCell className="text-center">{cp.name}</TableCell>
                 <TableCell className="text-center">{cp.ownerName}</TableCell>
-                <TableCell className="text-center">
-                  {cp.email || "N/A"}
-                </TableCell>
-                <TableCell className="text-center">{cp.phoneNo}</TableCell>
+
+                {showContacts && (
+                  <>
+                    <TableCell className="text-center">
+                      {cp.email || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-center">{cp.phoneNo}</TableCell>
+                  </>
+                )}
                 <TableCell className="text-center">
                   {cp.employees.length}
                 </TableCell>
