@@ -828,7 +828,7 @@ export const BookingForm = () => {
                     onChange={(e) =>
                       handleInputChange(
                         ["payment", "amount"],
-                        Number(e.target.value),
+                        Number(e.target.value) ? Number(e.target.value) : 0,
                       )
                     }
                     placeholder="0"
@@ -941,7 +941,7 @@ export const BookingForm = () => {
                     onChange={(e) =>
                       handleInputChange(
                         ["bookingDetails", "bookingAmt"],
-                        Number(e.target.value),
+                        Number(e.target.value) ? Number(e.target.value) : 0,
                       )
                     }
                     placeholder="0"
@@ -1030,7 +1030,7 @@ export const BookingForm = () => {
                     onChange={(e) =>
                       handleInputChange(
                         ["bookingDetails", "av"],
-                        Number(e.target.value),
+                        Number(e.target.value) ? Number(e.target.value) : 0,
                       )
                     }
                     placeholder="0"

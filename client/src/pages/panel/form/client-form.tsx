@@ -392,7 +392,10 @@ const ClientForm = () => {
                     <Input
                       value={client.budget}
                       onChange={(e) =>
-                        handleInputChange("budget", Number(e.target.value))
+                        handleInputChange(
+                          "budget",
+                          Number(e.target.value) ? Number(e.target.value) : 0,
+                        )
                       }
                       placeholder="0"
                     />
