@@ -47,10 +47,6 @@ export const AdminPermissions: Permission[] = [
     ],
   },
   {
-    page: "Task",
-    actions: ["view-task", "create-task", "delete-task", "update-task"],
-  },
-  {
     page: "Booking",
     actions: [
       "view-booking",
@@ -120,10 +116,6 @@ export const DefaultPermissions: Permission[] = [
     page: "Dashboard",
     actions: ["view-dashboard"],
   },
-  {
-    page: "Task",
-    actions: ["view-task", "create-task", "delete-task", "update-task"],
-  },
 ];
 
 interface PermissionAction {
@@ -160,16 +152,6 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
       { value: "delete-user", label: "Delete user" },
       { value: "reset-password", label: "Reset user password" },
       { value: "lock-user", label: "Lock users" },
-    ],
-  },
-  {
-    page: "Task",
-    pageLabel: "Task Sections",
-    actions: [
-      { value: "view-task", label: "View Task" },
-      { value: "create-task", label: "Create Task" },
-      { value: "delete-task", label: "Delete Task" },
-      { value: "update-task", label: "Update Task" },
     ],
   },
   {

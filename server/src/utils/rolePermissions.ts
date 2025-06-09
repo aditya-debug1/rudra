@@ -45,10 +45,6 @@ export const defaultRootPermissions = [
     ],
   },
   {
-    page: "Task",
-    actions: ["view-task", "create-task", "delete-task", "update-task"],
-  },
-  {
     page: "Booking",
     actions: [
       "view-booking",
