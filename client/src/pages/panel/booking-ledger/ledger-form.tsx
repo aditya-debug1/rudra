@@ -223,13 +223,10 @@ const AmountInput: React.FC<AmountInputProps> = ({
       >
         <div className="flex gap-2">
           <Input
-            type="number"
             value={value}
             onChange={(e) => onValueChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
-            min="0"
-            step="0"
             className={error ? "border-red-500" : ""}
           />
           <Select
