@@ -3,6 +3,7 @@ import { Combobox, ComboboxOption } from "@/components/custom ui/combobox";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { MultiSelect } from "@/components/custom ui/multi-select";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,7 +48,7 @@ import {
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { TicketCheck } from "lucide-react";
+import { RefreshCw, TicketCheck } from "lucide-react";
 import { useState } from "react";
 import { BookingForm as PdfFlatBookingForm } from "./booking-pdf";
 import {
@@ -77,12 +78,13 @@ type paymentType = "regular-payment" | "down-payment";
 export const BookingForm = () => {
   const { toast } = useToast();
   const { useProjectsStructure } = useInventory();
-  const { data: projectsData } = useProjectsStructure();
+  const { data: projectsData, refetch: refetchProjects } =
+    useProjectsStructure();
   const mutateCreateClientBooking = useCreateClientBooking();
   const mutateUpdateClientBooking = useUpdateClientBooking();
   const { useReference } = useClientPartners();
-  const { data: users } = useUsersSummary();
-  const { data: refData } = useReference();
+  const { data: users, refetch: refetchUsers } = useUsersSummary();
+  const { data: refData, refetch: refetchRef } = useReference();
   const isSmallScreen = useMediaQuery("(max-width: 1024px)");
   const dialog = useAlertDialog({
     alertType: "Warn",
@@ -95,6 +97,7 @@ export const BookingForm = () => {
 
   // states
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefetching, setIsRefetching] = useState(false);
   const [clientId, setClientId] = useState<string | null>(null);
   const [amountUnit, setAmountUnit] = useState<number>(100000);
   const [avUnit, setAVUnit] = useState<number>(100000);
@@ -473,6 +476,31 @@ export const BookingForm = () => {
     }
   };
 
+  const handleRefetch = async () => {
+    setIsRefetching(true);
+
+    try {
+      await Promise.all([refetchProjects(), refetchUsers(), refetchRef()]);
+
+      toast({
+        title: "Data Refreshed",
+        description: "All data has been successfully updated.",
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Refetch Failed",
+        description: "Failed to refresh data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      await setTimeout(() => {
+        setIsRefetching(false);
+      }, 1000);
+      setIsRefetching(false);
+    }
+  };
+
   const handleSubmit = async () => {
     const newBooking: BookingType = {
       ...bookingData,
@@ -605,6 +633,14 @@ export const BookingForm = () => {
             >
               Commercial
             </Button>
+            <Tooltip content="Refresh">
+              <Button variant="outline" size="icon" onClick={handleRefetch}>
+                <RefreshCw
+                  size={20}
+                  className={isRefetching ? "animate-spin" : ""}
+                />
+              </Button>
+            </Tooltip>
           </div>
 
           <div className="space-y-6">
