@@ -64,6 +64,10 @@ export const defaultRootPermissions = [
     ],
   },
   {
+    page: "Target",
+    actions: ["view-target", "create-target", "update-target", "delete-target"],
+  },
+  {
     page: "Inventory",
     actions: [
       "view-inventory",
