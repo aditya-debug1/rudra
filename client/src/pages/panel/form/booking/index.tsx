@@ -523,8 +523,10 @@ export const BookingForm = () => {
       setIsSubmitting(true);
       const formattedData: ClientBookingCreateUpdateData = {
         date: newBooking.bookingDetails.date,
-        applicant: capitalizeWords(newBooking.applicants.primary),
-        coApplicant: capitalizeWords(newBooking.applicants.coApplicant || ""),
+        applicant: capitalizeWords(newBooking.applicants.primary.toLowerCase()),
+        coApplicant: capitalizeWords(
+          newBooking.applicants.coApplicant.toLowerCase() || "",
+        ),
         status: "booked",
         project: newBooking.project.name,
         wing: newBooking.unit.wing,
