@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { cn } from "@/lib/utils";
+import { getLabelForPage } from "@/store/data/side-links";
 import { userType } from "@/store/users";
 import { ChevronRight } from "lucide-react";
 import * as React from "react";
@@ -60,7 +61,7 @@ const Nav: React.FC<NavProps> = ({
       </div>
 
       <h1 className="md:hidden text-lg font-semibold md:text-2xl">
-        {currContent}
+        {getLabelForPage(currContent)}
       </h1>
       <div className="flex items-center justify-center gap-4">
         <ModeToggle />

@@ -63,6 +63,11 @@ export const NavLinks: NavLinkType[] = [
   },
 ];
 
+export function getLabelForPage(pageName: string): string | undefined {
+  const found = NavLinks.find((link) => link.pageName === pageName);
+  return found ? found.label : pageName;
+}
+
 // Example list that has notification
 // {
 //   pageName: "WebsitePages",
