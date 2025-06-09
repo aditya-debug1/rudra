@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 // Types
 export interface CPEmployeeType extends Document {
@@ -30,7 +30,9 @@ export interface ClientPartnerType extends Document {
   companyWebsite?: string;
   isDeleted: boolean;
   createdAt: Date;
+  createdBy?: string;
   updatedAt: Date;
+  updatedBy?: string;
 }
 
 // CPEmployee Schema (now a top-level schema)
@@ -67,6 +69,8 @@ const ClientPartnerSchema: Schema = new Schema(
     notes: { type: String },
     companyWebsite: { type: String },
     isDeleted: { type: Boolean, default: false },
+    createdBy: { type: String },
+    updatedBy: { type: String },
   },
   { timestamps: true },
 );

@@ -38,6 +38,8 @@ export const defaultRootPermissions = [
       "create-client-partner",
       "update-client-partner",
       "delete-client-partner",
+      "view-cp-contacts",
+      "view-all-cp",
       "view-cp-details",
       "create-cp-employee",
       "update-cp-employee",

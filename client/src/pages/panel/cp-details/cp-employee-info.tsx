@@ -1,4 +1,13 @@
+import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -7,29 +16,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { hasPermission } from "@/hooks/use-role";
+import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/store/auth";
 import {
   ClientPartnerType,
   EmployeeType,
   useClientPartners,
 } from "@/store/client-partner";
+import withStopPropagation from "@/utils/events/withStopPropagation";
+import { CustomAxiosError } from "@/utils/types/axios";
 import { Ellipsis } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { CP_ClientTable } from "./client-table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import withStopPropagation from "@/utils/events/withStopPropagation";
-import { useAlertDialog } from "@/components/custom ui/alertDialog";
-import { toast } from "@/hooks/use-toast";
-import { CustomAxiosError } from "@/utils/types/axios";
 import EmployeeFormDialog from "./employee-form"; // Import the form dialog
-import { useAuth } from "@/store/auth";
-import { hasPermission } from "@/hooks/use-role";
 
 interface EmployeesInfoProps {
   data?: ClientPartnerType;
@@ -37,6 +37,13 @@ interface EmployeesInfoProps {
 }
 
 export const EmployeesInfo = ({ data, pageCursor }: EmployeesInfoProps) => {
+  const { combinedRole } = useAuth(true);
+  const showContacts = hasPermission(
+    combinedRole,
+    "ClientPartner",
+    "view-cp-contacts",
+  );
+
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [heights, setHeights] = useState<Record<string, number>>({});
   const contentRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -106,13 +113,17 @@ export const EmployeesInfo = ({ data, pageCursor }: EmployeesInfoProps) => {
             <TableRow className="hover:bg-card">
               <TableHead className="text-center italic">#</TableHead>
               <TableHead className="text-center">Name</TableHead>
-              <TableHead className="text-center">Email</TableHead>
-              <TableHead className="text-center whitespace-nowrap">
-                Phone No
-              </TableHead>
-              <TableHead className="text-center whitespace-nowrap">
-                Alt No
-              </TableHead>
+              {showContacts && (
+                <>
+                  <TableHead className="text-center">Email</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">
+                    Phone No
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap">
+                    Alt No
+                  </TableHead>
+                </>
+              )}
               <TableHead className="text-center">Position</TableHead>
               <TableHead className="text-center whitespace-nowrap">
                 Total Clients
@@ -126,7 +137,10 @@ export const EmployeesInfo = ({ data, pageCursor }: EmployeesInfoProps) => {
           <TableBody>
             {!data?.employees || data.employees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center">
+                <TableCell
+                  colSpan={6 + (showContacts ? 3 : 0)}
+                  className="text-center"
+                >
                   No Employees Available
                 </TableCell>
               </TableRow>
@@ -145,15 +159,19 @@ export const EmployeesInfo = ({ data, pageCursor }: EmployeesInfoProps) => {
                       <TableCell className="text-center">
                         {emp.firstName + " " + emp.lastName}
                       </TableCell>
-                      <TableCell className="text-center">
-                        {emp.email || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {emp.phoneNo}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {emp.altNo || "N/A"}
-                      </TableCell>
+                      {showContacts && (
+                        <>
+                          <TableCell className="text-center">
+                            {emp.email || "N/A"}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {emp.phoneNo}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {emp.altNo || "N/A"}
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell className="text-center">
                         {emp.position || "N/A"}
                       </TableCell>
@@ -174,7 +192,7 @@ export const EmployeesInfo = ({ data, pageCursor }: EmployeesInfoProps) => {
 
                     <TableRow className="hover:bg-card expandable-row">
                       <TableCell
-                        colSpan={9}
+                        colSpan={6 + (showContacts ? 3 : 0)}
                         className="p-0 border-b border-t-0"
                       >
                         <div
