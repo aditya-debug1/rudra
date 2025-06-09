@@ -824,7 +824,6 @@ export const BookingForm = () => {
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
                   <Input
                     className="w-full"
-                    type="number"
                     value={bookingData.payment.amount}
                     onChange={(e) =>
                       handleInputChange(
@@ -938,7 +937,6 @@ export const BookingForm = () => {
                 <div className="flex flex-row gap-2 w-full">
                   <Input
                     className="w-full"
-                    type="number"
                     value={bookingData.bookingDetails.bookingAmt}
                     onChange={(e) =>
                       handleInputChange(
@@ -1028,7 +1026,6 @@ export const BookingForm = () => {
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
                   <Input
                     className="w-full"
-                    type="number"
                     value={bookingData.bookingDetails.av}
                     onChange={(e) =>
                       handleInputChange(
