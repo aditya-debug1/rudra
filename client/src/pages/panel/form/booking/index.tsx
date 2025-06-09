@@ -525,7 +525,7 @@ export const BookingForm = () => {
         date: newBooking.bookingDetails.date,
         applicant: capitalizeWords(newBooking.applicants.primary.toLowerCase()),
         coApplicant: capitalizeWords(
-          newBooking.applicants.coApplicant.toLowerCase() || "",
+          (newBooking.applicants.coApplicant || "").toLowerCase(),
         ),
         status: "booked",
         project: newBooking.project.name,
