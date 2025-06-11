@@ -712,7 +712,7 @@ export const BookingForm = () => {
                       onChange={(e) =>
                         handleInputChange(
                           ["applicants", "contact", "phoneNo"],
-                          e.target.value,
+                          e.target.value.trim(),
                         )
                       }
                     />
@@ -723,7 +723,7 @@ export const BookingForm = () => {
                       onChange={(e) =>
                         handleInputChange(
                           ["applicants", "contact", "residenceNo"],
-                          e.target.value,
+                          e.target.value.trim(),
                         )
                       }
                     />

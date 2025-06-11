@@ -327,14 +327,14 @@ const ClientForm = () => {
                     <Input
                       value={client.phoneNo}
                       onChange={(e) =>
-                        handleInputChange("phoneNo", e.target.value)
+                        handleInputChange("phoneNo", e.target.value.trim())
                       }
                       placeholder="Primary Number"
                     />
                     <Input
                       value={client.altNo}
                       onChange={(e) =>
-                        handleInputChange("altNo", e.target.value)
+                        handleInputChange("altNo", e.target.value.trim())
                       }
                       placeholder="Alt Number (optional)"
                     />
