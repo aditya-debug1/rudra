@@ -51,6 +51,7 @@ class ClientPartnerController {
           match: { isDeleted: { $ne: true } },
         })
         .skip(skip)
+        .sort({ createdAt: -1 })
         .limit(limitNumber);
 
       res.status(200).json({
