@@ -132,7 +132,14 @@ export default function ClientPartnerForm() {
       return;
     }
 
-    const validation = employeeSchema.safeParse(newEmployee);
+    // Prepare employee data with trimmed phone numbers for validation
+    const employeeForValidation = {
+      ...newEmployee,
+      phoneNo: newEmployee.phoneNo.trim(),
+      altNo: newEmployee.altNo.trim(),
+    };
+
+    const validation = employeeSchema.safeParse(employeeForValidation);
 
     if (!validation.success) {
       const errorMessages = formatZodErrors(validation.error.errors);
@@ -146,7 +153,7 @@ export default function ClientPartnerForm() {
     }
 
     const employee: Employee = {
-      ...newEmployee,
+      ...employeeForValidation,
       id: Date.now().toString(),
     };
 
@@ -200,13 +207,13 @@ export default function ClientPartnerForm() {
       return;
     }
 
-    // Prepare data for validation (exclude id)
+    // Prepare data for validation (exclude id) with trimmed phone numbers
     const employeeForValidation = {
       firstName: employee.firstName,
       lastName: employee.lastName,
       email: employee.email,
-      phoneNo: employee.phoneNo,
-      altNo: employee.altNo,
+      phoneNo: employee.phoneNo.trim(),
+      altNo: employee.altNo.trim(),
       position: employee.position,
       commissionPercentage: employee.commissionPercentage,
     };
@@ -223,6 +230,19 @@ export default function ClientPartnerForm() {
       });
       return;
     }
+
+    // Update the employee with trimmed phone numbers
+    setEmployees(
+      employees.map((emp) =>
+        emp.id === editingEmployeeId
+          ? {
+              ...emp,
+              phoneNo: emp.phoneNo.trim(),
+              altNo: emp.altNo.trim(),
+            }
+          : emp,
+      ),
+    );
 
     // If validation passes, stop editing
     setEditingEmployeeId(null);
@@ -259,13 +279,14 @@ export default function ClientPartnerForm() {
     }
 
     const formData = {
-      company,
+      ...company,
+      phoneNo: company.phoneNo.trim(),
       employees: employees.map((emp) => ({
         firstName: emp.firstName,
         lastName: emp.lastName,
         email: emp.email,
-        phoneNo: emp.phoneNo,
-        altNo: emp.altNo,
+        phoneNo: emp.phoneNo.trim(),
+        altNo: emp.altNo.trim(),
         position: emp.position,
         commissionPercentage: emp.commissionPercentage,
       })),
@@ -289,7 +310,7 @@ export default function ClientPartnerForm() {
       name: company.name,
       ownerName: company.ownerName,
       email: company.email,
-      phoneNo: company.phoneNo,
+      phoneNo: company.phoneNo.trim(),
       address: formatAddress(company.address),
       notes: company.notes,
       website: company.companyWebsite,
@@ -297,8 +318,8 @@ export default function ClientPartnerForm() {
         firstName: emp.firstName,
         lastName: emp.lastName,
         email: emp.email,
-        phoneNo: emp.phoneNo,
-        altNo: emp.altNo,
+        phoneNo: emp.phoneNo.trim(),
+        altNo: emp.altNo.trim(),
         position: emp.position,
         commissionPercentage: emp.commissionPercentage
           ? parseFloat(emp.commissionPercentage)
@@ -428,7 +449,7 @@ export default function ClientPartnerForm() {
                     placeholder="Contact"
                     value={company.phoneNo}
                     onChange={(e) =>
-                      handleCompanyChange(e.target.name, e.target.value)
+                      handleCompanyChange(e.target.name, e.target.value.trim())
                     }
                   />
                 </FormFieldWrapper>
@@ -555,7 +576,10 @@ export default function ClientPartnerForm() {
                     placeholder="Primary Number"
                     value={newEmployee.phoneNo}
                     onChange={(e) =>
-                      handleNewEmployeeChange(e.target.name, e.target.value)
+                      handleNewEmployeeChange(
+                        e.target.name,
+                        e.target.value.trim(),
+                      )
                     }
                   />
                   <Input
@@ -564,7 +588,10 @@ export default function ClientPartnerForm() {
                     placeholder="Alt Number (optional)"
                     value={newEmployee.altNo}
                     onChange={(e) =>
-                      handleNewEmployeeChange(e.target.name, e.target.value)
+                      handleNewEmployeeChange(
+                        e.target.name,
+                        e.target.value.trim(),
+                      )
                     }
                   />
                 </div>
@@ -698,7 +725,7 @@ export default function ClientPartnerForm() {
                             handleEmployeeEdit(
                               employee.id,
                               "phoneNo",
-                              e.target.value,
+                              e.target.value.trim(),
                             )
                           }
                         />
