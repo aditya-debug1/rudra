@@ -45,6 +45,7 @@ export const ClientPartnerTable = ({
             <TableHead className="text-center">#</TableHead>
             <TableHead className="text-center">Company</TableHead>
             <TableHead className="text-center">Owner</TableHead>
+            <TableHead className="text-center">Created By</TableHead>
             {showContacts && (
               <>
                 <TableHead className="text-center">Email</TableHead>
@@ -68,7 +69,7 @@ export const ClientPartnerTable = ({
           {!data || !data.clientPartners.length ? (
             <TableRow className="hover:bg-card">
               <TableCell
-                colSpan={5 + (showDetails ? 1 : 0) + (showContacts ? 2 : 0)}
+                colSpan={6 + (showDetails ? 1 : 0) + (showContacts ? 2 : 0)}
                 className="text-center"
               >
                 No Client Partners Data
@@ -82,6 +83,9 @@ export const ClientPartnerTable = ({
                 </TableCell>
                 <TableCell className="text-center">{cp.name}</TableCell>
                 <TableCell className="text-center">{cp.ownerName}</TableCell>
+                <TableCell className="text-center">
+                  {cp.createdBy || "N/A"}
+                </TableCell>
 
                 {showContacts && (
                   <>
