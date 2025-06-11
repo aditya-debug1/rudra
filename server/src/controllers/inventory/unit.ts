@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { Floor, Unit, UnitType } from "../../models/inventory"; // Adjust path as needed
+import auditService from "../../utils/audit-service";
 import createError from "../../utils/createError";
 
 class UnitController {
@@ -72,6 +73,14 @@ class UnitController {
       await Floor.findByIdAndUpdate(floorId, {
         $push: { units: savedUnit._id },
       });
+
+      // Log audit for unit creation
+      await auditService.logCreate(
+        savedUnit.toObject(),
+        req,
+        "Unit",
+        `Created unit ${unitNumber} on floor ${floorExists.displayNumber || floorId}`,
+      );
 
       res.status(201).json({
         success: true,
@@ -183,6 +192,9 @@ class UnitController {
         return;
       }
 
+      // Store original data for audit
+      const originalData = existingUnit.toObject();
+
       // Do not allow changing floorId or unitNumber to maintain data integrity
       if (req.body.floorId) {
         next(
@@ -207,6 +219,15 @@ class UnitController {
           },
         },
         { new: true },
+      );
+
+      // Log audit for unit update
+      await auditService.logUpdate(
+        originalData,
+        updatedUnit?.toObject(),
+        req,
+        "Unit",
+        `Updated unit ${existingUnit.unitNumber} (ID: ${unitId})`,
       );
 
       res.status(200).json({
@@ -270,6 +291,9 @@ class UnitController {
         return;
       }
 
+      // Store original data for audit
+      const originalData = existingUnit.toObject();
+
       const updateObj: any = { status };
 
       if (status === "available") {
@@ -283,6 +307,15 @@ class UnitController {
         unitId,
         { $set: updateObj },
         { new: true },
+      );
+
+      // Log audit for status update
+      await auditService.logUpdate(
+        originalData,
+        updatedUnit?.toObject(),
+        req,
+        "Unit",
+        `Updated status of unit ${existingUnit.unitNumber} from ${originalData.status} to ${status}`,
       );
 
       res.status(200).json({
@@ -317,6 +350,9 @@ class UnitController {
         return;
       }
 
+      // Store unit data for audit before deletion
+      const unitData = unit.toObject();
+
       // Remove unit from floor's units array
       await Floor.findByIdAndUpdate(unit.floorId, {
         $pull: { units: unitId },
@@ -324,6 +360,14 @@ class UnitController {
 
       // Delete the unit
       await Unit.findByIdAndDelete(unitId);
+
+      // Log audit for unit deletion
+      await auditService.logDelete(
+        unitData,
+        req,
+        "Unit",
+        `Deleted unit ${unitData.unitNumber} (ID: ${unitId})`,
+      );
 
       res.status(200).json({
         success: true,
