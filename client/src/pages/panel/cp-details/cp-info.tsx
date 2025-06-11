@@ -160,8 +160,11 @@ export const ClientPartnerInfo = ({
               {data.createdBy || "Unknown"}
             </Badge>
             <span>on</span>
-            <time className="font-medium text-foreground">
+            <time className="sm:hidden font-medium text-foreground">
               {data.createdAt && formatDate(data.createdAt)}
+            </time>
+            <time className="hidden sm:block font-medium text-foreground">
+              {data.createdAt && formatDateTime(data.createdAt)}
             </time>
           </div>
 

@@ -39,7 +39,7 @@ export const useClientPartnerStore = create<ClientPartnerStore>((set) => ({
     })),
   resetFilters: () =>
     set({
-      filters: { page: 1, limit: 10, search: "" },
+      filters: { page: 1, limit: 5, search: "" },
     }),
 
   // Selected client partner state

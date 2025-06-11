@@ -6,6 +6,7 @@ import BookingLedger, {
   PaymentType,
 } from "../models/booking-ledger";
 import ClientBooking from "../models/clientBooking";
+import AuditService from "../utils/audit-service";
 import createError from "../utils/createError";
 
 export class BookingLedgerController {
@@ -76,6 +77,19 @@ export class BookingLedgerController {
           runValidators: true,
         },
       );
+
+      // Audit Log: Payment Creation
+      try {
+        await AuditService.logCreate(
+          savedPayment,
+          req,
+          "BookingLedger",
+          `Payment entry created for client ${savedPayment.clientId} with amount ${savedPayment.amount} via ${savedPayment.method}`,
+        );
+      } catch (auditError) {
+        console.error("Audit logging failed for payment creation:", auditError);
+        // Don't fail the main operation due to audit logging failure
+      }
 
       res.status(201).json({
         success: true,
@@ -280,6 +294,22 @@ export class BookingLedgerController {
       // Use the model's soft delete method
       await payment.softDelete(deletedBy, reason);
 
+      // Audit Log: Payment Soft Deletion
+      try {
+        await AuditService.logDelete(
+          payment,
+          req,
+          "BookingLedger",
+          `Payment entry soft deleted for client ${payment.clientId} with amount ${payment.amount}${reason ? ` - Reason: ${reason}` : ""}`,
+        );
+      } catch (auditError) {
+        console.error(
+          "Audit logging failed for payment soft deletion:",
+          auditError,
+        );
+        // Don't fail the main operation due to audit logging failure
+      }
+
       res.status(200).json({
         success: true,
         message: "Payment deleted successfully",
@@ -322,6 +352,23 @@ export class BookingLedgerController {
 
       // Use the model's restore method
       await payment.restore();
+
+      // Audit Log: Payment Restoration
+      try {
+        await AuditService.createLog(
+          "update",
+          payment,
+          req,
+          "BookingLedger",
+          `Payment entry restored for client ${payment.clientId} with amount ${payment.amount}`,
+        );
+      } catch (auditError) {
+        console.error(
+          "Audit logging failed for payment restoration:",
+          auditError,
+        );
+        // Don't fail the main operation due to audit logging failure
+      }
 
       res.status(200).json({
         success: true,

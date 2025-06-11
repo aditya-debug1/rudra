@@ -35,6 +35,7 @@ const ClientPartnerList = () => {
   // Debounce hook
   const debouncedSetSearch = useDebounce((value: string) => {
     setFilters({ search: value, page: 1 });
+    handlePageChange(1);
   }, 600);
 
   // Event Handler

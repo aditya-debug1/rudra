@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { CPEmployee } from "../models/client-partner";
 import ClientBooking, { ClientBookingType } from "../models/clientBooking";
 import { Unit } from "../models/inventory";
+import AuditService from "../utils/audit-service"; // Import the audit service
 import createError from "../utils/createError";
 
 interface ClientPartner {
@@ -45,6 +46,14 @@ export class ClientBookingController {
       unit.reservedByOrReason = savedBooking.applicant;
       unit.referenceId = savedBooking._id;
       await unit.save();
+
+      // Log the creation in audit
+      await AuditService.logCreate(
+        savedBooking.toObject(),
+        req,
+        "ClientBooking",
+        `Created new client booking for ${savedBooking.applicant} - Unit: ${savedBooking.wing + "-" + unit.unitNumber} in Project: ${savedBooking.project}`,
+      );
 
       res.status(201).json({
         success: true,
@@ -313,7 +322,16 @@ export class ClientBookingController {
         return next(createError(400, "Invalid booking ID format"));
       }
 
-      // First update the booking without population
+      // Get the original booking data for audit logging
+      const originalBooking = await ClientBooking.findById(id);
+      if (!originalBooking) {
+        return next(createError(404, "Booking not found"));
+      }
+
+      // Store original data for audit
+      const originalData = originalBooking.toObject();
+
+      // Update the booking without population
       const updatedBooking = await ClientBooking.findByIdAndUpdate(
         id,
         { $set: updateData },
@@ -336,6 +354,15 @@ export class ClientBookingController {
           console.log("Failed to populate clientPartner:", err);
         }
       }
+
+      // Log the update in audit
+      await AuditService.logUpdate(
+        originalData,
+        updatedBooking.toObject(),
+        req,
+        "ClientBooking",
+        `Updated client booking ${updateData.status ? "status " : ""}for ${updatedBooking.applicant} - ID: ${id}`,
+      );
 
       res.status(200).json({
         success: true,
@@ -362,11 +389,29 @@ export class ClientBookingController {
         return next(createError(400, "Invalid booking ID format"));
       }
 
+      // Get the booking data before deletion for audit logging
+      const bookingToDelete = await ClientBooking.findById(id);
+      if (!bookingToDelete) {
+        return next(createError(404, "Booking not found"));
+      }
+
+      // Store booking data for audit
+      const deletedData = bookingToDelete.toObject();
+
+      // Delete the booking
       const deletedBooking = await ClientBooking.findByIdAndDelete(id);
 
       if (!deletedBooking) {
         return next(createError(404, "Booking not found"));
       }
+
+      // Log the deletion in audit
+      await AuditService.logDelete(
+        deletedData,
+        req,
+        "ClientBooking",
+        `Deleted client booking for ${deletedData.applicant} - ID: ${id}`,
+      );
 
       res.status(200).json({
         success: true,
