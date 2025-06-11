@@ -44,7 +44,17 @@ export const employeeSchema = z.object({
   ),
 });
 
+// Updated schema to handle multiple employees
 export const ClientPartnerSchema = z.object({
+  company: companySchema,
+  employees: z
+    .array(employeeSchema)
+    .min(1, "At least one employee is required")
+    .max(50, "Maximum 50 employees allowed"), // Optional: add reasonable limit
+});
+
+// Keep the old schema for backward compatibility if needed
+export const ClientPartnerSingleEmployeeSchema = z.object({
   company: companySchema,
   employee: employeeSchema,
 });
