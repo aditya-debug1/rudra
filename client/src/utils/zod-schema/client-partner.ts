@@ -46,11 +46,19 @@ export const employeeSchema = z.object({
 
 // Updated schema to handle multiple employees
 export const ClientPartnerSchema = z.object({
-  company: companySchema,
+  name: z.string().min(1, "Company name is required"),
+  ownerName: z.string().min(1, "Owner name is required"),
+  email: z.string().email("Invalid email format").optional().or(z.literal("")),
+  phoneNo: z
+    .string()
+    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+  companyWebsite: z.string().optional(),
   employees: z
     .array(employeeSchema)
     .min(1, "At least one employee is required")
-    .max(50, "Maximum 50 employees allowed"), // Optional: add reasonable limit
+    .max(50, "Maximum 50 employees allowed"),
 });
 
 // Keep the old schema for backward compatibility if needed
