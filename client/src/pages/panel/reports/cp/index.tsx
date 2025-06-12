@@ -7,12 +7,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useClientPartners } from "@/store/client-partner";
+import { useUsersSummary } from "@/store/users";
 import { Download, FileSpreadsheet } from "lucide-react";
 import { exportCpToExcel } from "./excel";
 
 export function ClientPartnerReport() {
   // Fetch data from stores
   const { useClientPartnersList } = useClientPartners();
+  const { data: managers, isLoading: isManagerLoading } = useUsersSummary();
   const { data, isLoading } = useClientPartnersList({
     page: 1,
     limit: 10000,
@@ -22,7 +24,7 @@ export function ClientPartnerReport() {
   // Handle export action
   const handleDownload = () => {
     if (data && data?.clientPartners.length > 0) {
-      exportCpToExcel(data?.clientPartners);
+      exportCpToExcel(data?.clientPartners, managers);
     } else {
       console.log("No client partner data available for export");
     }
@@ -46,7 +48,9 @@ export function ClientPartnerReport() {
           className="w-full mt-2"
           variant="default"
           onClick={handleDownload}
-          disabled={isLoading || data?.clientPartners.length === 0}
+          disabled={
+            isLoading || isManagerLoading || data?.clientPartners.length === 0
+          }
         >
           <Download className="h-4 w-4 mr-2" />
           Download Report

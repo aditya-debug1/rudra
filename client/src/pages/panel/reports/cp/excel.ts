@@ -1,12 +1,37 @@
 import { ClientPartnerType, EmployeeType } from "@/store/client-partner";
+import { usersSummaryType } from "@/store/users";
 import { autoSizeColumns } from "@/utils/func/excel";
 import ExcelJS from "exceljs";
 
+const formatDateTime = (date: string | Date) => {
+  return new Date(date).toLocaleString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const getManagerName = (
+  username: string,
+  managers: usersSummaryType[] | undefined,
+) => {
+  if (!managers || !username) return username;
+  const manager = managers.find((m) => m.username === username);
+  return manager ? manager.firstName + " " + manager.lastName : username;
+};
+
 // Function to format company data
-function formatCompanyData(cp: ClientPartnerType) {
+function formatCompanyData(
+  cp: ClientPartnerType,
+  usersSummary: usersSummaryType[],
+) {
   return {
+    "Created At": formatDateTime(cp.createdAt || ""),
     "Company Name": cp.name,
     "Owner Name": cp.ownerName,
+    "Created By": getManagerName(cp.createdBy || "N/A", usersSummary),
     "Company Phone": cp.phoneNo || "N/A",
     "Company Email": cp.email || "N/A",
     "Total Employees": cp.employees.length.toString(),
@@ -33,7 +58,10 @@ function formatEmployeeData(employee: EmployeeType, companyName: string) {
   };
 }
 
-export function exportCpToExcel(data: ClientPartnerType[]): void {
+export function exportCpToExcel(
+  data: ClientPartnerType[],
+  usersSummary: usersSummaryType[] | undefined,
+): void {
   if (!data || data.length === 0) {
     console.warn("No client partners data to export");
     return;
@@ -43,7 +71,9 @@ export function exportCpToExcel(data: ClientPartnerType[]): void {
   const workbook = new ExcelJS.Workbook();
 
   // Format data
-  const companyData = data.map((cp) => formatCompanyData(cp));
+  const companyData = data.map((cp) =>
+    formatCompanyData(cp, usersSummary || []),
+  );
 
   // Create companies sheet
   const companyWorksheet = workbook.addWorksheet("Companies");

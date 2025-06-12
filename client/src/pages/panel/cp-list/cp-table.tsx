@@ -10,7 +10,17 @@ import {
 import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { GetClientPartnersResponse } from "@/store/client-partner";
+import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { ChevronRight } from "lucide-react";
+
+const getManagerName = (
+  username: string,
+  managers: usersSummaryType[] | undefined,
+) => {
+  if (!managers || !username) return username;
+  const manager = managers.find((m) => m.username === username);
+  return manager ? manager.firstName : username;
+};
 
 interface ClientPartnerTableProps {
   data?: GetClientPartnersResponse;
@@ -22,6 +32,7 @@ export const ClientPartnerTable = ({
   handleOpenDetails,
 }: ClientPartnerTableProps) => {
   const { combinedRole } = useAuth(true);
+  const { data: managers } = useUsersSummary();
   const showDetails = hasPermission(
     combinedRole,
     "ClientPartner",
@@ -84,7 +95,7 @@ export const ClientPartnerTable = ({
                 <TableCell className="text-center">{cp.name}</TableCell>
                 <TableCell className="text-center">{cp.ownerName}</TableCell>
                 <TableCell className="text-center">
-                  {cp.createdBy || "N/A"}
+                  {getManagerName(cp.createdBy || "N/A", managers)}
                 </TableCell>
 
                 {showContacts && (
