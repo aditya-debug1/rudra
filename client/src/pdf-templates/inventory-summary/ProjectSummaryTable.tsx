@@ -1,5 +1,4 @@
 import { unitStatus } from "@/store/inventory";
-import { hexDarkenColor } from "@/utils/func/colors";
 import { toProperCase } from "@/utils/func/strUtils";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import { ALL_UNIT_STATUSES, getStatusColor } from "./utils";
@@ -126,10 +125,7 @@ export const ProjectSummaryTable = ({ summary }: ProjectSummaryProps) => (
             >
               <Text
                 style={{
-                  color:
-                    status === "available"
-                      ? "#696969"
-                      : hexDarkenColor(getStatusColor(status), 10),
+                  color: "#000000",
                 }}
               >
                 {summary.statusCounts[status]}

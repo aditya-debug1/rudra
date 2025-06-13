@@ -1,5 +1,4 @@
 import { unitStatus } from "@/store/inventory";
-import { hexDarkenColor } from "@/utils/func/colors";
 import { G, Path, Rect, Svg, Text } from "@react-pdf/renderer";
 import _ from "lodash";
 import { getStatusColor } from "./utils";
@@ -47,7 +46,6 @@ export const BarChart = ({
         const x = 65 + index * (barWidth + barGap);
         const y = height - 25 - barHeight;
         const fillColor = getStatusColor(status);
-        const textColor = status === "available" ? "#696969" : fillColor;
 
         // Calculate label position with a minimum distance from the top
         const labelY = Math.max(y - 10, paddingTop);
@@ -72,7 +70,7 @@ export const BarChart = ({
                 fontSize: 8,
                 textAnchor: "middle",
                 fontWeight: "bold",
-                fill: hexDarkenColor(textColor, 10),
+                fill: "#000000",
               }}
             >
               {value}
