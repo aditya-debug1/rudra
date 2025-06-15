@@ -119,18 +119,34 @@ export class ClientBookingController {
         }
       }
 
-      // Date range filter
+      // Date range filter with timezone adjustment
       if (fromDate || toDate) {
         filter.date = {};
+
         if (fromDate) {
-          const fromDateObj = new Date(fromDate as string);
-          fromDateObj.setHours(0, 0, 0, 0);
-          filter.date.$gte = fromDateObj;
+          // Create date in local timezone (IST)
+          const fromDateStr = fromDate as string;
+          const fromDateObj = new Date(fromDateStr);
+
+          // Adjust to IST by adding the timezone offset
+          const offset = fromDateObj.getTimezoneOffset() * 60000;
+          const localFromDate = new Date(fromDateObj.getTime() - offset);
+          localFromDate.setHours(0, 0, 0, 0);
+
+          filter.date.$gte = localFromDate;
         }
+
         if (toDate) {
-          const toDateObj = new Date(toDate as string);
-          toDateObj.setHours(23, 59, 59, 999);
-          filter.date.$lte = toDateObj;
+          // Create date in local timezone (IST)
+          const toDateStr = toDate as string;
+          const toDateObj = new Date(toDateStr);
+
+          // Adjust to IST by adding the timezone offset
+          const offset = toDateObj.getTimezoneOffset() * 60000;
+          const localToDate = new Date(toDateObj.getTime() - offset);
+          localToDate.setHours(23, 59, 59, 999);
+
+          filter.date.$lte = localToDate;
         }
       }
 
