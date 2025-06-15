@@ -19,10 +19,10 @@ export const STATUS_COLORS: Record<Exclude<unitStatus, "others">, string> = {
 
 export const ALL_UNIT_STATUSES: Array<Exclude<unitStatus, "others">> = [
   "available",
-  "reserved",
+  "canceled",
   "booked",
   "registered",
-  "canceled",
+  "reserved",
   "investor",
   "not-for-sale",
 ];
