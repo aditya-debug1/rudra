@@ -7,6 +7,7 @@ import { ClientReport } from "./client";
 import { ClientPartnerReport } from "./cp";
 import { InventoryReport } from "./inventory";
 import { InventorySummaryReport } from "./inventory-summary";
+import { SalesManagerReport } from "./target";
 import { UserReport } from "./user";
 
 const Reports = () => {
@@ -36,6 +37,7 @@ const Reports = () => {
       {showReport("user-report") && <UserReport />}
       {showReport("client-report") && <ClientReport />}
       {showReport("cp-report") && <ClientPartnerReport />}
+      {showReport("sales-range-report") && <SalesManagerReport />}
     </div>
   );
 };
