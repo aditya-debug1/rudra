@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { addDays, isBefore, format, isAfter, startOfToday } from "date-fns";
+import { addDays, format, isAfter, isBefore, startOfToday } from "date-fns";
 import { Calendar as CalendarIcon, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { DateRange, isDateRange } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -12,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
 
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   disableDates?: "past" | "present" | "future" | null;
@@ -24,6 +24,7 @@ interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   autoClose?: boolean;
   minDate?: Date;
   maxDate?: Date;
+  showIcons?: boolean;
 }
 export function DatePickerWithRange({
   disableDates = null,
@@ -36,6 +37,7 @@ export function DatePickerWithRange({
   autoClose = false,
   minDate,
   maxDate,
+  showIcons = true,
 }: DatePickerProps) {
   // Variables
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -99,7 +101,7 @@ export function DatePickerWithRange({
               !date && "text-muted-foreground",
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            {showIcons && <CalendarIcon className="mr-2 h-4 w-4" />}
             <span>
               {formatDateRange()}
               {required && <span className="text-red-500 ml-1">*</span>}
