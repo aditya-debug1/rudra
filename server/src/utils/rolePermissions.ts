@@ -99,6 +99,7 @@ export const defaultRootPermissions = [
       "inventory-report",
       "inventory-summary-report",
       "booking-report",
+      "sales-range-report",
     ],
   },
   {
