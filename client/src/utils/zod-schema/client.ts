@@ -27,15 +27,12 @@ export const ClientSchema = z.object({
   firstName: z
     .string()
     .min(2, "First name must be at least 2 characters")
-    .regex(/^[A-Za-z]+$/, {
-      message: "Only alphabetic characters are allowed",
+    .regex(/^[A-Za-z\s]+$/, {
+      message: "Only alphabetic characters and spaces are allowed",
     }),
-  lastName: z
-    .string()
-    .min(2, "Last name must be at least 2 characters")
-    .regex(/^[A-Za-z]+$/, {
-      message: "Only alphabetic characters are allowed",
-    }),
+  lastName: z.string().regex(/^[A-Za-z\s-]+$/, {
+    message: "Only alphabetic characters and spaces are allowed",
+  }),
   occupation: z
     .string()
     .optional()
