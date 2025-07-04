@@ -212,6 +212,9 @@ export const CancellationForm = () => {
   const getProjectData = () =>
     projects?.find((p) => p.name === cancellationData.project.name);
 
+  const getProjectDataName = (projectName: string) =>
+    projects?.find((p) => p.name === projectName);
+
   const wingOptions =
     getProjectData()?.wings.map((w) => ({
       label: `Wing ${w.name}`,
@@ -240,8 +243,8 @@ export const CancellationForm = () => {
       ...cancellationData,
       project: {
         name: value,
-        by: getProjectData()?.by || "",
-        location: getProjectData()?.location || "",
+        by: getProjectDataName(value)?.by || "",
+        location: getProjectDataName(value)?.location || "",
       },
       property: {
         unitNo: "",
