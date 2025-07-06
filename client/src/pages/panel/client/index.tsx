@@ -89,7 +89,6 @@ const ClientsList = () => {
 
   useEffect(() => {
     handlePageChange(PageNo);
-    resetFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [PageNo]);
 

@@ -75,7 +75,7 @@ export const ClientTable = ({
   ) => {
     if (!references || !ref) return ref;
     const reference = references.find((r) => r._id === ref);
-    return reference ? reference.firstName + " " + reference.lastName : ref;
+    return reference ? reference.companyName : ref;
   };
 
   const getManagerName = (

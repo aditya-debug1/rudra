@@ -21,6 +21,7 @@ import { hasPermission } from "@/hooks/use-role";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import { ClientType, VisitType } from "@/store/client";
+import { RefernceListType, useClientPartners } from "@/store/client-partner";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { useVisits } from "@/store/visit";
 import withStopPropagation from "@/utils/events/withStopPropagation";
@@ -31,7 +32,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { RemarkForm } from "./remark-form";
 import { RemarkTable } from "./remark-table";
 import { VisitForm } from "./visit-form";
-import { RefernceListType, useClientPartners } from "@/store/client-partner";
 
 interface VisitInfoProps {
   client: ClientType;
@@ -117,7 +117,7 @@ export const VisitInfo = ({ client }: VisitInfoProps) => {
   ) => {
     if (!references || !ref) return ref;
     const reference = references.find((r) => r._id === ref);
-    return reference ? reference.firstName + " " + reference.lastName : ref;
+    return reference ? reference.companyName : ref;
   };
 
   useEffect(() => {
