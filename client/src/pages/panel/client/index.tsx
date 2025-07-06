@@ -138,7 +138,7 @@ const ClientsList = () => {
   }
 
   return (
-    <Card className="w-[90svw] lg:w-full">
+    <Card className="w-[90svw] lg:w-[95svw] xl:w-full">
       <CardHeader>
         <CardTitle>Client List</CardTitle>
       </CardHeader>
