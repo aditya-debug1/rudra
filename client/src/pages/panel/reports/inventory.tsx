@@ -1,5 +1,5 @@
 import { pdf } from "@react-pdf/renderer";
-import { Download, FileBox, Loader2 } from "lucide-react";
+import { Download, FileBox, FileSearch, Loader2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 // Components
@@ -26,6 +26,7 @@ import { AvailabilityPDF } from "@/pdf-templates/inventory-chart";
 export function InventoryReport() {
   // State hooks
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isPreviewingPDF, setIsPreviewingPDF] = useState(false);
   const [selectedProject, setSelectedProject] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -52,11 +53,73 @@ export function InventoryReport() {
     setError(null); // Reset any previous errors
   }, []);
 
-  // Generate and show PDF
-  const generateAndShowPDF = useCallback(async (project: ProjectType) => {
+  // Generate filename for the PDF
+  const generateFilename = useCallback((project: ProjectType): string => {
+    const projectName = project.name.replace(/[^a-zA-Z0-9]/g, "_");
+    const timestamp = new Date().toISOString().split("T")[0];
+    return `Availability_Chart_${projectName}_${timestamp}.pdf`;
+  }, []);
+
+  // Generate and download PDF
+  const downloadPDF = useCallback(
+    async (project: ProjectType) => {
+      if (!project) return;
+
+      setIsGeneratingPDF(true);
+      setError(null);
+
+      try {
+        // Create a blob from the PDF component
+        const blob = await pdf(<AvailabilityPDF project={project} />).toBlob();
+
+        // Create a URL for the blob
+        const url = URL.createObjectURL(blob);
+
+        // Generate filename
+        const filename = generateFilename(project);
+
+        // Download the PDF
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        toast({
+          title: "PDF Downloaded Successfully",
+          description: "The PDF has been downloaded to your device.",
+          variant: "success",
+        });
+
+        // Clean up the blob URL after a delay to ensure download completes
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 10000);
+      } catch (error) {
+        console.error("Error downloading PDF:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to download PDF",
+        );
+
+        toast({
+          title: "PDF Download Error",
+          description:
+            "There was a problem downloading the PDF. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsGeneratingPDF(false);
+      }
+    },
+    [generateFilename],
+  );
+
+  // Generate and preview PDF
+  const previewPDF = useCallback(async (project: ProjectType) => {
     if (!project) return;
 
-    setIsGeneratingPDF(true);
+    setIsPreviewingPDF(true);
     setError(null);
 
     try {
@@ -66,43 +129,54 @@ export function InventoryReport() {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
 
-      // Open PDF in new tab
+      // Open PDF in new tab for preview
       const newWindow = window.open(url, "_blank");
 
       // Check if popup was blocked
       if (!newWindow) {
-        throw new Error("Pop-up blocked. Please allow pop-ups for this site.");
+        console.warn("Pop-up blocked, unable to preview PDF.");
+        toast({
+          title: "Preview Blocked",
+          description:
+            "Pop-up was blocked. Please allow pop-ups to preview the PDF.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "PDF Preview Opened",
+          description: "The PDF preview has been opened in a new tab.",
+          variant: "success",
+        });
+
+        // Cleanup the blob URL when window unloads
+        newWindow.addEventListener("unload", () => URL.revokeObjectURL(url));
       }
 
-      toast({
-        title: "PDF Generated Successfully",
-        description: "The availability chart PDF has been opened in a new tab.",
-        variant: "success",
-      });
-
-      // Cleanup the blob URL when window unloads
-      newWindow.addEventListener("unload", () => URL.revokeObjectURL(url));
+      // Clean up the blob URL after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 10000);
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error previewing PDF:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to generate PDF",
+        error instanceof Error ? error.message : "Failed to preview PDF",
       );
 
       toast({
-        title: "PDF Generation Error",
+        title: "PDF Preview Error",
         description:
-          "There was a problem generating the PDF. Please try again.",
+          "There was a problem previewing the PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingPDF(false);
+      setIsPreviewingPDF(false);
     }
   }, []);
 
   // Handle download button click
   const handleDownload = useCallback(() => {
     if (projectData?.data) {
-      generateAndShowPDF(projectData.data);
+      downloadPDF(projectData.data);
     } else {
       setError("No project data available");
       toast({
@@ -111,11 +185,27 @@ export function InventoryReport() {
         variant: "destructive",
       });
     }
-  }, [projectData, generateAndShowPDF]);
+  }, [projectData, downloadPDF]);
 
-  // Determine button state
-  const isButtonDisabled =
+  // Handle preview button click
+  const handlePreview = useCallback(() => {
+    if (projectData?.data) {
+      previewPDF(projectData.data);
+    } else {
+      setError("No project data available");
+      toast({
+        title: "Error",
+        description: "No project data available. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [projectData, previewPDF]);
+
+  // Determine button states
+  const isDownloadDisabled =
     !selectedProject || isGeneratingPDF || isLoadingProjectDetails;
+  const isPreviewDisabled =
+    !selectedProject || isPreviewingPDF || isLoadingProjectDetails;
 
   return (
     <Card className="w-72 flex flex-col h-full shadow-md">
@@ -159,24 +249,44 @@ export function InventoryReport() {
           disabled={isLoadingProjects || projects.length === 0}
         />
 
-        <Button
-          className="w-full"
-          variant="default"
-          onClick={handleDownload}
-          disabled={isButtonDisabled}
-        >
-          {isGeneratingPDF || isLoadingProjectDetails ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {isGeneratingPDF ? "Generating..." : "Loading..."}
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4 mr-2" />
-              Download Chart
-            </>
-          )}
-        </Button>
+        <div className="w-full gap-2 flex justify-between">
+          <Button
+            className="w-full"
+            variant="default"
+            onClick={handleDownload}
+            disabled={isDownloadDisabled}
+          >
+            {isGeneratingPDF ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Downloa...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </>
+            )}
+          </Button>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={handlePreview}
+            disabled={isPreviewDisabled}
+          >
+            {isPreviewingPDF ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Preview...
+              </>
+            ) : (
+              <>
+                <FileSearch className="h-4 w-4 mr-2" />
+                Preview
+              </>
+            )}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
