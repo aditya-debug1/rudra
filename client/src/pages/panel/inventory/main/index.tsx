@@ -201,7 +201,9 @@ export default function ProjectsTable() {
                       {formatDate(project.startDate)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge className={getStatusColor(project.status)}>
+                      <Badge
+                        className={`text-nowrap ${getStatusColor(project.status)}`}
+                      >
                         {project.status == "under-construction"
                           ? "U/C"
                           : toProperCase(project.status)}
