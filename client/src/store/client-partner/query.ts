@@ -1,6 +1,6 @@
 // src/hooks/useClientPartners.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { clientPartnerApi, EmployeeData } from "./api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { clientPartnerApi, ClientPartnerFilters, EmployeeData } from "./api";
 
 // Central hook for client partner-related queries and mutations
 export const useClientPartners = () => {
@@ -8,7 +8,7 @@ export const useClientPartners = () => {
 
   // Get client partners with filters
   const useClientPartnersList = (
-    filters = { page: 1, limit: 10, search: "" },
+    filters: ClientPartnerFilters = { page: 1, limit: 10, search: "" },
   ) =>
     useQuery({
       queryKey: ["clientPartners", filters],

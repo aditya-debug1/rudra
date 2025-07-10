@@ -12,7 +12,7 @@ class ClientPartnerController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { page = 1, limit = 10, search } = req.query;
+      const { page = 1, limit = 10, search, createdBy } = req.query;
       const pageNumber = Number(page);
       const limitNumber = Number(limit);
       const skip = (pageNumber - 1) * limitNumber;
@@ -21,6 +21,10 @@ class ClientPartnerController {
       let query: any = { isDeleted: { $ne: true } };
 
       // Handle search
+      if (createdBy) {
+        query.createdBy = createdBy;
+      }
+
       if (search) {
         const searchTerms = (search as string).trim().split(/\s+/);
         const searchConditions: any[] = searchTerms.map((term) => {

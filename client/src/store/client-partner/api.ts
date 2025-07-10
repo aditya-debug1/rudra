@@ -25,10 +25,11 @@ export interface DeleteClientPartnerResponse {
   cpId: string;
 }
 
-interface ClientPartnerFilters {
+export interface ClientPartnerFilters {
   page?: number;
   limit?: number;
   search?: string;
+  createdBy?: string;
 }
 
 // Employee data types
@@ -46,12 +47,13 @@ export interface EmployeeData {
 export const clientPartnerApi = {
   // Get all client partners with optional filters
   getAllClientPartners: async (filters: ClientPartnerFilters = {}) => {
-    const { page = 1, limit = 10, search } = filters;
+    const { page = 1, limit = 10, search, createdBy } = filters;
 
     const queryParams = new URLSearchParams();
     queryParams.append("page", page.toString());
     queryParams.append("limit", limit.toString());
     if (search) queryParams.append("search", search);
+    if (createdBy) queryParams.append("createdBy", createdBy);
 
     const response = await newRequest.get<GetClientPartnersResponse>(
       `/client-partner?${queryParams.toString()}`,

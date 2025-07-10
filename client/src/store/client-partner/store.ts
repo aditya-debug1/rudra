@@ -6,6 +6,7 @@ interface ClientPartnerFilters {
   page: number;
   limit: number;
   search: string;
+  createdBy?: string;
 }
 
 interface ClientPartnerStore {

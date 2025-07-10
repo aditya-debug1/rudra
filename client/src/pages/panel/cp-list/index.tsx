@@ -30,6 +30,7 @@ const ClientPartnerList = () => {
 
   // States
   const [searchInput, setSearchInput] = useState(filters.search || "");
+  const [createdBy, setCreatedBy] = useState<string>(filters.createdBy || "");
   const [isFiltered, setIsFiltered] = useState(false);
 
   // Debounce hook
@@ -44,6 +45,12 @@ const ClientPartnerList = () => {
     navigate(`/panel/client-partners/${newPage}`);
   };
 
+  const handleCreatedBySelect = (user: string) => {
+    setCreatedBy(user);
+    setFilters({ createdBy: user });
+    setIsFiltered(true);
+  };
+
   const handleSearch = (value: string) => {
     setSearchInput(value);
     debouncedSetSearch(value);
@@ -52,6 +59,7 @@ const ClientPartnerList = () => {
 
   const handleClearFilter = () => {
     setSearchInput("");
+    setCreatedBy("");
     resetFilters();
     setIsFiltered(false);
   };
@@ -116,6 +124,8 @@ const ClientPartnerList = () => {
         <ClientPartnerHeader
           searchInput={searchInput}
           handleSearch={handleSearch}
+          createdBy={createdBy}
+          setCreatedBy={handleCreatedBySelect}
           isFiltered={isFiltered}
           handleClearFilter={handleClearFilter}
           data={data}

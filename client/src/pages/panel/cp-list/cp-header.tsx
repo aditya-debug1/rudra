@@ -1,15 +1,27 @@
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { GetClientPartnersResponse } from "@/store/client-partner";
+import { ignoreRole } from "@/store/data/options";
+import { useUsersSummary } from "@/store/users";
 import { FilterX, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ClientPartnerHeaderProps {
   searchInput: string;
   handleSearch: (value: string) => void;
+  createdBy: string;
+  setCreatedBy: (value: string) => void;
   isFiltered: boolean;
   handleClearFilter: () => void;
   data?: GetClientPartnersResponse;
@@ -19,17 +31,24 @@ interface ClientPartnerHeaderProps {
 export const ClientPartnerHeader = ({
   searchInput,
   handleSearch,
+  createdBy,
+  setCreatedBy,
   isFiltered,
   handleClearFilter,
   data,
   handlePageChange,
 }: ClientPartnerHeaderProps) => {
+  const { data: users } = useUsersSummary();
   const navigate = useNavigate();
   const { combinedRole } = useAuth(true);
   const createClientPartner = hasPermission(
     combinedRole,
     "Form",
     "client-partner-form",
+  );
+
+  const userOptions = users?.filter(
+    (user) => !user.roles.some((role) => ignoreRole.includes(role)),
   );
 
   return (
@@ -43,6 +62,20 @@ export const ClientPartnerHeader = ({
           placeholder="Search Client Partners..."
           className="sm:max-w-64"
         />
+        <Select onValueChange={setCreatedBy} value={createdBy}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Employee" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {userOptions?.map((user) => (
+                <SelectItem value={user.username}>
+                  {user.firstName + " " + user.lastName}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
 
         {isFiltered && (
           <Tooltip content="Clear filter">
