@@ -123,7 +123,7 @@ const formatDate = (date: Date): string => {
 
 const formatPropertyIdentifier = (property: PropertyDetails): string => {
   const { type, wing, unitNo } = property;
-  return `${toProperCase(type)} ${wing ? `${wing}-` : ""}${unitNo}`;
+  return `${toProperCase(type)} ${unitNo} in ${wing}`;
 };
 
 /**

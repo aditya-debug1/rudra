@@ -791,7 +791,7 @@ const WingPage: React.FC<{
 
       {/* Wing Title with continuation indication */}
       {pageIndex === 0 ? (
-        <Text style={styles.wingTitle}>Wing {wing.name}</Text>
+        <Text style={styles.wingTitle}>{wing.name}</Text>
       ) : (
         <Text style={styles.continuedText}>{wing.name} (continued)</Text>
       )}

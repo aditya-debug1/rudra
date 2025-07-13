@@ -243,13 +243,13 @@ export const ProjectSummaryPDF = ({ project }: { project: ProjectType }) => {
           return (
             <View key={wingIndex} break>
               <Text style={[styles.sectionTitle, styles.wingSection]}>
-                {wing.name} Wing Summary
+                {wing.name} Summary
               </Text>
 
               {/* Wing Pie Chart */}
               <View style={styles.container}>
                 <Text style={styles.title}>
-                  {wing.name} Wing Status Distribution
+                  {wing.name} Status Distribution
                 </Text>
                 <PieChart
                   data={wingSummary.statusDistribution}

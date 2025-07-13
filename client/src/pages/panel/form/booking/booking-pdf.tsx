@@ -274,350 +274,364 @@ const BookingFormPage = ({
 }: {
   data: BookingType;
   isCustomerCopy?: boolean;
-}) => (
-  <Page size="A4" style={styles.page}>
-    <View style={styles.container}>
-      {/* Copy Indicator */}
-      {isCustomerCopy && (
-        <View style={styles.copyIndicator}>
-          <Text style={styles.bold}>CUSTOMER COPY</Text>
-        </View>
-      )}
-      {/* Header Section */}
-      <View style={styles.section}>
-        <View style={styles.logoContainer}>
-          <Image src={ganpatiImage} style={{ width: 30, height: 30 }} />
-        </View>
-        <Text style={styles.heading}>{data.project.name.toUpperCase()}</Text>
-        <Text style={[styles.bold, styles.center, { marginBottom: 4 }]}>
-          Project By: {data.project.by.toUpperCase()}
-        </Text>
-        <Text style={styles.center}>{data.project.address}</Text>
-        <Text style={[styles.subHeading, styles.mt8]}>
-          BOOKING APPLICATION FORM
-        </Text>
-      </View>
-
-      {/* Date field */}
-      <View style={[styles.row, styles.flexEnd]}>
-        <LabeledText
-          label="DATE"
-          value={formatDate(data.bookingDetails.date.toString())}
-        />
-      </View>
-
-      {/* Applicant Information */}
-      <View style={[styles.section, styles.gap2]}>
-        <LabeledText
-          label="APPLICANT NAME"
-          value={data.applicants.primary.toUpperCase()}
-        />
-        <LabeledText
-          label="CO-APPLICANT NAME"
-          value={
-            data.applicants.coApplicant
-              ? data.applicants.coApplicant.toUpperCase()
-              : "_______________________"
-          }
-        />
-        <LabeledText
-          label="ADDRESS"
-          value={formatAddress(data.applicants.contact.address)}
-        />
-      </View>
-
-      {/* Contact Information */}
-      <View style={[styles.row, styles.gap15, styles.section]}>
-        <View>
-          <LabeledText
-            label="MOBILE NO"
-            value={data.applicants.contact.phoneNo}
-          />
-        </View>
-        <View>
-          <LabeledText
-            label="RESIDENCE NO"
-            value={
-              data.applicants.contact.residenceNo
-                ? data.applicants.contact.residenceNo
-                : "_________________"
-            }
-          />
-        </View>
-        <View>
-          <LabeledText
-            label="EMAIL"
-            value={
-              data.applicants.contact.email
-                ? data.applicants.contact.email.toLowerCase()
-                : "________________________________"
-            }
-          />
-        </View>
-      </View>
-
-      <View style={styles.separator} />
-
-      {/* Property Details */}
-      <View style={[styles.row, styles.section]}>
-        <View style={styles.col20}>
-          <LabeledText
-            label={
-              data.type == "residential"
-                ? "FLAT NO"
-                : `${data.unit.configuration.toUpperCase()} NO`
-            }
-            value={data.unit.unitNo}
-          />
-        </View>
-        {data.type == "residential" && data.unit.wing && (
-          <View style={styles.col20}>
-            <LabeledText label="WING" value={data.unit.wing.toUpperCase()} />
+}) => {
+  const [labelPart, valuePart] = data.unit.wing
+    ? data.unit.wing.toUpperCase().split(/ (.+)/)
+    : "";
+  return (
+    <Page size="A4" style={styles.page}>
+      <View style={styles.container}>
+        {/* Copy Indicator */}
+        {isCustomerCopy && (
+          <View style={styles.copyIndicator}>
+            <Text style={styles.bold}>CUSTOMER COPY</Text>
           </View>
         )}
-        {data.type == "commercial" && data.unit.area && (
+        {/* Header Section */}
+        <View style={styles.section}>
+          <View style={styles.logoContainer}>
+            <Image src={ganpatiImage} style={{ width: 30, height: 30 }} />
+          </View>
+          <Text style={styles.heading}>{data.project.name.toUpperCase()}</Text>
+          <Text style={[styles.bold, styles.center, { marginBottom: 4 }]}>
+            Project By: {data.project.by.toUpperCase()}
+          </Text>
+          <Text style={styles.center}>{data.project.address}</Text>
+          <Text style={[styles.subHeading, styles.mt8]}>
+            BOOKING APPLICATION FORM
+          </Text>
+        </View>
+
+        {/* Date field */}
+        <View style={[styles.row, styles.flexEnd]}>
+          <LabeledText
+            label="DATE"
+            value={formatDate(data.bookingDetails.date.toString())}
+          />
+        </View>
+
+        {/* Applicant Information */}
+        <View style={[styles.section, styles.gap2]}>
+          <LabeledText
+            label="APPLICANT NAME"
+            value={data.applicants.primary.toUpperCase()}
+          />
+          <LabeledText
+            label="CO-APPLICANT NAME"
+            value={
+              data.applicants.coApplicant
+                ? data.applicants.coApplicant.toUpperCase()
+                : "_______________________"
+            }
+          />
+          <LabeledText
+            label="ADDRESS"
+            value={formatAddress(data.applicants.contact.address)}
+          />
+        </View>
+
+        {/* Contact Information */}
+        <View style={[styles.row, styles.gap15, styles.section]}>
+          <View>
+            <LabeledText
+              label="MOBILE NO"
+              value={data.applicants.contact.phoneNo}
+            />
+          </View>
+          <View>
+            <LabeledText
+              label="RESIDENCE NO"
+              value={
+                data.applicants.contact.residenceNo
+                  ? data.applicants.contact.residenceNo
+                  : "_________________"
+              }
+            />
+          </View>
+          <View>
+            <LabeledText
+              label="EMAIL"
+              value={
+                data.applicants.contact.email
+                  ? data.applicants.contact.email.toLowerCase()
+                  : "________________________________"
+              }
+            />
+          </View>
+        </View>
+
+        <View style={styles.separator} />
+
+        {/* Property Details */}
+        <View style={[styles.row, styles.section]}>
           <View style={styles.col20}>
             <LabeledText
-              label="AREA"
-              value={`${data.unit.area.toString()}Sq.ft.`}
+              label={
+                data.type == "residential"
+                  ? "FLAT NO"
+                  : `${data.unit.configuration.toUpperCase()} NO`
+              }
+              value={data.unit.unitNo}
+            />
+          </View>
+          {data.type == "residential" && data.unit.wing && (
+            <View style={styles.col20}>
+              <LabeledText
+                label={labelPart || "WING"}
+                value={valuePart || "Unkown"}
+              />
+            </View>
+          )}
+          {data.type == "commercial" && data.unit.area && (
+            <View style={styles.col20}>
+              <LabeledText
+                label="AREA"
+                value={`${data.unit.area.toString()}Sq.ft.`}
+              />
+            </View>
+          )}
+
+          <View style={styles.col20}>
+            <LabeledText label="FLOOR" value={data.unit.floor} />
+          </View>
+          <View style={styles.col30}>
+            <LabeledText
+              label="CONFIGURATION"
+              value={data.unit.configuration.toUpperCase()}
+            />
+          </View>
+
+          <View style={styles.col10}>
+            <Text style={styles.bold}>
+              {"A-" + (simplifyNumber(data.bookingDetails.av) || 0)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Cost Table Section */}
+        <View style={[styles.section]}>
+          <View style={styles.table}>
+            {/* Header Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.tableColHeader}>
+                <Text>DESCRIPTION</Text>
+              </View>
+              <View style={styles.tableColHeader}>
+                <Text>RATE</Text>
+              </View>
+              <View style={[styles.tableColHeader, { borderRightWidth: 0 }]}>
+                <Text>AMOUNT (Rs.)</Text>
+              </View>
+            </View>
+
+            {/* Data Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text>UNIT COST</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text>LUMP SUM</Text>
+              </View>
+              <View style={styles.tableColLast}>
+                <Text>₹{formatToCurrency(data.payment.amount)}</Text>
+              </View>
+            </View>
+
+            {/* Notes Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.tableColFull}>
+                <Text>{data.payment.includedChargesNote}</Text>
+              </View>
+            </View>
+
+            {/* Amount in Words Row */}
+            <View style={styles.tableRowLast}>
+              <View style={styles.tableColFull}>
+                <Text>
+                  <Text style={styles.bold}>Rupees in Words: </Text>
+                  {numberToWords(data.payment.amount)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Bank Information */}
+        {data.type == "residential" && (
+          <View style={styles.section}>
+            <LabeledText
+              label={
+                data.payment.banks && data.payment.banks?.length > 0
+                  ? "SELECTED BANK FOR LOAN"
+                  : "PAYMENT MODE"
+              }
+              value={data.payment.banks?.join(", ") || "SELF FUNDING"}
             />
           </View>
         )}
 
-        <View style={styles.col20}>
-          <LabeledText label="FLOOR" value={data.unit.floor} />
-        </View>
-        <View style={styles.col30}>
-          <LabeledText
-            label="CONFIGURATION"
-            value={data.unit.configuration.toUpperCase()}
-          />
-        </View>
+        <View style={styles.separator} />
 
-        <View style={styles.col10}>
-          <Text style={styles.bold}>
-            {"A-" + (simplifyNumber(data.bookingDetails.av) || 0)}
-          </Text>
-        </View>
-      </View>
+        {data.type == "residential" && (
+          <React.Fragment>
+            {/* Notes Section */}
+            <View style={[styles.row, styles.section]}>
+              {/* Extra Charges */}
+              <View style={[styles.col45, styles.small, styles.gap4]}>
+                <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
+                  Extra:
+                </Text>
+                <Text>
+                  1) Rs.15000 Advocate Charges at the time of Registration.
+                </Text>
+                <Text>2) Maintenance at the time of Possession.</Text>
+                <Text>
+                  3) Society Charges Rs.1 Lakh at the time of Possession.
+                </Text>
+              </View>
 
-      {/* Cost Table Section */}
-      <View style={[styles.section]}>
-        <View style={styles.table}>
-          {/* Header Row */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableColHeader}>
-              <Text>DESCRIPTION</Text>
+              {/* Notes */}
+              <View style={[styles.col55, styles.small, styles.gap4]}>
+                <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
+                  Note:
+                </Text>
+                <Text>
+                  1) Token amount less than Rs.50,000/- is Non-Refundable after
+                  15 days.
+                </Text>
+                <Text>2) Registration within 30 days from Booking date.</Text>
+              </View>
             </View>
-            <View style={styles.tableColHeader}>
-              <Text>RATE</Text>
-            </View>
-            <View style={[styles.tableColHeader, { borderRightWidth: 0 }]}>
-              <Text>AMOUNT (Rs.)</Text>
-            </View>
-          </View>
 
-          {/* Data Row */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol}>
-              <Text>UNIT COST</Text>
+            {/* First Signature Block */}
+            <View style={[styles.row, styles.flexEnd, styles.mt8]}>
+              <View style={styles.signatureBlock}>
+                <View style={styles.signatureLine} />
+                <Text>APPLICANT SIGNATURE</Text>
+              </View>
             </View>
-            <View style={styles.tableCol}>
-              <Text>LUMP SUM</Text>
-            </View>
-            <View style={styles.tableColLast}>
-              <Text>₹{formatToCurrency(data.payment.amount)}</Text>
-            </View>
-          </View>
+          </React.Fragment>
+        )}
 
-          {/* Notes Row */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableColFull}>
-              <Text>{data.payment.includedChargesNote}</Text>
-            </View>
-          </View>
+        {data.type == "commercial" && (
+          <React.Fragment>
+            {/* Notes Section */}
+            <View style={[styles.row, styles.section]}>
+              {/* Extra Charges */}
+              <View style={[styles.col50, styles.small, styles.gap4]}>
+                <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
+                  EXTRA CHARGES: AT THE TIME OF REGISTRATION
+                </Text>
+                <Text>
+                  1) Development Charges (₹400 x {data.unit.area}Sq.ft.) = ₹
+                  {data.unit.area && 400 * data.unit.area}/-
+                </Text>
+                <Text>2) Society Charges = ₹1,00,000/-</Text>
+                <Text>3) Advocate Charges = ₹15,000/-</Text>
+                <Text>4) Maintenance at the time of Possession.</Text>
+              </View>
 
-          {/* Amount in Words Row */}
-          <View style={styles.tableRowLast}>
-            <View style={styles.tableColFull}>
-              <Text>
-                <Text style={styles.bold}>Rupees in Words: </Text>
-                {numberToWords(data.payment.amount)}
-              </Text>
+              {/* Notes */}
+              <View style={[styles.col50, styles.small, styles.gap4]}>
+                <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
+                  Note:
+                </Text>
+                <Text>
+                  1) Token amount less than Rs.50,000/- is Non-Refundable. after
+                  15 days.
+                </Text>
+              </View>
             </View>
-          </View>
-        </View>
-      </View>
 
-      {/* Bank Information */}
-      {data.type == "residential" && (
+            {/* First Signature Block */}
+            <View style={[styles.row, styles.flexEnd, styles.mt8]}>
+              <View style={styles.signatureBlock}>
+                <View style={styles.signatureLine} />
+                <Text>APPLICANT SIGNATURE</Text>
+              </View>
+            </View>
+          </React.Fragment>
+        )}
+
+        <View style={styles.separator} />
+
+        {/* Payment Terms */}
         <View style={styles.section}>
-          <LabeledText
-            label={
-              data.payment.banks && data.payment.banks?.length > 0
-                ? "SELECTED BANK FOR LOAN"
-                : "PAYMENT MODE"
-            }
-            value={data.payment.banks?.join(", ") || "SELF FUNDING"}
-          />
+          <Text style={styles.subHeading}>PAYMENT TERMS</Text>
+          <Text>{addNumberingToLines(data.payment.paymentTerms)}</Text>
         </View>
-      )}
 
-      <View style={styles.separator} />
+        <View style={styles.separator} />
 
-      {data.type == "residential" && (
-        <React.Fragment>
-          {/* Notes Section */}
-          <View style={[styles.row, styles.section]}>
-            {/* Extra Charges */}
-            <View style={[styles.col45, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                Extra:
-              </Text>
-              <Text>
-                1) Rs.15000 Advocate Charges at the time of Registration.
-              </Text>
-              <Text>2) Maintenance at the time of Possession.</Text>
-              <Text>
-                3) Society Charges Rs.1 Lakh at the time of Possession.
-              </Text>
-            </View>
+        {/* Payment Details */}
+        <View style={[styles.row, styles.section]}>
+          <View style={styles.col50}>
+            <LabeledText
+              label="BOOKING AMOUNT"
+              value={`₹${formatToCurrency(data.bookingDetails.bookingAmt)}`}
+            />
+          </View>
+          <View style={styles.col50}>
+            <LabeledText
+              label="CHEQUE NO"
+              value={data.bookingDetails.checkNo}
+            />
+          </View>
+        </View>
 
-            {/* Notes */}
-            <View style={[styles.col55, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                Note:
-              </Text>
-              <Text>
-                1) Token amount less than Rs.50,000/- is Non-Refundable after 15
-                days.
-              </Text>
-              <Text>2) Registration within 30 days from Booking date.</Text>
-            </View>
+        <View style={[styles.row, styles.section]}>
+          <View style={styles.col50}>
+            <LabeledText
+              label="BANK NAME"
+              value={data.bookingDetails.bankName}
+            />
+          </View>
+          <View style={styles.col50}>
+            <LabeledText
+              label="DATE"
+              value={formatDate(data.bookingDetails.paymentDate.toString())}
+            />
+          </View>
+        </View>
+
+        <View style={styles.separator} />
+
+        {/* Feedback Section */}
+        <View style={styles.section}>
+          <Text style={styles.subHeading}>
+            HOW DID YOU GET TO KNOW ABOUT OUR PROJECT
+          </Text>
+
+          <View style={[styles.row, styles.gap15, styles.mt16]}>
+            <LabeledText label="HOARDING" value={"___________________"} />
+            <LabeledText label="WEBSITE" value={"___________________"} />
+            <LabeledText label="FRIEND" value={"_______________________"} />
+          </View>
+          <View style={[styles.row, styles.gap15, styles.mt8]}>
+            <LabeledText
+              label="CLIENT PARTNER"
+              value={"_________________________________________"}
+            />
+            <LabeledText label="OTHER" value={"__________________________"} />
+          </View>
+        </View>
+
+        {/* Final Signatures - Absolutely positioned at bottom */}
+        <View style={styles.bottomSignatures}>
+          <View style={styles.signatureBlock}>
+            <View style={styles.signatureLine} />
+            <Text>AUTHORISED SIGNATORY</Text>
           </View>
 
-          {/* First Signature Block */}
-          <View style={[styles.row, styles.flexEnd, styles.mt8]}>
-            <View style={styles.signatureBlock}>
-              <View style={styles.signatureLine} />
-              <Text>APPLICANT SIGNATURE</Text>
-            </View>
+          <View style={styles.signatureBlock}>
+            <View style={styles.signatureLine} />
+            <Text>APPLICANT SIGNATURE</Text>
           </View>
-        </React.Fragment>
-      )}
-
-      {data.type == "commercial" && (
-        <React.Fragment>
-          {/* Notes Section */}
-          <View style={[styles.row, styles.section]}>
-            {/* Extra Charges */}
-            <View style={[styles.col50, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                EXTRA CHARGES: AT THE TIME OF REGISTRATION
-              </Text>
-              <Text>
-                1) Development Charges (₹400 x {data.unit.area}Sq.ft.) = ₹
-                {data.unit.area && 400 * data.unit.area}/-
-              </Text>
-              <Text>2) Society Charges = ₹1,00,000/-</Text>
-              <Text>3) Advocate Charges = ₹15,000/-</Text>
-              <Text>4) Maintenance at the time of Possession.</Text>
-            </View>
-
-            {/* Notes */}
-            <View style={[styles.col50, styles.small, styles.gap4]}>
-              <Text style={[styles.bold, styles.underline, { fontSize: 10 }]}>
-                Note:
-              </Text>
-              <Text>
-                1) Token amount less than Rs.50,000/- is Non-Refundable. after
-                15 days.
-              </Text>
-            </View>
-          </View>
-
-          {/* First Signature Block */}
-          <View style={[styles.row, styles.flexEnd, styles.mt8]}>
-            <View style={styles.signatureBlock}>
-              <View style={styles.signatureLine} />
-              <Text>APPLICANT SIGNATURE</Text>
-            </View>
-          </View>
-        </React.Fragment>
-      )}
-
-      <View style={styles.separator} />
-
-      {/* Payment Terms */}
-      <View style={styles.section}>
-        <Text style={styles.subHeading}>PAYMENT TERMS</Text>
-        <Text>{addNumberingToLines(data.payment.paymentTerms)}</Text>
-      </View>
-
-      <View style={styles.separator} />
-
-      {/* Payment Details */}
-      <View style={[styles.row, styles.section]}>
-        <View style={styles.col50}>
-          <LabeledText
-            label="BOOKING AMOUNT"
-            value={`₹${formatToCurrency(data.bookingDetails.bookingAmt)}`}
-          />
-        </View>
-        <View style={styles.col50}>
-          <LabeledText label="CHEQUE NO" value={data.bookingDetails.checkNo} />
         </View>
       </View>
-
-      <View style={[styles.row, styles.section]}>
-        <View style={styles.col50}>
-          <LabeledText label="BANK NAME" value={data.bookingDetails.bankName} />
-        </View>
-        <View style={styles.col50}>
-          <LabeledText
-            label="DATE"
-            value={formatDate(data.bookingDetails.paymentDate.toString())}
-          />
-        </View>
-      </View>
-
-      <View style={styles.separator} />
-
-      {/* Feedback Section */}
-      <View style={styles.section}>
-        <Text style={styles.subHeading}>
-          HOW DID YOU GET TO KNOW ABOUT OUR PROJECT
-        </Text>
-
-        <View style={[styles.row, styles.gap15, styles.mt16]}>
-          <LabeledText label="HOARDING" value={"___________________"} />
-          <LabeledText label="WEBSITE" value={"___________________"} />
-          <LabeledText label="FRIEND" value={"_______________________"} />
-        </View>
-        <View style={[styles.row, styles.gap15, styles.mt8]}>
-          <LabeledText
-            label="CLIENT PARTNER"
-            value={"_________________________________________"}
-          />
-          <LabeledText label="OTHER" value={"__________________________"} />
-        </View>
-      </View>
-
-      {/* Final Signatures - Absolutely positioned at bottom */}
-      <View style={styles.bottomSignatures}>
-        <View style={styles.signatureBlock}>
-          <View style={styles.signatureLine} />
-          <Text>AUTHORISED SIGNATORY</Text>
-        </View>
-
-        <View style={styles.signatureBlock}>
-          <View style={styles.signatureLine} />
-          <Text>APPLICANT SIGNATURE</Text>
-        </View>
-      </View>
-    </View>
-  </Page>
-);
+    </Page>
+  );
+};
 
 export const BookingForm = ({ data }: BookingFormProps) => {
   return (

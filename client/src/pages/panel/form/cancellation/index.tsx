@@ -217,7 +217,7 @@ export const CancellationForm = () => {
 
   const wingOptions =
     getProjectData()?.wings.map((w) => ({
-      label: `Wing ${w.name}`,
+      label: w.name,
       value: w.name,
     })) || [];
 
