@@ -17,7 +17,7 @@ const getReferenceName = (
 ): string => {
   if (!references || !refId) return refId;
   const reference = references.find((r) => r._id === refId);
-  return reference ? `${reference.firstName} ${reference.lastName}` : refId;
+  return reference ? `${reference.companyName}` : refId;
 };
 
 // Helper function to get a manager's full name
