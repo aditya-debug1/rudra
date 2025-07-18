@@ -93,13 +93,14 @@ export const VisitForm = ({
   ];
 
   //Define manager options
-  const managerOptions =
+  const managerOptions = [{ label: "N/A", value: "N/A" }].concat(
     users
       ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
-      })) || [];
+      })) || [],
+  );
 
   // Define status options
   const statusOptions = [
