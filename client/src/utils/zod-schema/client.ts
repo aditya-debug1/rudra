@@ -62,6 +62,6 @@ export const ClientSchema = z.object({
 
   project: z.string().min(1, "Project is required"),
   requirement: z.string().min(1, "Requirement is required"),
-  budget: z.number().positive("Budget must be greater than zero"),
+  budget: z.number(),
   visitData: VisitSchema,
 });

@@ -81,16 +81,18 @@ const ClientForm = () => {
   const { data: users } = useUsersSummary();
   const { data: refData } = useReference();
 
-  const projectOptions =
-    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
+  const projectOptions = [{ label: "N/A", value: "N/A" }].concat(
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [],
+  );
 
-  const managerOptions =
+  const managerOptions = [{ label: "N/A", value: "N/A" }].concat(
     users
       ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
-      })) || [];
+      })) || [],
+  );
 
   const refDynamicOptions: ComboboxOption[] =
     refData?.references?.map((ref) => ({
@@ -147,7 +149,8 @@ const ClientForm = () => {
       client.firstName &&
       client.lastName &&
       client.phoneNo &&
-      client.budget > 0 &&
+      typeof client.budget === "number" &&
+      !isNaN(client.budget) &&
       client.project &&
       client.requirement &&
       client.visitData.date &&

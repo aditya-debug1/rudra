@@ -1,6 +1,7 @@
 import { ComboboxOption } from "@/components/custom ui/combobox";
 
 export const requirementOptions = [
+  { label: "N/A", value: "N/A" },
   { label: "1 BHK", value: "1bhk" },
   { label: "2 BHK", value: "2bhk" },
   { label: "2.5 BHK", value: "2.5bhk" },
@@ -8,6 +9,21 @@ export const requirementOptions = [
   { label: "4.5 BHK", value: "4.5bhk" },
   { label: "Shop", value: "shop" },
   { label: "Office", value: "office" },
+];
+
+export const assignedProjects = [
+  {
+    username: "",
+    project: "",
+  },
+  {
+    username: "",
+    project: "",
+  },
+  {
+    username: "",
+    project: "",
+  },
 ];
 
 export const budgetOptions = [

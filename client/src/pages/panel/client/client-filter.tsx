@@ -93,16 +93,18 @@ export const ClientFilter = ({
     ...refDynamicOptions,
   ];
 
-  const projectOptions =
-    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
+  const projectOptions = [{ label: "N/A", value: "N/A" }].concat(
+    projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [],
+  );
 
-  const managerOptions =
+  const managerOptions = [{ label: "N/A", value: "N/A" }].concat(
     users
       ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
         label: `${user.firstName} ${user.lastName}`,
         value: user.username,
-      })) || [];
+      })) || [],
+  );
 
   // Initialize filters from store
   useEffect(() => {
