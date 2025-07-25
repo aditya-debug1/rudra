@@ -39,6 +39,7 @@ import {
 } from "@/store/data/options";
 import { unitStatus, useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
+import { getLabelFromValue } from "@/utils/func/arrayUtils";
 import { getOrdinal } from "@/utils/func/numberUtils";
 import {
   capitalizeWords,
@@ -47,7 +48,7 @@ import {
 } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
-import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
+import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
 import { RefreshCw, TicketCheck } from "lucide-react";
 import { useState } from "react";
 import { BookingForm as PdfFlatBookingForm } from "./booking-pdf";
@@ -462,7 +463,18 @@ export const BookingForm = () => {
   const openPdfInNewTab = async (bookingData: BookingType) => {
     try {
       const blob = await pdf(
-        <PdfFlatBookingForm data={bookingData} />,
+        <PdfFlatBookingForm
+          data={bookingData}
+          metaData={{
+            manager: getLabelFromValue(managerOptions, selectedSM) || "N/A",
+            cp: (() => {
+              const selectedRef = refData?.references?.find(
+                (ref) => ref._id === selectedCP,
+              );
+              return selectedRef?.companyName || "N/A";
+            })(),
+          }}
+        />,
       ).toBlob();
       const blobUrl = URL.createObjectURL(blob);
       window.open(blobUrl, "_blank");
@@ -1155,7 +1167,21 @@ export const BookingForm = () => {
       <CardFooter className="justify-end p-4 sm:p-6 gap-4">
         {finalizedBooking && (
           <PDFDownloadLink
-            document={<PdfFlatBookingForm data={finalizedBooking} />}
+            document={
+              <PdfFlatBookingForm
+                data={finalizedBooking}
+                metaData={{
+                  manager:
+                    getLabelFromValue(managerOptions, selectedSM) || "N/A",
+                  cp: (() => {
+                    const selectedRef = refData?.references?.find(
+                      (ref) => ref._id === selectedCP,
+                    );
+                    return selectedRef?.companyName || "N/A";
+                  })(),
+                }}
+              />
+            }
             fileName={`booking-${finalizedBooking.applicants.primary}-${finalizedBooking.unit.unitNo}.pdf`}
             className="bg-primary text-secondary px-4 py-2 rounded-md hover:bg-primary/90 w-full sm:w-auto"
           >

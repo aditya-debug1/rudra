@@ -24,6 +24,7 @@ import { addNumberingToLines, formatAddress } from "@/utils/func/strUtils";
 
 interface BookingFormProps {
   data: BookingType;
+  metaData: { manager: string; cp: string };
 }
 
 // Register fonts with better performance loading
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
   spaceBetween: {
     justifyContent: "space-between",
   },
+  spaceAround: { justifyContent: "space-around" },
   flexEnd: {
     justifyContent: "flex-end",
   },
@@ -161,6 +163,7 @@ const styles = StyleSheet.create({
 
   // Spacing
   mt16: { marginTop: 16 },
+  mt12: { marginTop: 12 },
   mt8: { marginTop: 8 },
   mb4: { marginBottom: 4 },
   gap2: { gap: 2 },
@@ -270,9 +273,11 @@ const LabeledText = ({ label, value }: { label: string; value: string }) => (
 // Component for a single booking form
 const BookingFormPage = ({
   data,
+  metaData,
   isCustomerCopy = false,
 }: {
   data: BookingType;
+  metaData: { manager: string; cp: string };
   isCustomerCopy?: boolean;
 }) => {
   const [labelPart, valuePart] = data.unit.wing
@@ -603,16 +608,29 @@ const BookingFormPage = ({
           </Text>
 
           <View style={[styles.row, styles.gap15, styles.mt16]}>
-            <LabeledText label="HOARDING" value={"___________________"} />
-            <LabeledText label="WEBSITE" value={"___________________"} />
-            <LabeledText label="FRIEND" value={"_______________________"} />
+            <LabeledText label="HOARDING" value={"_______________________"} />
+            <LabeledText label="WEBSITE" value={"_______________________"} />
+            <LabeledText label="FRIEND" value={"_________________________"} />
           </View>
-          <View style={[styles.row, styles.gap15, styles.mt8]}>
+          <View
+            style={[styles.row, styles.gap15, styles.mt16, styles.spaceBetween]}
+          >
             <LabeledText
               label="CLIENT PARTNER"
-              value={"_________________________________________"}
+              value={
+                !isCustomerCopy
+                  ? metaData.cp
+                  : "________________________________"
+              }
             />
-            <LabeledText label="OTHER" value={"__________________________"} />
+            <LabeledText
+              label="SALES MANAGER"
+              value={
+                !isCustomerCopy
+                  ? metaData.manager
+                  : "__________________________"
+              }
+            />
           </View>
         </View>
 
@@ -633,14 +651,14 @@ const BookingFormPage = ({
   );
 };
 
-export const BookingForm = ({ data }: BookingFormProps) => {
+export const BookingForm = ({ data, metaData }: BookingFormProps) => {
   return (
     <Document>
       {/* Original */}
-      <BookingFormPage data={data} />
+      <BookingFormPage data={data} metaData={metaData} />
 
       {/* Customer Copy */}
-      <BookingFormPage data={data} isCustomerCopy />
+      <BookingFormPage data={data} metaData={metaData} isCustomerCopy />
     </Document>
   );
 };
