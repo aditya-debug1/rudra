@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { Client } from "../models/client";
-import { Visit } from "../models/visit";
-import { CPEmployee } from "../models/client-partner";
-import createError from "../utils/createError";
-import auditService from "../utils/audit-service";
 import mongoose from "mongoose";
+import { Client } from "../models/client";
+import { CPEmployee } from "../models/client-partner";
+import { Visit } from "../models/visit";
+import auditService from "../utils/audit-service";
+import createError from "../utils/createError";
 
 class ClientController {
   async createClient(req: Request, res: Response, next: NextFunction) {
@@ -93,6 +93,7 @@ class ClientController {
         page = 1,
         limit = 10,
         manager,
+        assignedProject,
         search,
         minBudget,
         maxBudget,
@@ -166,6 +167,7 @@ class ClientController {
       const additionalFilters: any = {};
       if (requirement) additionalFilters.requirement = requirement;
       if (project) additionalFilters.project = project;
+      if (assignedProject) additionalFilters.project = assignedProject;
 
       if (Object.keys(additionalFilters).length > 0) {
         pipeline.push({ $match: additionalFilters });
