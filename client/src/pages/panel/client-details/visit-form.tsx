@@ -8,14 +8,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { VisitType } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
-import { ignoreRole, refDefaultOptions } from "@/store/data/options";
+import {
+  customReferenceOptions,
+  ignoreRole,
+  refDefaultOptions,
+} from "@/store/data/options";
 import { useUsersSummary } from "@/store/users";
 import { useVisits } from "@/store/visit";
 import withStopPropagation from "@/utils/events/withStopPropagation";
+import { toProperCase } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { VisitSchema } from "@/utils/zod-schema/client";
@@ -89,6 +95,9 @@ export const VisitForm = ({
 
   const referenceOptions: ComboboxOption[] = [
     ...refDefaultOptions,
+    ...customReferenceOptions.map((opt) => {
+      return { label: toProperCase(opt), value: opt };
+    }),
     ...refDynamicOptions,
   ];
 
@@ -115,11 +124,19 @@ export const VisitForm = ({
   const handleInitialLoad = useCallback(() => {
     if (mode === "update" && initialData) {
       // Extract only the needed fields from initialData
-      const { date, reference, source, relation, closing, status } =
+      const { date, reference, otherRefs, source, relation, closing, status } =
         initialData;
 
       // Create the value object with destructuring
-      const value = { date, reference, source, relation, closing, status };
+      const value = {
+        date,
+        reference,
+        otherRefs,
+        source,
+        relation,
+        closing,
+        status,
+      };
 
       setFormData(value);
       setOldData(value);
@@ -232,32 +249,31 @@ export const VisitForm = ({
           <div className="space-y-4 my-4">
             {/* Visit Date - Full width */}
             <FormFieldWrapper
-              LabelText="Visit Date"
+              LabelText="Reference"
               Important
               ImportantSide="right"
             >
-              <DatePickerV2
-                className="sm:w-full"
-                defaultDate={new Date(formData.date)}
-                onDateChange={handleDateChange}
-              />
-            </FormFieldWrapper>
-
-            {/* Row 1: Reference and Source */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormFieldWrapper
-                LabelText="Reference"
-                Important
-                ImportantSide="right"
-              >
+              <div className="flex flex-col lg:flex-row gap-2">
                 <Combobox
                   value={formData.reference}
                   width="w-full"
                   options={referenceOptions}
                   onChange={(value) => handleInputChange("reference", value)}
                 />
-              </FormFieldWrapper>
+                {customReferenceOptions.includes(formData.reference) && (
+                  <Input
+                    placeholder="Enter reference"
+                    value={formData.otherRefs}
+                    onChange={(e) =>
+                      handleInputChange("otherRefs", e.target.value)
+                    }
+                  />
+                )}
+              </div>
+            </FormFieldWrapper>
 
+            {/* Row 1: Reference and Source */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormFieldWrapper
                 LabelText="Source"
                 Important
@@ -272,10 +288,7 @@ export const VisitForm = ({
                   emptyMessage="No source found"
                 />
               </FormFieldWrapper>
-            </div>
 
-            {/* Row 2: Relation and Closing */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormFieldWrapper
                 LabelText="Relation"
                 Important
@@ -290,7 +303,10 @@ export const VisitForm = ({
                   emptyMessage="No relation found"
                 />
               </FormFieldWrapper>
+            </div>
 
+            {/* Row 2: Relation and Closing */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormFieldWrapper
                 LabelText="Closing"
                 Important
@@ -303,6 +319,18 @@ export const VisitForm = ({
                   onChange={(value) => handleInputChange("closing", value)}
                   placeholder="Select closing"
                   emptyMessage="No closing found"
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper
+                LabelText="Visit Date"
+                Important
+                ImportantSide="right"
+              >
+                <DatePickerV2
+                  className="sm:w-full"
+                  defaultDate={new Date(formData.date)}
+                  onDateChange={handleDateChange}
                 />
               </FormFieldWrapper>
             </div>

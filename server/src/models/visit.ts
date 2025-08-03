@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface RemarkType extends Document {
   _id: Types.ObjectId;
@@ -10,6 +10,7 @@ export interface VisitType extends Document {
   _id: Types.ObjectId;
   date: Date;
   reference: string;
+  otherRefs?: string;
   source: string;
   relation: string;
   closing: string;
@@ -30,6 +31,7 @@ const RemarkSchema = new Schema({
 const VisitSchema = new Schema({
   date: { type: Date, required: true },
   reference: { type: String, required: true },
+  otherRefs: { type: String },
   source: { type: String, required: true },
   relation: { type: String, required: true },
   closing: { type: String, required: true },

@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/store/auth";
 import { ClientType, VisitType } from "@/store/client";
 import { RefernceListType, useClientPartners } from "@/store/client-partner";
+import { customReferenceOptions } from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { useVisits } from "@/store/visit";
 import withStopPropagation from "@/utils/events/withStopPropagation";
@@ -182,10 +183,14 @@ export const VisitInfo = ({ client }: VisitInfoProps) => {
                           : "N/A"}
                       </TableCell>
                       <TableCell className="text-center whitespace-nowrap">
-                        {getRefernceName(
-                          visit.reference,
-                          refData?.references,
-                        ) || "N/A"}
+                        {customReferenceOptions.includes(
+                          client.visits[0].reference,
+                        )
+                          ? client.visits[0].otherRefs
+                          : getRefernceName(
+                              client.visits[0].reference,
+                              refData?.references,
+                            ) || "N/A"}
                       </TableCell>
                       <TableCell className="text-center">
                         {getManagerName(visit.source, managers) || "N/A"}

@@ -1,6 +1,7 @@
 import { ComboboxOption } from "@/components/custom ui/combobox";
 import { ClientType } from "@/store/client";
 import { RefernceListType } from "@/store/client-partner";
+import { customReferenceOptions } from "@/store/data/options";
 import { usersSummaryType } from "@/store/users";
 import {
   getLabelFromValue,
@@ -46,7 +47,12 @@ const formatClientData = (client: ClientType, lists: ExportLists) => {
     Budget: `₹${client.budget}`,
     Project: getSafeLabelFromValue(lists.projectList, client.project),
     Reference: capitalizeWords(
-      getReferenceName(lastVisit.reference, lists.referenceList).toLowerCase(),
+      customReferenceOptions.includes(lastVisit.reference)
+        ? lastVisit.otherRefs || ""
+        : getReferenceName(
+            lastVisit.reference,
+            lists.referenceList,
+          ).toLowerCase(),
     ),
     Sourcing: getManagerName(lastVisit.source, lists.managerList),
     Relationship: getManagerName(lastVisit.relation, lists.managerList),

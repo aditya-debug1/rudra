@@ -38,6 +38,8 @@ export const refDefaultOptions: ComboboxOption[] = [
   { label: "Direct Walking", value: "walking" },
 ];
 
+export const customReferenceOptions = ["reference", "other"];
+
 export const ignoreRole = ["Developer", "SkipRole"];
 
 export const statusOptions = [

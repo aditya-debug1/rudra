@@ -25,6 +25,7 @@ import { ClientType, useClients, VisitType } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
 import {
   budgetOptions,
+  customReferenceOptions,
   ignoreRole,
   refDefaultOptions,
   requirementOptions,
@@ -32,7 +33,11 @@ import {
 } from "@/store/data/options";
 import { useInventory } from "@/store/inventory";
 import { useUsersSummary } from "@/store/users";
-import { capitalizeWords, formatAddress } from "@/utils/func/strUtils";
+import {
+  capitalizeWords,
+  formatAddress,
+  toProperCase,
+} from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientSchema } from "@/utils/zod-schema/client";
@@ -59,6 +64,7 @@ const ClientForm = () => {
     visitData: {
       date: new Date(),
       reference: "",
+      otherRefs: "",
       source: "",
       relation: "",
       closing: "",
@@ -102,6 +108,9 @@ const ClientForm = () => {
 
   const referenceOptions: ComboboxOption[] = [
     ...refDefaultOptions,
+    ...customReferenceOptions.map((opt) => {
+      return { label: toProperCase(opt), value: opt };
+    }),
     ...refDynamicOptions,
   ];
 
@@ -468,16 +477,32 @@ const ClientForm = () => {
                   Important
                   ImportantSide="right"
                 >
-                  <Combobox
-                    options={referenceOptions}
-                    value={client.visitData?.reference ?? ""}
-                    onChange={(e) =>
-                      handleInputChange("visitData.reference", e)
-                    }
-                    width="w-full"
-                    placeholder="Select reference"
-                    emptyMessage="No reference found"
-                  />
+                  <div className="flex flex-col lg:flex-row gap-2">
+                    <Combobox
+                      options={referenceOptions}
+                      value={client.visitData?.reference ?? ""}
+                      onChange={(e) =>
+                        handleInputChange("visitData.reference", e)
+                      }
+                      width="w-full"
+                      placeholder="Select reference"
+                      emptyMessage="No reference found"
+                    />
+                    {customReferenceOptions.includes(
+                      client.visitData?.reference,
+                    ) && (
+                      <Input
+                        placeholder="Enter reference"
+                        value={client.visitData.otherRefs}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "visitData.otherRefs",
+                            e.target.value,
+                          )
+                        }
+                      />
+                    )}
+                  </div>
                 </FormFieldWrapper>
               </div>
 

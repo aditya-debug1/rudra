@@ -8,6 +8,7 @@ export interface VisitType {
   _id?: string;
   date: Date;
   reference: string;
+  otherRefs?: string;
   source: string;
   relation: string;
   closing: string;

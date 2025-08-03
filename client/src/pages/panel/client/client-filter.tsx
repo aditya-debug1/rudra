@@ -25,6 +25,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useClientStore } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
 import {
+  customReferenceOptions,
   ignoreRole,
   refDefaultOptions,
   requirementOptions,
@@ -90,6 +91,9 @@ export const ClientFilter = ({
 
   const referenceOptions: ComboboxOption[] = [
     ...refDefaultOptions,
+    ...customReferenceOptions.map((opt) => {
+      return { label: toProperCase(opt), value: opt };
+    }),
     ...refDynamicOptions,
   ];
 

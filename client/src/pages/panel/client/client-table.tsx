@@ -13,7 +13,10 @@ import { hasPermission } from "@/hooks/use-role";
 import { useAuth } from "@/store/auth";
 import { ClientType, GetClientsResponse } from "@/store/client";
 import { RefernceListType, useClientPartners } from "@/store/client-partner";
-import { requirementOptions } from "@/store/data/options";
+import {
+  customReferenceOptions,
+  requirementOptions,
+} from "@/store/data/options";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { getLabelFromValue } from "@/utils/func/arrayUtils";
 import { simplifyNumber } from "@/utils/func/numberUtils.ts";
@@ -155,10 +158,14 @@ export const ClientTable = ({
                     </TableCell>
                     <TableCell>₹{simplifyNumber(client.budget)}</TableCell>
                     <TableCell className="whitespace-nowrap">
-                      {getRefernceName(
+                      {customReferenceOptions.includes(
                         client.visits[0].reference,
-                        refData?.references,
-                      )}
+                      )
+                        ? client.visits[0].otherRefs
+                        : getRefernceName(
+                            client.visits[0].reference,
+                            refData?.references,
+                          )}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {getManagerName(client.visits[0].source, managers)}
