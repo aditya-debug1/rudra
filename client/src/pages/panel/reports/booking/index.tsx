@@ -12,7 +12,7 @@ import {
 import { useClientBookings } from "@/store/client-booking/query";
 import { useBookingStore } from "@/store/client-booking/store";
 import { useUsersSummary } from "@/store/users";
-import { Download, FileSpreadsheet } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { BookingFilter } from "../../booking/booking-filter";
 import { exportBookingToExcel } from "./excel";
@@ -20,7 +20,7 @@ import { exportBookingToExcel } from "./excel";
 export function BookingReport() {
   // Fetch data from stores
   const { filters, resetFilters } = useBookingStore();
-  const { data } = useClientBookings({
+  const { data, isFetching } = useClientBookings({
     ...filters,
     page: 1,
     limit: 100000,
@@ -54,6 +54,10 @@ export function BookingReport() {
     }
   };
 
+  // Check if download should be disabled
+  const isDownloadDisabled =
+    !data?.data || data.data.length === 0 || isFetching;
+
   return (
     <Card className="w-72 flex flex-col h-full">
       <CardHeader>
@@ -66,7 +70,14 @@ export function BookingReport() {
           Detailed booking list in a spreadsheet
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">{/* Your content here */}</CardContent>
+      <CardContent className="flex-grow">
+        {isFetching && (
+          <div className="flex items-center justify-center text-sm text-gray-500">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Updating data...
+          </div>
+        )}
+      </CardContent>
       <CardFooter className="mt-auto flex-col gap-3">
         <BookingFilter>
           <Tooltip content="More filter options">
@@ -88,10 +99,19 @@ export function BookingReport() {
           className="w-full"
           variant="default"
           onClick={handleDownload}
-          disabled={!data?.data || data.data.length === 0}
+          disabled={isDownloadDisabled}
         >
-          <Download className="h-4 w-4 mr-2" />
-          Download Report
+          {isFetching ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4 mr-2" />
+              Download Report
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>
