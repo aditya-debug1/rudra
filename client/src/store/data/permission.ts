@@ -68,10 +68,6 @@ export const AdminPermissions: Permission[] = [
     ],
   },
   {
-    page: "Target",
-    actions: ["view-target", "create-target", "update-target", "delete-target"],
-  },
-  {
     page: "Inventory",
     actions: [
       "view-inventory",
@@ -225,16 +221,6 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
         value: "view-deleted-booking-payments",
         label: "View Deleted Booking Payments",
       },
-    ],
-  },
-  {
-    page: "Target",
-    pageLabel: "Target Sections",
-    actions: [
-      { value: "view-target", label: "View Target" },
-      { value: "create-target", label: "Create Target" },
-      { value: "update-target", label: "Update Target" },
-      { value: "delete-target", label: "Delete Target" },
     ],
   },
   {

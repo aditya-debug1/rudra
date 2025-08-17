@@ -192,7 +192,7 @@ export default function StatusChart({ manager }: StatusChartProps) {
   };
 
   return (
-    <Card className="flex flex-col w-full">
+    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
       <CardHeader className="flex-row justify-between">
         <div className="flex flex-col space-y-1.5">
           <CardTitle>Status Chart</CardTitle>

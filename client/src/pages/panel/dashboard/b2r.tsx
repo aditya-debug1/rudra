@@ -283,7 +283,7 @@ export default function BookingRegistrationChart({
   // Handle error state
   if (error) {
     return (
-      <Card className="md:col-span-2">
+      <Card className="md:col-span-3">
         <CardHeader>
           <CardTitle>Registration Chart</CardTitle>
           <CardDescription>
@@ -302,7 +302,7 @@ export default function BookingRegistrationChart({
   }
 
   return (
-    <Card className="md:col-span-2">
+    <Card className="md:col-span-3">
       <CardHeader className="flex-row justify-between">
         <div>
           <CardTitle>Registration Chart</CardTitle>
@@ -438,7 +438,7 @@ export default function BookingRegistrationChart({
           Total registrations: {summaryStats.totalRegistrations} / Total
           bookings: {summaryStats.totalBookings} / Total canceled:{" "}
           {summaryStats.totalCanceled}
-          {` (Registration rate: ${summaryStats.registrationRate.toFixed(1)}%)`}
+          {` (Registration rate: ${summaryStats.registrationRate ? summaryStats.registrationRate.toFixed(1) : 0}%)`}
         </div>
       </CardFooter>
     </Card>

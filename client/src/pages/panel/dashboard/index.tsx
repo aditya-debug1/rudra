@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import BookingRegistrationChart from "./b2r";
 import BookingChart from "./booking";
 import StatusChart from "./status-pie";
-import TargetChart from "./target";
 
 const Dashboard = () => {
   // Hooks
@@ -33,7 +32,6 @@ const Dashboard = () => {
     <div className="w-full grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       <BookingChart manager={manager} />
       <StatusChart manager={manager} />
-      <TargetChart manager={manager} />
       <BookingRegistrationChart manager={manager} />
     </div>
   );

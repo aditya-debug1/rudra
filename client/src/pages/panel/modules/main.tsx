@@ -15,10 +15,8 @@ const ClientList = lazy(() => import("@/pages/panel/client"));
 const ClientDetails = lazy(() => import("@/pages/panel/client-details"));
 const ClientPartnerList = lazy(() => import("@/pages/panel/cp-list"));
 const ClientPartnerDetails = lazy(() => import("@/pages/panel/cp-details"));
-const Task = lazy(() => import("@/pages/panel/task"));
 const BookingList = lazy(() => import("@/pages/panel/booking"));
 const BookingLedger = lazy(() => import("@/pages/panel/booking-ledger"));
-const TargetList = lazy(() => import("@/pages/panel/target"));
 const Inventory = lazy(() => import("@/pages/panel/inventory"));
 const InventoryDetails = lazy(() => import("@/pages/panel/inventory/details"));
 const InventoryForm = lazy(
@@ -68,8 +66,6 @@ const MainBody: React.FC<MainProps> = ({
         return <ClientList />;
       case "ClientPartner":
         return <ClientPartnerList />;
-      case "Task":
-        return <Task />;
       case "Inventory":
         return <Inventory />;
       case "Form":
@@ -89,8 +85,6 @@ const MainBody: React.FC<MainProps> = ({
     { path: "analytics", element: <Maintainance />, pageName: "Analytics" },
     { path: "users/", element: <UserList />, pageName: "Users" },
     { path: "users/details/:id", element: <UserDetails />, pageName: "Users" },
-    { path: "target/", element: <TargetList />, pageName: "Target" },
-    { path: "target/:id", element: <TargetList />, pageName: "Target" },
     { path: "clients/:pageno", element: <ClientList />, pageName: "Clients" },
     {
       path: "clients/:pageno/details/:id",
@@ -119,7 +113,6 @@ const MainBody: React.FC<MainProps> = ({
       element: <BookingLedger />,
       pageName: "Booking",
     },
-    { path: "task", element: <Task />, pageName: "Task" },
     { path: "form", element: <Form />, pageName: "Form" },
     { path: "form/:name", element: <Form />, pageName: "Form" },
     {

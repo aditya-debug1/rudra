@@ -37,12 +37,6 @@ export const NavLinks: NavLinkType[] = [
     to: "/booking",
   },
   {
-    pageName: "Target",
-    icon: "Crosshair",
-    label: "Target",
-    to: "/target",
-  },
-  {
     pageName: "Inventory",
     icon: "Inbox",
     label: "Inventory",
