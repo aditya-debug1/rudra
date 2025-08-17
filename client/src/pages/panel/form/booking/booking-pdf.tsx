@@ -616,7 +616,7 @@ const BookingFormPage = ({
             style={[styles.row, styles.gap15, styles.mt16, styles.spaceBetween]}
           >
             <LabeledText
-              label="CLIENT PARTNER"
+              label="CHANNEL PARTNER"
               value={
                 !isCustomerCopy
                   ? metaData.cp
