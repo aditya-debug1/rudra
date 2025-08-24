@@ -3,6 +3,7 @@ import auditRoute from "./audit";
 import authRoute from "./auth";
 import bankRoute from "./bank";
 import bookingLedgerRoute from "./booking-ledger";
+import categoryRoute from "./category";
 import clientRoute from "./client";
 import clientPartnerRoute from "./client-partner";
 import clientBookingRoute from "./clientBooking";
@@ -18,6 +19,7 @@ export {
   authRoute,
   bankRoute,
   bookingLedgerRoute,
+  categoryRoute,
   clientBookingRoute,
   clientPartnerRoute,
   clientRoute,

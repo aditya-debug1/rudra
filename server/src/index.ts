@@ -9,6 +9,7 @@ import {
   authRoute,
   bankRoute,
   bookingLedgerRoute,
+  categoryRoute,
   clientBookingRoute,
   clientPartnerRoute,
   clientRoute,
@@ -79,6 +80,7 @@ app.use("/api/analytics", analyticsRoute);
 app.use("/api/inventory", inventoryRoute);
 app.use("/api/bank", bankRoute);
 app.use("/api/target", targetRoute);
+app.use("/api/category", categoryRoute);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
