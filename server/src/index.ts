@@ -3,21 +3,7 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { DB_URI, FRONTEND_URL, PORT } from "./config/dotenv";
-import {
-  analyticsRoute,
-  auditRoute,
-  authRoute,
-  bankRoute,
-  bookingLedgerRoute,
-  clientBookingRoute,
-  clientPartnerRoute,
-  clientRoute,
-  inventoryRoute,
-  roleRoute,
-  targetRoute,
-  userRoute,
-  visitRoute,
-} from "./routes";
+import { registerRoutes } from "./routes";
 
 // Initialize express app
 const app = express();
@@ -66,23 +52,12 @@ app.use(
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to the Express server!");
 });
-app.use("/api/auth", authRoute);
-app.use("/api/user", userRoute);
-app.use("/api/role", roleRoute);
-app.use("/api/audit", auditRoute);
-app.use("/api/client", clientRoute);
-app.use("/api/client-booking", clientBookingRoute);
-app.use("/api/booking-ledger", bookingLedgerRoute);
-app.use("/api/visit", visitRoute);
-app.use("/api/client-partner", clientPartnerRoute);
-app.use("/api/analytics", analyticsRoute);
-app.use("/api/inventory", inventoryRoute);
-app.use("/api/bank", bankRoute);
-app.use("/api/target", targetRoute);
+
+// Mount all API routes via the registry
+registerRoutes(app, "/api");
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // Log the error for server-side tracking
   console.error("An error occurred:", err);
 
   const statusCode = err.status || 500;

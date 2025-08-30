@@ -108,6 +108,7 @@ export const defaultRootPermissions = [
       "change-precedence",
       "view-audit",
       "view-auth",
+      "view-category",
     ],
   },
 ];
