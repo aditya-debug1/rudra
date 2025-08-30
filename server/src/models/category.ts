@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface InventoryCategory extends Document {
+export interface Category extends Document {
   displayName: string;
   name: string;
   colorHex: string;
@@ -8,7 +8,7 @@ export interface InventoryCategory extends Document {
   type: "mutable" | "immutable";
 }
 
-const InventoryCategorySchema: Schema = new Schema(
+const CategorySchema: Schema = new Schema(
   {
     displayName: {
       type: String,
@@ -44,7 +44,4 @@ const InventoryCategorySchema: Schema = new Schema(
   },
 );
 
-export default mongoose.model<InventoryCategory>(
-  "InventoryCategory",
-  InventoryCategorySchema,
-);
+export default mongoose.model<Category>("Category", CategorySchema);

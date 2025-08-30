@@ -28,6 +28,7 @@ const Settings = lazy(() => import("@/pages/panel/settings"));
 const Role = lazy(() => import("@/pages/panel/settings/role"));
 const Audit = lazy(() => import("@/pages/panel/settings/audit"));
 const Auth = lazy(() => import("@/pages/panel/settings/auth"));
+const Category = lazy(() => import("@/pages/panel/settings/category"));
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
@@ -150,6 +151,11 @@ const MainBody: React.FC<MainProps> = ({
     {
       path: "settings/auth",
       element: <Auth />,
+      pageName: "Settings",
+    },
+    {
+      path: "settings/categories",
+      element: <Category />,
       pageName: "Settings",
     },
     {

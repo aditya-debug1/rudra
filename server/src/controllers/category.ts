@@ -41,6 +41,15 @@ class InventoryCategoryController {
         categoryId: doc._id,
       });
     } catch (error: any) {
+      if (error.code === 11000 && error.keyPattern?.name) {
+        return next(
+          createError(
+            400,
+            `Category name "${error.keyValue.name}" already exists`,
+          ),
+        );
+      }
+
       next(
         createError(
           400,
@@ -73,6 +82,15 @@ class InventoryCategoryController {
 
       res.status(200).json(updated);
     } catch (error: any) {
+      if (error.code === 11000 && error.keyPattern?.name) {
+        return next(
+          createError(
+            400,
+            `Category name "${error.keyValue.name}" already exists`,
+          ),
+        );
+      }
+
       next(
         createError(
           400,
