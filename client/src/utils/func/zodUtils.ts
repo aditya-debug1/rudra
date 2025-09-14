@@ -35,3 +35,27 @@ export const formatZodMessagesOnly = (errors: z.ZodIssue[], maxToShow = 4) => {
 
   return formattedErrors;
 };
+
+export const peekZodErrors = (
+  input: z.ZodError | z.ZodIssue[],
+  page = 1,
+  limit = 4,
+) => {
+  const issues: z.ZodIssue[] = Array.isArray(input) ? input : input.issues;
+
+  const start = Math.max(0, (page - 1) * limit);
+  const shown = issues.slice(start, start + limit);
+
+  const text = shown
+    .map((e) => {
+      const fieldPath = e.path.join(".").replace(/_/g, " ");
+      const label = fieldPath
+        ? fieldPath.charAt(0).toUpperCase() + fieldPath.slice(1)
+        : "Field";
+      return `• ${label}: ${e.message}`;
+    })
+    .join("\n");
+
+  const remaining = Math.max(0, issues.length - (start + shown.length));
+  return remaining ? `${text}\n\n... +${remaining} more` : text;
+};

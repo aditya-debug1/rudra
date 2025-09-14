@@ -628,12 +628,7 @@ export default function ClientPartnerForm() {
                 />
               </FormFieldWrapper>
 
-              <Button
-                type="button"
-                onClick={addEmployee}
-                className="w-full"
-                variant="outline"
-              >
+              <Button type="button" onClick={addEmployee} className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Employee
               </Button>

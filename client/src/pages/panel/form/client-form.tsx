@@ -38,7 +38,7 @@ import {
   formatAddress,
   toProperCase,
 } from "@/utils/func/strUtils";
-import { formatZodErrors } from "@/utils/func/zodUtils";
+import { peekZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { ClientSchema } from "@/utils/zod-schema/client";
 import { User } from "lucide-react";
@@ -154,30 +154,6 @@ const ClientForm = () => {
   }
 
   async function handleSubmit() {
-    const manualValidation =
-      client.firstName &&
-      client.lastName &&
-      client.phoneNo &&
-      typeof client.budget === "number" &&
-      !isNaN(client.budget) &&
-      client.project &&
-      client.requirement &&
-      client.visitData.date &&
-      client.visitData.reference &&
-      client.visitData.source &&
-      client.visitData.relation &&
-      client.visitData.closing &&
-      client.visitData.status;
-
-    if (!manualValidation) {
-      toast({
-        title: "Form Validation Error",
-        description: `Please fill all the required fields before submission`,
-        variant: "warning",
-      });
-      return;
-    }
-
     // Prepare data for validation
     const clientData = {
       ...client,
@@ -203,7 +179,7 @@ const ClientForm = () => {
     const validation = ClientSchema.safeParse(clientData);
 
     if (!validation.success) {
-      const errorMessages = formatZodErrors(validation.error.errors);
+      const errorMessages = peekZodErrors(validation.error.errors);
 
       toast({
         title: "Form Validation Error",
