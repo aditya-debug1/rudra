@@ -48,6 +48,31 @@ export interface DemandLetterDataType {
   };
 }
 
+// Put this near your other utils in the same file
+const formatWingLabel = (raw?: string) => {
+  if (!raw) return "";
+  const s = String(raw).trim().replace(/\s+/g, " ");
+
+  // Matches: "Wing A", "Tower A", "wing-b", "TOWER c", etc.
+  const labeled = s.match(/^(wing|tower)\s*([A-Za-z0-9-]+)$/i);
+  if (labeled) {
+    const prefix = labeled[1].toLowerCase() === "tower" ? "Tower" : "Wing";
+    const code = labeled[2].toUpperCase();
+    return labeled[1].toLowerCase() === "tower"
+      ? `${prefix}-${code}`
+      : `${code}-${prefix}`;
+  }
+
+  // Matches just a code like "A", "b", "C-1"
+  const codeOnly = s.match(/^([A-Za-z0-9-]+)$/);
+  if (codeOnly) {
+    return `${codeOnly[1].toUpperCase()}-Wing`;
+  }
+
+  // Fallback: return as-is (or strip any leading 'wing/tower' words)
+  return s;
+};
+
 interface DemandLetterProps {
   data: DemandLetterDataType;
   letterHeadData: { name: string; address: string; email: string };
@@ -333,8 +358,8 @@ export const DemandLetterPdf = ({
           <Text>
             Subject: Demand Letter for Unit {data.property.unitDetails.unitNo},{" "}
             {getOrdinal(data.property.unitDetails.floorNo)} Floor,{" "}
-            {data.property.unitDetails.wing}-Wing at proposed building "
-            {data.property.project.name}" situated at{" "}
+            {formatWingLabel(data.property.unitDetails.wing)} at proposed
+            building "{data.property.project.name}" situated at{" "}
             {data.property.project.address}.
           </Text>
         </View>
