@@ -315,10 +315,10 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
             <div className="flex items-center justify-between space-x-2">
               <div className="space-y-1">
                 <Label htmlFor="signature" className="text-sm font-medium">
-                  Include Signature
+                  Include Signature &amp; Stamp
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Add authorized signature to the document
+                  Add authorized signature &amp; stamp to the document
                 </p>
               </div>
               <Switch

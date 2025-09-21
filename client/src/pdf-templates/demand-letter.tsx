@@ -524,29 +524,12 @@ export const DemandLetterPdf = ({
           <Text>Thanking You,</Text>
           <Text>Yours Faithfully</Text>
         </View>
-        {/* {isSigned && (
-          <View
-            style={{
-              position: "absolute",
-              bottom: interestAmount ? 120 : 110,
-              ...(interestAmount ? { right: 110 } : { left: 40 }),
-            }}
-          >
-            <Image
-              src={interestAmount ? AccountantSign : ManagerSign}
-              style={[styles.sign, { width: interestAmount ? 90 : 50 }]}
-            />
-            <View style={styles.signatureSpace}>
-              <InkedRectStamp companyName={letterHeadData.name} />
-            </View>
-          </View>
-        )} */}
         {isSigned && (
           <View
             style={{
               position: "absolute",
               bottom: interestAmount ? 120 : 130,
-              ...(interestAmount ? { right: 110 } : { left: 75 }),
+              ...(interestAmount ? { right: 130 } : { left: 75 }),
               alignItems: "center", // Center align items
               justifyContent: "center",
             }}
@@ -569,6 +552,7 @@ export const DemandLetterPdf = ({
                 src={interestAmount ? AccountantSign : ManagerSign}
                 style={{
                   width: interestAmount ? 90 : 50,
+                  marginTop: interestAmount ? 10 : 0,
                   height: 50,
                 }}
               />
