@@ -40,3 +40,15 @@ export function addNumberingToLines(input: string): string {
 export function splitCamelCaseWords(input: string): string {
   return input.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
+
+export const splitAndFormatAmpersand = (raw: string) => {
+  if (!raw) return "";
+  // collapse whitespace
+  const cleaned = raw.replace(/\s+/g, " ").trim();
+  // normalize around '&' by splitting and rejoining
+  const parts = cleaned
+    .split("&")
+    .map((p) => capitalizeWords(p.trim()))
+    .filter(Boolean);
+  return parts.join(" & ");
+};

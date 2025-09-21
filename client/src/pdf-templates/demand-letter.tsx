@@ -341,12 +341,18 @@ export const DemandLetterPdf = ({
         <View style={styles.recipient}>
           <Text style={styles.recipientLabel}>To:</Text>
           <Text style={styles.recipientName}>
-            Mr. {data.applicationInfo.applicant}
+            {data.applicationInfo.applicant}
           </Text>
           {data.applicationInfo.coApplicant && (
-            <Text style={styles.recipientName}>
-              Mrs. {data.applicationInfo.coApplicant}
-            </Text>
+            <>
+              {data.applicationInfo.coApplicant
+                .split(" & ")
+                .map((name, index) => (
+                  <Text key={index} style={styles.recipientName}>
+                    {name.trim()}
+                  </Text>
+                ))}
+            </>
           )}
         </View>
 

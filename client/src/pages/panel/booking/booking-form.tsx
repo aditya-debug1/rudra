@@ -29,7 +29,7 @@ import {
 } from "@/store/client-booking/types";
 import { ignoreRole } from "@/store/data/options";
 import { useUsersSummary } from "@/store/users";
-import { formatAddress } from "@/utils/func/strUtils";
+import { formatAddress, splitAndFormatAmpersand } from "@/utils/func/strUtils";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { CustomAxiosError } from "@/utils/types/axios";
 import { bookingUpdateSchema } from "@/utils/zod-schema/booking";
@@ -112,6 +112,7 @@ export const BookingUpdateForm = ({
   const handleSave = async () => {
     const formattedData = {
       ...formData,
+      coApplicant: splitAndFormatAmpersand(formData.coApplicant || ""),
       address: formatAddress(formData.address || ""),
     };
     const schemaValidation = bookingUpdateSchema.safeParse(formattedData);
