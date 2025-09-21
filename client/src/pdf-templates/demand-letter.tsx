@@ -16,6 +16,7 @@ import {
 } from "@react-pdf/renderer";
 import { Buffer } from "buffer";
 import LetterHead from "./letterhead";
+import InkedRectStamp from "./stamp";
 
 export interface DemandLetterDataType {
   applicationInfo: {
@@ -333,11 +334,9 @@ export const DemandLetterPdf = ({
             {interestAmount ? "INTEREST LETTER" : "DEMAND LETTER"}
           </Text>
         </View>
-
         <View style={styles.date}>
           <Text>Date: {formatDate(data.applicationInfo.date)}</Text>
         </View>
-
         <View style={styles.recipient}>
           <Text style={styles.recipientLabel}>To:</Text>
           <Text style={styles.recipientName}>
@@ -355,11 +354,9 @@ export const DemandLetterPdf = ({
             </>
           )}
         </View>
-
         <View style={styles.greeting}>
           <Text>Dear Sir/Madam,</Text>
         </View>
-
         <View style={styles.subject}>
           <Text>
             Subject: Demand Letter for Unit {data.property.unitDetails.unitNo},{" "}
@@ -369,7 +366,6 @@ export const DemandLetterPdf = ({
             {data.property.project.address}.
           </Text>
         </View>
-
         <Text style={[styles.paragraph, { marginBottom: 4 }]}>
           With reference to the above booking, we would like to inform you that
           <Text style={styles.bold}>
@@ -377,7 +373,6 @@ export const DemandLetterPdf = ({
           </Text>
           work has been completed in our above project.
         </Text>
-
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableColHeader}>
@@ -466,22 +461,18 @@ export const DemandLetterPdf = ({
             </>
           )}
         </View>
-
         <Text style={styles.amountWords}>
           (Rupees: {numberToWords(amountPayable + interestAmount)})
         </Text>
-
         <Text style={styles.paragraph}>
           We request you to release the balance payment within 7 days, interest
           will be charged @24% per annum after 7 days.
         </Text>
-
         <Text style={[styles.paragraph, { marginBottom: 3 }]}>
           <Text style={styles.bold}>
             The cheque/payment to be made in favor of:
           </Text>
         </Text>
-
         <View style={styles.bankTable}>
           <View style={styles.tableRow}>
             <View style={styles.tableColHeader}>
@@ -529,18 +520,16 @@ export const DemandLetterPdf = ({
             </View>
           </View>
         </View>
-
         <View style={styles.closing}>
           <Text>Thanking You,</Text>
           <Text>Yours Faithfully</Text>
         </View>
-
-        {isSigned && (
+        {/* {isSigned && (
           <View
             style={{
               position: "absolute",
-              bottom: interestAmount ? 140 : 175,
-              right: 90,
+              bottom: interestAmount ? 120 : 110,
+              ...(interestAmount ? { right: 110 } : { left: 40 }),
             }}
           >
             <Image
@@ -548,8 +537,41 @@ export const DemandLetterPdf = ({
               style={[styles.sign, { width: interestAmount ? 90 : 50 }]}
             />
             <View style={styles.signatureSpace}>
-              <Text>_________________________</Text>
-              <Text>Authorized Signatory</Text>
+              <InkedRectStamp companyName={letterHeadData.name} />
+            </View>
+          </View>
+        )} */}
+        {isSigned && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: interestAmount ? 120 : 130,
+              ...(interestAmount ? { right: 110 } : { left: 75 }),
+              alignItems: "center", // Center align items
+              justifyContent: "center",
+            }}
+          >
+            {/* Stamp as background layer */}
+            <View style={{ position: "absolute", zIndex: 1 }}>
+              <InkedRectStamp companyName={letterHeadData.name} />
+            </View>
+
+            {/* Signature image on top, centered */}
+            <View
+              style={{
+                position: "relative",
+                zIndex: 2,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                src={interestAmount ? AccountantSign : ManagerSign}
+                style={{
+                  width: interestAmount ? 90 : 50,
+                  height: 50,
+                }}
+              />
             </View>
           </View>
         )}
