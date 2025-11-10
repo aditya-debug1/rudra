@@ -45,7 +45,9 @@ import { User } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface ClientData extends Omit<ClientType, "_id" | "visits"> {
-  visitData: Omit<VisitType, "client" | "_id">;
+  visitData: Omit<VisitType, "client" | "_id" | "date"> & {
+    date: undefined | Date;
+  };
 }
 
 const ClientForm = () => {
@@ -62,7 +64,7 @@ const ClientForm = () => {
     requirement: "",
     budget: 0,
     visitData: {
-      date: new Date(),
+      date: undefined,
       reference: "",
       otherRefs: "",
       source: "",
@@ -154,6 +156,7 @@ const ClientForm = () => {
   }
 
   async function handleSubmit() {
+    console.log("Client Form");
     // Prepare data for validation
     const clientData = {
       ...client,
@@ -189,10 +192,20 @@ const ClientForm = () => {
       return;
     }
 
+    const hasStatus = !!validation.data.visitData.status;
+
+    if (!hasStatus) {
+      return toast({
+        title: "Form Validation Error",
+        description: `Please select a visit status before submitting.`,
+        variant: "warning",
+      });
+    }
+
     // Actual client creation logic goes here
     try {
       setIsSubmitting(true);
-      await createClientMutation.mutateAsync(clientData);
+      await createClientMutation.mutateAsync(validation.data);
       toast({
         title: "Success",
         description: "Client created successfully",
@@ -441,7 +454,7 @@ const ClientForm = () => {
                 >
                   <DatePicker
                     className="w-full"
-                    defaultDate={client.visitData?.date ?? new Date()}
+                    defaultDate={client.visitData?.date}
                     onDateChange={(e) => handleInputChange("visitData.date", e)}
                     disableDates="future"
                     closeOnDayClick
