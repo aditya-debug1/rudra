@@ -257,9 +257,12 @@ const EOIBookingForm: React.FC = () => {
     ]);
   }, [setBreadcrumbs, pageNo]);
 
+  const flatStatusFilter: string[] = useMemo(
+    () => ["available", "canceled"],
+    [],
+  );
   // Helper functions to get filtered project data (same as booking form)
   const getFilteredProjectsData = useCallback(() => {
-    const flatStatusFilter: string[] = ["available", "canceled"];
     if (!projectsData?.data) return [];
 
     return projectsData.data
@@ -284,7 +287,7 @@ const EOIBookingForm: React.FC = () => {
         return filteredProject;
       })
       .filter((project) => project.wings.length > 0);
-  }, [projectsData?.data]);
+  }, [projectsData?.data, flatStatusFilter]);
 
   const projectData = useMemo(() => {
     const projects = getFilteredProjectsData();
@@ -297,11 +300,11 @@ const EOIBookingForm: React.FC = () => {
     return projectData.wings
       .filter((wing) =>
         wing.floors.some((floor) =>
-          floor.units.some((unit) => unit.status === "available"),
+          floor.units.some((unit) => flatStatusFilter.includes(unit.status)),
         ),
       )
       .map((wing) => ({ label: wing.name, value: wing.name }));
-  }, [projectData]);
+  }, [projectData, flatStatusFilter]);
 
   const availableFloors = useMemo<ComboboxOption[]>(() => {
     if (!formData.wing || !projectData) return [];
@@ -311,7 +314,7 @@ const EOIBookingForm: React.FC = () => {
 
     return wing.floors
       .filter((floor) =>
-        floor.units.some((unit) => unit.status === "available"),
+        floor.units.some((unit) => flatStatusFilter.includes(unit.status)),
       )
       .map((floor) => ({
         label:
@@ -320,7 +323,7 @@ const EOIBookingForm: React.FC = () => {
             : `${getOrdinal(floor.displayNumber)} Floor`,
         value: floor.displayNumber.toString(),
       }));
-  }, [formData.wing, projectData]);
+  }, [formData.wing, projectData, flatStatusFilter]);
 
   const availableUnits = useMemo<UnitOption[]>(() => {
     if (!formData.wing || !formData.floor || !projectData) return [];
@@ -334,7 +337,7 @@ const EOIBookingForm: React.FC = () => {
     if (!floor) return [];
 
     return floor.units
-      .filter((unit) => unit.status === "available")
+      .filter((unit) => flatStatusFilter.includes(unit.status))
       .map((unit) => ({
         label: `Unit ${unit.unitNumber}`,
         value: unit.unitNumber,
@@ -342,7 +345,7 @@ const EOIBookingForm: React.FC = () => {
         configuration: unit.configuration,
         area: unit.area,
       }));
-  }, [formData.wing, formData.floor, projectData]);
+  }, [formData.wing, formData.floor, projectData, flatStatusFilter]);
 
   const handleRefetch = async () => {
     setIsRefetching(true);
