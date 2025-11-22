@@ -11,7 +11,7 @@ import {
 import { EoiType, GetEoisResponse } from "@/store/eoi";
 import { usersSummaryType, useUsersSummary } from "@/store/users";
 import { simplifyNumber } from "@/utils/func/numberUtils.ts";
-import { Ban, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 interface EoiTableProps {
@@ -110,13 +110,8 @@ export const EoiTable = ({ data, openDetails }: EoiTableProps) => {
                             e.stopPropagation();
                             openDetails(eoi._id);
                           }}
-                          disabled={eoi.status == "booked"}
                         >
-                          {eoi.status == "booked" ? (
-                            <Ban className="h-5 w-5 text-red-500" />
-                          ) : (
-                            <ChevronRight />
-                          )}
+                          <ChevronRight />
                         </Button>
                       </Tooltip>
                     </TableCell>

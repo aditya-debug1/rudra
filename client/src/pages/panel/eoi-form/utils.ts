@@ -192,6 +192,7 @@ export const FlatChargesNoteList = [
   "Including Taxes without Parking",
   "Including Taxes with Stilt Parking",
   "Including Taxes with Open Parking",
+  "Furnished Flat including Taxes without Parking",
   "Other",
 ];
 
