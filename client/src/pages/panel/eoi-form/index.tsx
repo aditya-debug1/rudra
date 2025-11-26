@@ -496,7 +496,7 @@ const EOIBookingForm: React.FC = () => {
         address: formatAddress(submissionData.address),
         paymentType: submissionData.paymentType,
         paymentStatus: "Token Received",
-        bookingAmt: submissionData.bookingAmt,
+        bookingAmt: submissionData.tokenAmt,
         agreementValue: submissionData.agreementValue,
         dealTerms: submissionData.dealTerms,
         paymentTerms: submissionData.paymentTerms,
@@ -1042,6 +1042,13 @@ const EOIBookingForm: React.FC = () => {
       </CardContent>
 
       <CardFooter className="justify-end p-4 sm:p-6 gap-4">
+        <Button
+          variant="outline"
+          onClick={handleRefetch}
+          disabled={isRefetching}
+        >
+          <RefreshCw size={20} className={isRefetching ? "animate-spin" : ""} />
+        </Button>
         <Button
           className="w-full sm:w-auto"
           onClick={handleSubmit}
