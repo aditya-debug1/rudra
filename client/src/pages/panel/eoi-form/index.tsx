@@ -1,6 +1,7 @@
 import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import { Combobox } from "@/components/custom ui/combobox";
+import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { Loader } from "@/components/custom ui/loader";
 import { MultiSelect } from "@/components/custom ui/multi-select";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
@@ -655,9 +656,12 @@ const EOIBookingForm: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <FormField label="Booking Date" locked>
-                <Input
-                  value={formData.date.toLocaleDateString("en-IN")}
-                  disabled
+                <DatePickerV2
+                  className="sm:w-full"
+                  defaultDate={formData.date}
+                  onDateChange={(e) => {
+                    handleInputChange("date", e);
+                  }}
                 />
               </FormField>
 
