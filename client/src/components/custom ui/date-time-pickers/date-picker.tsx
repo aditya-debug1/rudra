@@ -37,6 +37,7 @@ export function DatePicker({
   // useEffects
   useEffect(() => {
     if (defaultDate instanceof Date) setDate(defaultDate);
+    else setDate(undefined);
   }, [defaultDate]);
 
   // handlers
