@@ -10,6 +10,7 @@ interface ProjectStats {
 interface SalesManagerStats {
   salesManager: string;
   totalBookings: number;
+  totalRegisterations: number;
   canceledBookings: number;
   totalVisits: number;
   projects: ProjectStats[];
@@ -36,20 +37,46 @@ export const getSalesManagerStats = async (
       return res.status(400).json({ message: "Invalid date format" });
     }
 
-    // Adjust end date to include the entire day
+    // Adjust date range to include the entire day
     const adjustedStart = new Date(start);
-    start.setHours(0, 0, 0, 0);
+    adjustedStart.setHours(0, 0, 0, 0);
     const adjustedEnd = new Date(end);
     adjustedEnd.setHours(23, 59, 59, 999);
 
-    // First get all unique sales managers from bookings
-    const salesManagers = await ClientBooking.distinct("salesManager", {
-      date: { $gte: adjustedStart, $lte: adjustedEnd },
-    });
+    // Get unique sales managers from BOTH bookings and visits
+    const salesManagersFromBookings = await ClientBooking.distinct(
+      "salesManager",
+      {
+        date: { $gte: adjustedStart, $lte: adjustedEnd },
+      },
+    );
+
+    // Extract sales managers from visits (from the source field)
+    const visitsWithSource = await Visit.find(
+      {
+        date: { $gte: adjustedStart, $lte: adjustedEnd },
+        source: { $exists: true, $ne: null, $nin: ["", null] },
+      },
+      { source: 1 },
+    );
+
+    // Extract unique sales manager names from source field
+    const salesManagersFromVisits = [
+      ...new Set(
+        visitsWithSource
+          .map((visit) => visit.source?.trim())
+          .filter((source) => source && source.length > 0),
+      ),
+    ];
+
+    // Combine and deduplicate all sales managers
+    const allSalesManagers = [
+      ...new Set([...salesManagersFromBookings, ...salesManagersFromVisits]),
+    ].filter(Boolean); // Remove any null/undefined values
 
     // Then perform aggregation for each sales manager
     const results = await Promise.all(
-      salesManagers.map(async (salesManager) => {
+      allSalesManagers.map(async (salesManager) => {
         // Count bookings for this sales manager
         const bookingStats = await ClientBooking.aggregate([
           {
@@ -61,7 +88,7 @@ export const getSalesManagerStats = async (
           {
             $group: {
               _id: null,
-              totalBookings: { $sum: 1 }, // Count all bookings without condition
+              totalBookings: { $sum: 1 },
               totalRegisterations: {
                 $sum: {
                   $cond: [{ $eq: ["$status", "registered"] }, 1, 0],
@@ -82,7 +109,7 @@ export const getSalesManagerStats = async (
             $match: {
               date: { $gte: adjustedStart, $lte: adjustedEnd },
               salesManager: salesManager,
-              status: { $nin: ["canceled", "registered"] }, // Exclude both canceled and registered
+              status: { $nin: ["canceled", "registered"] },
             },
           },
           {
@@ -103,7 +130,7 @@ export const getSalesManagerStats = async (
         // Count visits where this sales manager appears in source
         const visitCount = await Visit.countDocuments({
           date: { $gte: adjustedStart, $lte: adjustedEnd },
-          source: { $regex: salesManager, $options: "i" }, // Case insensitive match
+          source: { $regex: new RegExp(`^${salesManager}$`, "i") },
         });
 
         return {
