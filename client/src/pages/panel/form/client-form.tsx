@@ -93,7 +93,10 @@ const ClientForm = () => {
     projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [],
   );
 
-  const managerOptions = [{ label: "N/A", value: "N/A" }].concat(
+  const managerOptions = [
+    { label: "N/A", value: "N/A" },
+    { label: "BANM", value: "BANM" },
+  ].concat(
     users
       ?.filter((user) => !user.roles.some((role) => ignoreRole.includes(role)))
       .map((user) => ({
@@ -110,6 +113,7 @@ const ClientForm = () => {
 
   const referenceOptions: ComboboxOption[] = [
     ...refDefaultOptions,
+    { label: "BANM", value: "BANM" },
     ...customReferenceOptions.map((opt) => {
       return { label: toProperCase(opt), value: opt };
     }),
