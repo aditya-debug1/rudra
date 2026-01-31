@@ -23,6 +23,7 @@ export const defaultRootPermissions = [
       "update-client",
       "view-client-details",
       "create-visits",
+      "update-status",
       "update-visits",
       "delete-visits",
       "create-remarks",

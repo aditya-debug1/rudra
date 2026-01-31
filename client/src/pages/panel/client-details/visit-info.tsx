@@ -32,6 +32,7 @@ import { Ellipsis } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { RemarkForm } from "./remark-form";
 import { RemarkTable } from "./remark-table";
+import { StatusChangeForm } from "./status-change-form";
 import { VisitForm } from "./visit-form";
 
 interface VisitInfoProps {
@@ -261,16 +262,19 @@ function VisitAction({
   handleDelete: (id: string) => void;
 }) {
   const [isVisitOpen, setIsVisitOpen] = useState<boolean>(false);
+  const [isStatusOpen, setIsStatusOpen] = useState<boolean>(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState<boolean>(false);
   const { combinedRole } = useAuth(true);
 
   const Permissions = {
+    updateStatus: hasPermission(combinedRole, "Clients", "update-status"),
     updateVisit: hasPermission(combinedRole, "Clients", "update-visits"),
     deleteVisit: hasPermission(combinedRole, "Clients", "delete-visits"),
     createRemark: hasPermission(combinedRole, "Clients", "create-remarks"),
   };
 
   const hasPerms =
+    Permissions.updateStatus ||
     Permissions.updateVisit ||
     Permissions.deleteVisit ||
     Permissions.createRemark;
@@ -292,6 +296,14 @@ function VisitAction({
           <DropdownMenuContent className="mx-3">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {Permissions.updateStatus && (
+              <DropdownMenuItem
+                onClick={withStopPropagation(() => setIsStatusOpen(true))}
+              >
+                Update Status
+              </DropdownMenuItem>
+            )}
+
             {Permissions.updateVisit && (
               <DropdownMenuItem
                 onClick={withStopPropagation(() => setIsVisitOpen(true))}
@@ -323,6 +335,11 @@ function VisitAction({
         isOpen={isVisitOpen}
         onOpenChange={setIsVisitOpen}
         mode="update"
+        initialData={visit}
+      />
+      <StatusChangeForm
+        isOpen={isStatusOpen}
+        onOpenChange={setIsStatusOpen}
         initialData={visit}
       />
       <RemarkForm
