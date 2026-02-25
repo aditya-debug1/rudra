@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { hasPermission } from "@/hooks/use-role";
+import { useAuth } from "@/store/auth";
 import { useClients, useClientStore } from "@/store/client";
 import { useClientPartners } from "@/store/client-partner";
 import { requirementOptions } from "@/store/data/options";
@@ -23,6 +25,7 @@ export function ClientReport() {
   // Fetch data from stores
   const { useClientsList } = useClients();
   const { filters, resetFilters } = useClientStore();
+  const { combinedRole } = useAuth(true);
   const { data, isFetching } = useClientsList({
     ...filters,
     page: 1,
@@ -37,6 +40,10 @@ export function ClientReport() {
   const { data: projectsData } = useProjectsStructure();
   const projectOptions =
     projectsData?.data?.map((p) => ({ label: p.name, value: p.name! })) || [];
+
+  const canViewContactInfo =
+    hasPermission(combinedRole, "Clients", "view-client-contact-info") ||
+    hasPermission(combinedRole, "Clients", "view-contact-info");
 
   const countAppliedFilters = (filterObj: typeof filters) => {
     // List of keys to exclude
@@ -68,7 +75,7 @@ export function ClientReport() {
   // Handle export action
   const handleDownload = () => {
     if (data?.clients && data.clients.length > 0) {
-      exportClientToExcel(data.clients, lists);
+      exportClientToExcel(data.clients, lists, canViewContactInfo);
     } else {
       console.log("No client data available");
     }

@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useBreadcrumb, useBreadcrumbStore } from "@/hooks/use-breadcrumb";
 import { VisitForm } from "./visit-form";
 import { hasPermission } from "@/hooks/use-role";
-import { ClientSchema } from "@/utils/zod-schema/client";
+import { ClientBaseSchema } from "@/utils/zod-schema/client";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 
 // Define default client value outside component to avoid recreating on each render
@@ -44,7 +44,7 @@ const DEFAULT_CLIENT: ClientType = {
   visits: [],
 };
 
-export const ClientUpdateSchema = ClientSchema.omit({ visitData: true });
+export const ClientUpdateSchema = ClientBaseSchema.omit({ visitData: true });
 
 const ClientDetails = () => {
   // Hooks

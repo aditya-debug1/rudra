@@ -32,7 +32,11 @@ const getManagerName = (
 };
 
 // Format the client data for export
-const formatClientData = (client: ClientType, lists: ExportLists) => {
+const formatClientData = (
+  client: ClientType,
+  lists: ExportLists,
+  includeContactInfo: boolean,
+) => {
   const lastVisit = client.visits[0];
   return {
     Date: new Date(lastVisit.date).toLocaleString("en-GB", {
@@ -41,8 +45,12 @@ const formatClientData = (client: ClientType, lists: ExportLists) => {
       day: "2-digit",
     }),
     Name: `${client.firstName} ${client.lastName}`,
-    Contact: client.phoneNo,
-    "Alt Contact": client.altNo || "-",
+    ...(includeContactInfo
+      ? {
+          Contact: client.phoneNo,
+          "Alt Contact": client.altNo || "-",
+        }
+      : {}),
     Requirement: getLabelFromValue(lists.requirementList, client.requirement),
     Budget: `₹${client.budget}`,
     Project: getSafeLabelFromValue(lists.projectList, client.project),
@@ -73,13 +81,16 @@ interface ExportLists {
 export function exportClientToExcel(
   data: ClientType[],
   lists: ExportLists,
+  includeContactInfo: boolean,
 ): void {
   if (!data || data.length === 0) {
     console.warn("No client data to export");
     return;
   }
 
-  const formattedData = data.map((client) => formatClientData(client, lists));
+  const formattedData = data.map((client) =>
+    formatClientData(client, lists, includeContactInfo),
+  );
 
   // Create workbook and worksheet
   const workbook = new ExcelJS.Workbook();

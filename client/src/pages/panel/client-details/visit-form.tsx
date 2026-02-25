@@ -33,18 +33,31 @@ import { z } from "zod";
 const VisitFormSchema = VisitSchema.pick({
   date: true,
   reference: true,
+  otherRefs: true,
   source: true,
   relation: true,
   closing: true,
-}).extend({
-  status: z.union([
-    z.literal("lost"),
-    z.literal("cold"),
-    z.literal("warm"),
-    z.literal("hot"),
-    z.literal("booked"),
-  ]),
-});
+})
+  .extend({
+    status: z.union([
+      z.literal("lost"),
+      z.literal("cold"),
+      z.literal("warm"),
+      z.literal("hot"),
+      z.literal("booked"),
+    ]),
+  })
+  .superRefine(({ reference, otherRefs }, ctx) => {
+    const requiresOtherRef = reference === "reference" || reference === "other";
+
+    if (requiresOtherRef && !otherRefs?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["otherRefs"],
+        message: "Reference is required",
+      });
+    }
+  });
 
 interface VisitFormProps {
   isOpen: boolean;
