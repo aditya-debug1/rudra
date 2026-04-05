@@ -1,3 +1,4 @@
+import { aadhaarSchema, panSchema } from "@/utils/zod-schema/utils";
 import { z } from "zod";
 
 // Define a discriminated union for the unit based on type
@@ -46,6 +47,8 @@ const BookingSchema = z.discriminatedUnion("type", [
         address: z.string().min(1, "Address required"),
         residenceNo: z.string().optional(),
       }),
+      aadhaarNo: aadhaarSchema.optional(),
+      panNo: panSchema.optional(),
     }),
     // Payment Information
     bookingDetails: z.object({
@@ -83,6 +86,8 @@ const BookingSchema = z.discriminatedUnion("type", [
         address: z.string().min(1, "Address required"),
         residenceNo: z.string().optional(),
       }),
+      aadhaarNo: aadhaarSchema.optional(),
+      panNo: panSchema.optional(),
     }),
     // Payment Information
     bookingDetails: z.object({
@@ -131,6 +136,8 @@ export interface BookingType {
       address: string;
       residenceNo?: string;
     };
+    aadhaarNo?: string;
+    panNo?: string;
   };
   // Payment Information
   bookingDetails: {

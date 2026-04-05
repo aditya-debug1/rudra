@@ -143,6 +143,8 @@ export const BookingForm = () => {
         phoneNo: "",
         address: "",
       },
+      aadhaarNo: undefined,
+      panNo: undefined,
     },
     bookingDetails: {
       date: new Date(),
@@ -567,6 +569,8 @@ export const BookingForm = () => {
         coApplicant: capitalizeWords(
           (newBooking.applicants.coApplicant || "").toLowerCase(),
         ),
+        aadhaarNo: schemaValidation.data.applicants.aadhaarNo,
+        panNo: schemaValidation.data.applicants.panNo,
         status: "booked",
         project: newBooking.project.name,
         wing: newBooking.unit.wing,
@@ -858,6 +862,35 @@ export const BookingForm = () => {
                 }
               />
             </FormFieldWrapper>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormFieldWrapper className="gap-3" LabelText="Aadhaar Number">
+                <Input
+                  placeholder="e.g. 1234 5678 9012"
+                  maxLength={14}
+                  value={bookingData.applicants.aadhaarNo || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      ["applicants", "aadhaarNo"],
+                      e.target.value,
+                    )
+                  }
+                />
+              </FormFieldWrapper>
+              <FormFieldWrapper className="gap-3" LabelText="PAN Number">
+                <Input
+                  placeholder="e.g. ABCPY1234K"
+                  maxLength={10}
+                  value={bookingData.applicants.panNo || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      ["applicants", "panNo"],
+                      e.target.value.toUpperCase(),
+                    )
+                  }
+                />
+              </FormFieldWrapper>
+            </div>
           </div>
 
           <div className="space-y-6 pt-6 border-t">

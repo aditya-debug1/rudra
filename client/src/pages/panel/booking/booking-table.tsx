@@ -300,7 +300,16 @@ const DetailsRow = ({ booking }: { booking: ClientBooking }) => {
           <h4 className="text-sm font-bold">Co Applicant:</h4>
           <p className="text-sm">{booking.coApplicant || "N/A"}</p>
         </span>
-        <span className="flex items-center gap-3 col-span-2">
+        <span className="flex items-center gap-3">
+          <h4 className="text-sm font-bold">Aadhaar No:</h4>
+          <p className="text-sm">{booking.aadhaarNo || "N/A"}</p>
+        </span>
+        <span className="flex items-center gap-3">
+          <h4 className="text-sm font-bold">PAN No:</h4>
+          <p className="text-sm">{booking.panNo || "N/A"}</p>
+        </span>
+
+        <span className="flex items-center gap-3 col-span-3">
           <h4 className="text-sm font-bold">Client Partner:</h4>
           <p className="text-sm">{booking.clientPartner || "N/A"}</p>
         </span>

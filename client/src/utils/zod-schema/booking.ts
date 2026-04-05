@@ -1,8 +1,11 @@
 import { z } from "zod";
+import { aadhaarSchema, panSchema } from "./utils";
 
 export const bookingUpdateSchema = z.object({
   applicant: z.string().min(1, "Applicant name is required"),
   coApplicant: z.string().optional(),
+  aadhaarNo: aadhaarSchema.nullable(),
+  panNo: panSchema.nullable(),
   phoneNo: z
     .string()
     .min(10, "Phone number must be at least 10 digits")

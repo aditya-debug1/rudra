@@ -14,6 +14,8 @@ export interface ClientBookingType extends Document {
   date: Date;
   applicant: string;
   coApplicant?: string;
+  aadhaarNo?: string;
+  panNo?: string;
   status: status;
 
   //Unit Details
@@ -54,6 +56,14 @@ const ClientBookingSchema: Schema = new Schema(
       trim: true,
     },
     coApplicant: {
+      type: String,
+      trim: true,
+    },
+    aadhaarNo: {
+      type: String,
+      trim: true,
+    },
+    panNo: {
       type: String,
       trim: true,
     },

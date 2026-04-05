@@ -57,6 +57,8 @@ export const BookingUpdateForm = ({
         date: booking.date,
         applicant: booking.applicant,
         coApplicant: booking.coApplicant || "",
+        aadhaarNo: booking.aadhaarNo || "",
+        panNo: booking.panNo || "",
         phoneNo: booking.phoneNo,
         altNo: booking.altNo || "",
         email: booking.email || "",
@@ -220,7 +222,25 @@ export const BookingUpdateForm = ({
                 />
               </FormFieldWrapper>
 
-              {/* Contact Information */}
+              <FormFieldWrapper LabelText="Aadhaar Number" className="gap-3">
+                <Input
+                  name="aadhaarNo"
+                  value={formData.aadhaarNo || ""}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g., 1234 5678 9012"
+                />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper LabelText="PAN Number" className="gap-3">
+                <Input
+                  name="panNo"
+                  value={formData.panNo || ""}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g., ABCDE1234F"
+                />
+              </FormFieldWrapper>
               <FormFieldWrapper
                 Important
                 ImportantSide="right"

@@ -12,6 +12,8 @@ export interface ClientBooking {
   date: Date;
   applicant: string;
   coApplicant?: string;
+  aadhaarNo?: string;
+  panNo?: string;
   status: bookingClientStatus;
   project: string;
   wing?: string;
@@ -59,6 +61,8 @@ export interface ClientBookingCreateUpdateData {
   date?: Date;
   applicant: string;
   coApplicant?: string;
+  aadhaarNo?: string;
+  panNo?: string;
   status: bookingClientStatus;
   project: string;
   wing?: string;
