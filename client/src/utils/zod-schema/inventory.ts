@@ -141,7 +141,7 @@ const bankDetailsSchema = z.object({
     .trim()
     .min(3, "Account holder name must be at least 3 characters")
     .max(100, "Account holder name must be under 100 characters")
-    .regex(/^[a-zA-Z\s.'-]+$/, "Name contains invalid characters"),
+    .regex(/^[a-zA-Z\s./'-]+$/, "Name contains invalid characters"),
 
   accountNumber: z
     .string()

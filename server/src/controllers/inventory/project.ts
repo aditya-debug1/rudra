@@ -519,9 +519,15 @@ class ProjectController {
         return next(createError(400, "Invalid or missing project name"));
       }
 
+      // Escape special regex characters to handle project names with parentheses, brackets, etc.
+      const escapedProjectName = projectName
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
       // Find project by name (case-insensitive search)
       const project = await Project.findOne({
-        name: { $regex: new RegExp(`^${projectName.trim()}$`, "i") },
+        // name: { $regex: new RegExp(`^${projectName.trim()}$`, "i") },
+        name: { $regex: new RegExp(`^${escapedProjectName}$`, "i") },
       })
         .populate({
           path: "wings",
