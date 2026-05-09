@@ -36,6 +36,12 @@ function calculateMonthlyInterestAmount(amountPayable: number, months: number) {
   return ((amountPayable * 24) / 100 / 12) * months;
 }
 
+function calculateDailyInterestAmount(amountPayable: number, days: number) {
+  // amountPayable = (agreementValue * projectStage) / 100 - amountReceived
+  // Interest at 24% per annum, calculated per day
+  return ((amountPayable * 24) / 100 / 365) * days;
+}
+
 const BookingLedgerList = () => {
   // Hooks
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
@@ -105,7 +111,8 @@ const BookingLedgerList = () => {
     includeLetterHead: boolean = false,
     interestData?:
       | { type: "amount"; value: number }
-      | { type: "months"; value: number },
+      | { type: "months"; value: number }
+      | { type: "days"; value: number },
   ) => {
     if (!project || !clientBooking || !data) {
       return toast({
@@ -146,6 +153,21 @@ const BookingLedgerList = () => {
 
           if (amountPayable > 0) {
             finalInterestAmount = calculateMonthlyInterestAmount(
+              amountPayable,
+              interestData.value,
+            );
+          } else {
+            finalInterestAmount = 0;
+          }
+        } else if (interestData.type === "days") {
+          // Calculate interest based on days
+          const agreementValue = cb.agreementValue;
+          const projectStage = p.projectStage;
+          const amountPayable =
+            (agreementValue * projectStage) / 100 - amountReceived;
+
+          if (amountPayable > 0) {
+            finalInterestAmount = calculateDailyInterestAmount(
               amountPayable,
               interestData.value,
             );

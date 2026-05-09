@@ -36,7 +36,8 @@ interface BookingLedgerHeaderProps {
     includeLetterHead?: boolean,
     interestData?:
       | { type: "amount"; value: number }
-      | { type: "months"; value: number },
+      | { type: "months"; value: number }
+      | { type: "days"; value: number },
   ) => void;
   isFiltered: boolean;
   clearFilter: () => void;
@@ -121,7 +122,8 @@ interface PrintModalProps {
     includeLetterHead?: boolean,
     interestData?:
       | { type: "amount"; value: number }
-      | { type: "months"; value: number },
+      | { type: "months"; value: number }
+      | { type: "days"; value: number },
   ) => void;
 }
 
@@ -130,16 +132,18 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
   const [isSigned, setIsSigned] = useState(true);
   const [letterType, setLetterType] = useState("demand");
   const [interestCalculationType, setInterestCalculationType] =
-    useState("manual"); // "manual" or "calculated"
+    useState("manual"); // "manual", "months", or "days"
   const [interestAmt, setInterestAmt] = useState("");
   const [months, setMonths] = useState("");
+  const [days, setDays] = useState("");
   const [open, setOpen] = useState(false);
 
   const handlePrint = () => {
     if (letterType === "interest") {
       let interestData:
         | { type: "amount"; value: number }
-        | { type: "months"; value: number };
+        | { type: "months"; value: number }
+        | { type: "days"; value: number };
 
       if (interestCalculationType === "manual") {
         const amount = parseFloat(interestAmt);
@@ -151,7 +155,7 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
           });
         }
         interestData = { type: "amount", value: amount };
-      } else if (interestCalculationType === "calculated") {
+      } else if (interestCalculationType === "months") {
         const monthsNum = parseInt(months);
         if (!monthsNum || monthsNum <= 0) {
           return toast({
@@ -161,6 +165,16 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
           });
         }
         interestData = { type: "months", value: monthsNum };
+      } else if (interestCalculationType === "days") {
+        const daysNum = parseInt(days);
+        if (!daysNum || daysNum <= 0) {
+          return toast({
+            title: "Letter Creation Error",
+            description: "Please enter a valid number of days",
+            variant: "warning",
+          });
+        }
+        interestData = { type: "days", value: daysNum };
       } else {
         return;
       }
@@ -178,6 +192,7 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
     setInterestCalculationType("manual");
     setInterestAmt("");
     setMonths("");
+    setDays("");
     setIncludeLetterHead(true);
     setIsSigned(true);
   };
@@ -246,9 +261,15 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="calculated" id="calculated" />
-                      <Label htmlFor="calculated" className="text-sm">
+                      <RadioGroupItem value="months" id="months-radio" />
+                      <Label htmlFor="months-radio" className="text-sm">
                         Calculate by Months
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="days" id="days-radio" />
+                      <Label htmlFor="days-radio" className="text-sm">
+                        Calculate by Days
                       </Label>
                     </div>
                   </RadioGroup>
@@ -268,13 +289,14 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
                       placeholder="Enter interest amount"
                       value={interestAmt}
                       onChange={(e) => setInterestAmt(e.target.value)}
+                      onWheel={(e) => e.currentTarget.blur()}
                       min="0"
                       step="0"
                     />
                   </div>
                 )}
 
-                {interestCalculationType === "calculated" && (
+                {interestCalculationType === "months" && (
                   <div className="space-y-2">
                     <Label htmlFor="months" className="text-sm font-medium">
                       Number of Months
@@ -285,6 +307,28 @@ function PrintModal({ handleGenerateLetter }: PrintModalProps) {
                       placeholder="Enter number of months"
                       value={months}
                       onChange={(e) => setMonths(e.target.value)}
+                      onWheel={(e) => e.currentTarget.blur()}
+                      min="1"
+                      step="0"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Interest will be calculated at 24% annual rate
+                    </p>
+                  </div>
+                )}
+
+                {interestCalculationType === "days" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="days" className="text-sm font-medium">
+                      Number of Days
+                    </Label>
+                    <Input
+                      id="days"
+                      type="number"
+                      placeholder="Enter number of days"
+                      value={days}
+                      onChange={(e) => setDays(e.target.value)}
+                      onWheel={(e) => e.currentTarget.blur()}
                       min="1"
                       step="0"
                     />
