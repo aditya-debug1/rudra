@@ -24,6 +24,7 @@ import { isEqual } from "lodash";
 import { Box } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BankDetailsDisplay } from "./bank-details-display";
 import ProjectDetailsFooter from "./footer";
 import { ProjectInfo } from "./project-info";
 import { WingInfo } from "./wing-info";
@@ -214,11 +215,25 @@ export default function InventoryDetails() {
         />
 
         <WingInfo wings={editableProject?.wings || []} />
+
+        {editableProject?.bank && (
+          <div className="mt-6">
+            <BankDetailsDisplay
+              holderName={editableProject.bank.holderName}
+              accountNumber={editableProject.bank.accountNumber}
+              name={editableProject.bank.name}
+              branch={editableProject.bank.branch}
+              ifscCode={editableProject.bank.ifscCode}
+              accountType={editableProject.bank.accountType}
+            />
+          </div>
+        )}
       </CardContent>
       <CardFooter className="justify-end gap-2">
         <ProjectDetailsFooter
           isEditable={isEditable}
           hasBank={!!editableProject?.bank}
+          bankDetails={editableProject?.bank}
           handleEditToggle={handleEditToggle}
           projectId={editableProject?._id}
           handleDeleteProject={handleDeleteProject}

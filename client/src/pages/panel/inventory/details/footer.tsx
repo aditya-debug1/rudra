@@ -6,9 +6,19 @@ import { Edit, ReceiptIndianRupee, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { BankDetailsForm } from "./bank-form";
 
+interface BankDetails {
+  holderName: string;
+  accountNumber: string;
+  name: string;
+  branch: string;
+  ifscCode: string;
+  accountType: "saving" | "current";
+}
+
 interface ProjectDetailsFooterProps {
   isEditable: boolean;
   hasBank: boolean;
+  bankDetails?: BankDetails | null;
   projectId?: string;
   handleEditToggle: () => void;
   handleDeleteProject: () => void;
@@ -18,6 +28,7 @@ const ProjectDetailsFooter = ({
   isEditable,
   projectId,
   hasBank,
+  bankDetails,
   handleDeleteProject,
   handleEditToggle,
 }: ProjectDetailsFooterProps) => {
@@ -36,16 +47,30 @@ const ProjectDetailsFooter = ({
 
   return (
     <>
-      {!hasBank && (
-        <Tooltip content="Add Bank Account">
-          <Button
-            size="icon"
-            className="text-zinc-100 bg-amber-400 hover:bg-amber-500"
-            onClick={() => setIsOpen(true)}
-          >
-            <ReceiptIndianRupee />
-          </Button>
-        </Tooltip>
+      {updateInventory && (
+        <>
+          {!hasBank ? (
+            <Tooltip content="Add Bank Account">
+              <Button
+                size="icon"
+                className="text-zinc-100 bg-amber-400 hover:bg-amber-500"
+                onClick={() => setIsOpen(true)}
+              >
+                <ReceiptIndianRupee />
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip content="Edit Bank Details">
+              <Button
+                size="icon"
+                className="bg-amber-400 hover:bg-amber-500 text-white"
+                onClick={() => setIsOpen(true)}
+              >
+                <Edit />
+              </Button>
+            </Tooltip>
+          )}
+        </>
       )}
 
       {updateInventory && (
@@ -75,6 +100,7 @@ const ProjectDetailsFooter = ({
           isOpen={isOpen}
           onOpenChange={setIsOpen}
           projectId={projectId}
+          bankDetails={bankDetails}
         />
       )}
     </>

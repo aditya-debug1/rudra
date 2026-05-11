@@ -36,7 +36,7 @@ interface BankDetails {
 
 interface BankDetailsFormProps {
   projectId: string;
-  bankDetails?: BankDetails;
+  bankDetails?: BankDetails | null;
   isOpen: boolean;
   onOpenChange: (state: boolean) => void;
 }
