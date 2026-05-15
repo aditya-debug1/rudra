@@ -10,6 +10,7 @@ export interface SalesManagerStats {
   totalRegisterations: number;
   canceledBookings: number;
   totalVisits: number;
+  uniqueClientPartners: number;
   projects: ProjectStats[];
 }
 

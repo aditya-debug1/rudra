@@ -107,6 +107,7 @@ export function exportSalesManagerToExcel(
   const headerKeys = [
     "Sales Manager",
     "Visits",
+    "Active CPs",
     "Bookings",
     "Canceled",
     "Registerations",
@@ -116,6 +117,7 @@ export function exportSalesManagerToExcel(
   const headerDisplayNames = [
     "Sales Manager",
     "Visits",
+    "Active CPs",
     "Bookings",
     "Canceled",
     "Registerations",
@@ -129,7 +131,7 @@ export function exportSalesManagerToExcel(
     // Adjust width based on column type
     if (index === 0)
       width = 20; // Sales Manager column - wider for names
-    else if (index <= 4)
+    else if (index <= 5)
       width = 16; // Numeric columns - smaller
     else width = 8; // Project columns - compact due to shortened names
 
@@ -168,6 +170,7 @@ export function exportSalesManagerToExcel(
     const rowData: Record<string, string | number> = {
       "Sales Manager": getManagerName(manager.salesManager, managers),
       Visits: manager.totalVisits,
+      "Active CPs": manager.uniqueClientPartners,
       Bookings: manager.totalBookings,
       Canceled: manager.canceledBookings,
       Registerations: manager.totalRegisterations,
@@ -182,6 +185,42 @@ export function exportSalesManagerToExcel(
     });
 
     worksheet.addRow(rowData);
+  });
+
+  // Add totals row
+  const totalsData: Record<string, string | number> = {
+    "Sales Manager": "Total",
+    Visits: data.reduce((sum, m) => sum + m.totalVisits, 0),
+    "Active CPs": data.reduce((sum, m) => sum + m.uniqueClientPartners, 0),
+    Bookings: data.reduce((sum, m) => sum + m.totalBookings, 0),
+    Canceled: data.reduce((sum, m) => sum + m.canceledBookings, 0),
+    Registerations: data.reduce((sum, m) => sum + m.totalRegisterations, 0),
+  };
+
+  allProjects.forEach((projectName) => {
+    totalsData[projectName] = data.reduce((sum, m) => {
+      const projectStat = m.projects.find((p) => p.projectName === projectName);
+      return sum + (projectStat ? projectStat.bookings : 0);
+    }, 0);
+  });
+
+  const totalsRow = worksheet.addRow(totalsData);
+
+  // Style the totals row
+  totalsRow.eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF4472C4" },
+    };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
   });
 
   // Style the header row
@@ -199,7 +238,7 @@ export function exportSalesManagerToExcel(
   });
 
   // Style the data rows (starting from row 5)
-  for (let i = 5; i <= worksheet.rowCount; i++) {
+  for (let i = 5; i <= worksheet.rowCount - 1; i++) {
     const row = worksheet.getRow(i);
     row.eachCell((cell) => {
       cell.alignment = { horizontal: "center", vertical: "middle" };

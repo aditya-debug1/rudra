@@ -14,6 +14,7 @@ interface SalesManagerStats {
   canceledBookings: number;
   totalVisits: number;
   projects: ProjectStats[];
+  uniqueClientPartners: number;
 }
 
 export const getSalesManagerStats = async (
@@ -133,6 +134,55 @@ export const getSalesManagerStats = async (
           source: { $regex: new RegExp(`^${salesManager}$`, "i") },
         });
 
+        // Count unique client/channel partners from visits for this sales manager
+        const uniqueClientPartnersData = await Visit.aggregate([
+          {
+            $match: {
+              date: { $gte: adjustedStart, $lte: adjustedEnd },
+              source: { $regex: new RegExp(`^${salesManager}$`, "i") },
+            },
+          },
+          {
+            $addFields: {
+              partnerReference: {
+                $cond: [
+                  {
+                    $in: [
+                      "$reference",
+                      ["N/A", "walking", "BANM", "na", "N/a"],
+                    ],
+                  },
+                  null, // Ignore these values
+                  {
+                    $cond: [
+                      { $in: ["$reference", ["reference", "other"]] },
+                      { $toLower: "$otherRefs" }, // Use lowercase otherRefs
+                      "$reference", // Otherwise use reference
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            $match: {
+              partnerReference: { $nin: [null, ""] },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              uniquePartners: { $addToSet: "$partnerReference" },
+            },
+          },
+          {
+            $project: {
+              count: { $size: "$uniquePartners" },
+              _id: 0,
+            },
+          },
+        ]);
+
         return {
           salesManager,
           totalBookings: bookingStats[0]?.totalBookings || 0,
@@ -140,6 +190,7 @@ export const getSalesManagerStats = async (
           canceledBookings: bookingStats[0]?.canceledBookings || 0,
           totalVisits: visitCount,
           projects: projectStats,
+          uniqueClientPartners: uniqueClientPartnersData[0]?.count || 0,
         };
       }),
     );
