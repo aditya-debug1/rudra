@@ -10,6 +10,7 @@ import categoryRoute from "./category";
 import clientRoute from "./client";
 import clientPartnerRoute from "./client-partner";
 import clientBookingRoute from "./clientBooking";
+import registeredClients from "./registered-clients";
 import eoiRoute from "./eoi";
 import inventoryRoute from "./inventory";
 import roleRoute from "./role";
@@ -34,6 +35,7 @@ const ROUTES: Array<{ path: string; router: IRouter }> = [
   { path: "/target", router: targetRoute },
   { path: "/category", router: categoryRoute },
   { path: "/eoi", router: eoiRoute },
+  { path: "/registered-clients", router: registeredClients },
 ];
 
 export function registerRoutes(app: Express, base = "/api") {

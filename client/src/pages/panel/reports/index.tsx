@@ -10,6 +10,7 @@ import { InventoryReport } from "./inventory";
 import { InventorySummaryReport } from "./inventory-summary";
 import { SalesManagerReport } from "./target";
 import { UserReport } from "./user";
+import { RegisteredClientsReport } from "./registered-clients.ts";
 
 const Reports = () => {
   // Hooks
@@ -42,6 +43,9 @@ const Reports = () => {
       {showReport("client-report") && <ClientReport />}
       {showReport("cp-report") && <ClientPartnerReport />}
       {showReport("sales-range-report") && <SalesManagerReport />}
+      {showReport("registered-clients-payment-report") && (
+        <RegisteredClientsReport />
+      )}
     </div>
   );
 };

@@ -99,6 +99,7 @@ export const AdminPermissions: Permission[] = [
       "inventory-summary-report",
       "booking-report",
       "sales-range-report",
+      "registered-clients-payment-report",
     ],
   },
   { page: "EOI", actions: ["show-eoi-page"] },
@@ -264,6 +265,10 @@ export const availablePermissionPages: AvailablePermissionPage[] = [
       },
       { value: "booking-report", label: "View Booking Reports" },
       { value: "sales-range-report", label: "View Sales Range Reports" },
+      {
+        value: "registered-clients-payment-report",
+        label: "View Registered Clients Payment Reports",
+      },
     ],
   },
   {

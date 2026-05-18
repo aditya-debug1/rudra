@@ -97,6 +97,7 @@ export const defaultRootPermissions = [
       "inventory-summary-report",
       "booking-report",
       "sales-range-report",
+      "registered-clients-payment-report",
     ],
   },
   { page: "EOI", actions: ["show-eoi-page"] },
